@@ -218,3 +218,14 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Flask / SQLite databases
+*.db
+dev.db
+prod.db
+
+# Flask instance folder
+instance/
+
+# Migrations (keep if you want to track schema history, remove to ignore)
+# migrations/

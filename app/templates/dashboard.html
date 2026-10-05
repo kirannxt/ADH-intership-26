@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard">
+  <h1>Dashboard</h1>
+  <p>Hello, <strong>{{ current_user.username }}</strong>! You are logged in.</p>
+  <p>Account created: {{ current_user.created_at.strftime('%B %d, %Y') }}</p>
+</div>
+{% endblock %}

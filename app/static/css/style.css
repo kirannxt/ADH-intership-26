@@ -1,0 +1,114 @@
+/* ── Reset & Base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: #f8f9fa;
+  color: #212529;
+  line-height: 1.6;
+}
+
+a { color: #0d6efd; text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+/* ── Navbar ── */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #343a40;
+  padding: 0.75rem 2rem;
+}
+
+.nav-brand {
+  color: #fff;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.nav-links { list-style: none; display: flex; gap: 1.25rem; }
+.nav-links a { color: #adb5bd; font-size: 0.95rem; }
+.nav-links a:hover { color: #fff; text-decoration: none; }
+
+/* ── Container ── */
+.container {
+  max-width: 960px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+}
+
+/* ── Alerts ── */
+.alert {
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+.alert-success  { background: #d1e7dd; color: #0f5132; border: 1px solid #badbcc; }
+.alert-danger   { background: #f8d7da; color: #842029; border: 1px solid #f5c2c7; }
+.alert-warning  { background: #fff3cd; color: #664d03; border: 1px solid #ffecb5; }
+.alert-info     { background: #cff4fc; color: #055160; border: 1px solid #b6effb; }
+
+/* ── Buttons ── */
+.btn {
+  display: inline-block;
+  padding: 0.5rem 1.25rem;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.15s;
+}
+.btn:hover { opacity: 0.85; text-decoration: none; }
+.btn-primary   { background: #0d6efd; color: #fff; }
+.btn-secondary { background: #6c757d; color: #fff; }
+
+/* ── Hero ── */
+.hero {
+  text-align: center;
+  padding: 4rem 1rem;
+}
+.hero h1 { font-size: 2.5rem; margin-bottom: 0.75rem; }
+.hero p   { font-size: 1.1rem; color: #6c757d; margin-bottom: 1.5rem; }
+.hero .btn { margin: 0 0.25rem; }
+
+/* ── Dashboard ── */
+.dashboard h1 { margin-bottom: 0.5rem; }
+
+/* ── Forms ── */
+.form-container {
+  max-width: 420px;
+  margin: 2rem auto;
+  background: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.form-container h2 { margin-bottom: 1.25rem; }
+
+.form-group { margin-bottom: 1rem; }
+.form-group label { display: block; font-size: 0.875rem; margin-bottom: 0.3rem; font-weight: 500; }
+.form-control {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  transition: border-color 0.15s;
+}
+.form-control:focus { outline: none; border-color: #0d6efd; box-shadow: 0 0 0 3px rgba(13,110,253,0.15); }
+
+.form-check { display: flex; align-items: center; gap: 0.5rem; }
+.form-check-input { width: auto; }
+
+.mt-2 { margin-top: 1rem; font-size: 0.9rem; }
+
+/* ── Footer ── */
+.footer {
+  text-align: center;
+  padding: 1.5rem;
+  font-size: 0.85rem;
+  color: #6c757d;
+  border-top: 1px solid #dee2e6;
+  margin-top: 3rem;
+}
