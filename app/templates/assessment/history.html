@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Assessment History — AssessMe{% endblock %}
+
+{% block content %}
+<div class="container section">
+
+  <div class="flex-between mb-4">
+    <div>
+      <h1 class="page-title">📋 Assessment History</h1>
+      <p class="page-sub">All your past assessments in one place.</p>
+    </div>
+    <a href="{{ url_for('assessment.select') }}" class="btn btn-primary">➕ New Assessment</a>
+  </div>
+
+  <!-- Filter bar -->
+  <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;margin-bottom:1.5rem;">
+    <div style="flex:1;min-width:200px;">
+      <input type="text" class="form-control" placeholder="🔍  Search assessments…" style="max-width:320px;" />
+    </div>
+    <select class="form-control" style="width:auto;">
+      <option>All Types</option>
+      <option>Cognitive</option>
+      <option>Personality</option>
+      <option>Emotional IQ</option>
+      <option>Leadership</option>
+      <option>Stress</option>
+      <option>Career</option>
+    </select>
+    <select class="form-control" style="width:auto;">
+      <option>All Time</option>
+      <option>This Week</option>
+      <option>This Month</option>
+      <option>Last 3 Months</option>
+    </select>
+    <select class="form-control" style="width:auto;">
+      <option>All Status</option>
+      <option>Completed</option>
+      <option>In Progress</option>
+    </select>
+  </div>
+
+  <!-- Summary row -->
+  <div class="grid-4 mb-4">
+    {% for val, label, bg in [('12','Total','#ede9fe'),('9','Completed','#d1fae5'),('3','In Progress','#fef3c7'),('84%','Avg Score','#dbeafe')] %}
+    <div style="background:{{ bg }};border-radius:var(--radius-lg);padding:1.1rem 1.25rem;text-align:center;">
+      <div style="font-size:1.75rem;font-weight:800;color:var(--text);">{{ val }}</div>
+      <div style="font-size:.82rem;color:var(--text-muted);font-weight:600;">{{ label }}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- History list -->
+  <div class="card">
+    <div class="card-header flex-between">
+      <span class="card-title">All Assessments</span>
+      <span style="font-size:.85rem;color:var(--text-muted);">12 results</span>
+    </div>
+
+    {% set history = [
+      ('🧠','#ede9fe','Cognitive Skills','Oct 3, 2026','4 min 32s','91%','#4f46e5','Completed','success'),
+      ('🌟','#fef3c7','Personality Profile','Sep 28, 2026','7 min 15s','78%','#f59e0b','Completed','success'),
+      ('❤️','#fee2e2','Emotional Intelligence','Sep 20, 2026','11 min 4s','82%','#ef4444','Completed','success'),
+      ('🧑‍💼','#d1fae5','Leadership Aptitude','Oct 5, 2026','—','35%','#10b981','In Progress','warning'),
+      ('🧘','#e0f2fe','Stress & Wellbeing','Sep 12, 2026','5 min 50s','65%','#06b6d4','Completed','danger'),
+      ('💼','#f3e8ff','Career Aptitude','Sep 5, 2026','9 min 22s','88%','#8b5cf6','Completed','success'),
+      ('🧠','#ede9fe','Cognitive Skills','Aug 25, 2026','5 min 11s','86%','#4f46e5','Completed','success'),
+      ('🌟','#fef3c7','Personality Profile','Aug 10, 2026','8 min 30s','75%','#f59e0b','Completed','warning'),
+      ('❤️','#fee2e2','Emotional Intelligence','Jul 30, 2026','10 min 45s','74%','#ef4444','Completed','warning'),
+    ] %}
+
+    {% for icon, bg, name, date, dur, score, color, status, badge in history %}
+    <div class="history-item">
+      <div class="h-icon" style="background:{{ bg }};">{{ icon }}</div>
+      <div class="h-info">
+        <h4>{{ name }}</h4>
+        <p>{{ date }} &nbsp;·&nbsp; {{ dur }}</p>
+      </div>
+      <div style="display:flex;align-items:center;gap:1.5rem;">
+        <span class="badge badge-{{ badge }}">{{ status }}</span>
+        <div class="h-score">
+          <div class="score-val" style="color:{{ color }};">{{ score }}</div>
+        </div>
+        <div style="display:flex;gap:.4rem;">
+          <a href="{{ url_for('assessment.result') }}"          class="btn btn-ghost btn-sm" title="View Result">📊</a>
+          <a href="{{ url_for('assessment.recommendations') }}" class="btn btn-ghost btn-sm" title="Recommendations">💡</a>
+          {% if status == 'In Progress' %}
+          <a href="{{ url_for('assessment.questionnaire') }}"   class="btn btn-primary btn-sm">Resume</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+
+  </div>
+
+  <!-- Pagination -->
+  <div style="display:flex;justify-content:center;align-items:center;gap:.5rem;margin-top:1.5rem;">
+    <button class="btn btn-secondary btn-sm" disabled>← Prev</button>
+    {% for p in range(1,4) %}
+    <button class="btn {% if p == 1 %}btn-primary{% else %}btn-secondary{% endif %} btn-sm">{{ p }}</button>
+    {% endfor %}
+    <button class="btn btn-secondary btn-sm">Next →</button>
+  </div>
+
+</div>
+{% endblock %}

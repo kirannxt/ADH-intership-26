@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Choose Assessment — AssessMe{% endblock %}
+
+{% block content %}
+<div class="container section">
+
+  <div class="text-center mb-4">
+    <h1 class="page-title">Choose Your Assessment</h1>
+    <p class="page-sub">Select the type of assessment that best suits your goal.</p>
+  </div>
+
+  <!-- Steps indicator -->
+  <div class="steps mb-4">
+    {% for label in ['Select','Personal Info','Questionnaire','Review','Results'] %}
+    <div class="step {% if loop.index == 1 %}active{% endif %}">
+      <div class="step-circle">{{ loop.index }}</div>
+      <span class="step-label">{{ label }}</span>
+    </div>
+    {% endfor %}
+  </div>
+  <input type="hidden" id="current-step" value="0" />
+
+  <form method="POST" action="{{ url_for('assessment.personal_info') }}">
+    <input type="hidden" id="selected-assessment" name="assessment_type" value="" />
+
+    <div class="grid-3 mb-4">
+      {% set assessments = [
+        ('cognitive','🧠','#ede9fe','Cognitive Skills','Measure memory, attention, problem-solving and logical reasoning.','~10 min','20 questions','Beginner friendly'),
+        ('personality','🌟','#fef3c7','Personality Profile','Understand your personality traits using the Big Five model.','~8 min','25 questions','No prep needed'),
+        ('emotional','❤️','#fee2e2','Emotional Intelligence','Assess self-awareness, empathy and emotional regulation.','~12 min','30 questions','Reflective'),
+        ('leadership','🧑‍💼','#d1fae5','Leadership Aptitude','Evaluate decision-making, communication and leadership style.','~15 min','35 questions','Intermediate'),
+        ('stress','🧘','#e0f2fe','Stress & Wellbeing','Identify stress triggers and resilience strategies.','~6 min','15 questions','Self-care focus'),
+        ('career','💼','#f3e8ff','Career Aptitude','Match your strengths to potential career pathways.','~10 min','22 questions','Career focused'),
+      ] %}
+      {% for val, icon, color, title, desc, time, qs, tag in assessments %}
+      <div class="assessment-card" data-value="{{ val }}">
+        <div class="check-mark">✓</div>
+        <div class="a-icon" style="background:{{ color }};">{{ icon }}</div>
+        <h3>{{ title }}</h3>
+        <p>{{ desc }}</p>
+        <div class="assessment-meta">
+          <span class="badge badge-gray">⏱ {{ time }}</span>
+          <span class="badge badge-gray">❓ {{ qs }}</span>
+          <span class="badge badge-primary">{{ tag }}</span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="text-center">
+      <button type="submit" class="btn btn-primary btn-lg" id="start-btn"
+              onclick="if(!document.getElementById('selected-assessment').value){event.preventDefault();alert('Please select an assessment first.');}">
+        Continue →
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}

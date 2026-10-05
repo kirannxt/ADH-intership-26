@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}Your Results — AssessMe{% endblock %}
+
+{% block content %}
+<div class="container section">
+
+  <!-- Result header -->
+  <div class="result-header">
+    <div style="font-size:.85rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.8;margin-bottom:.5rem;">Cognitive Skills Assessment</div>
+    <h2>Your Assessment is Complete! 🎉</h2>
+    <p>Completed on October 5, 2026 · Duration: 4 min 32 sec</p>
+  </div>
+
+  <div class="grid-2 mb-4">
+
+    <!-- Overall score ring -->
+    <div class="card">
+      <div class="card-header"><span class="card-title">Overall Score</span></div>
+      <div class="card-body flex-center" style="flex-direction:column;gap:1rem;">
+        <div class="score-ring-wrap">
+          <div class="score-ring">
+            <svg viewBox="0 0 160 160">
+              <circle class="score-ring-track" cx="80" cy="80" r="70" />
+              <circle class="score-ring-fill" cx="80" cy="80" r="70"
+                      data-pct="84"
+                      stroke="url(#grad)" />
+              <defs>
+                <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%"   stop-color="#4f46e5"/>
+                  <stop offset="100%" stop-color="#06b6d4"/>
+                </linearGradient>
+              </defs>
+            </svg>
+            <div class="score-ring-text">
+              <span class="score-ring-value">84%</span>
+              <span class="score-ring-label">Overall</span>
+            </div>
+          </div>
+          <span class="badge badge-primary" style="font-size:.95rem;padding:.45rem 1.1rem;">Above Average</span>
+        </div>
+        <div style="display:flex;gap:1.5rem;text-align:center;margin-top:.5rem;">
+          <div><div style="font-size:1.5rem;font-weight:800;color:var(--success);">91%</div><div style="font-size:.8rem;color:var(--text-muted);">Best category</div></div>
+          <div><div style="font-size:1.5rem;font-weight:800;color:var(--warning);">Top 18%</div><div style="font-size:.8rem;color:var(--text-muted);">Percentile rank</div></div>
+          <div><div style="font-size:1.5rem;font-weight:800;color:var(--info);">+5%</div><div style="font-size:.8rem;color:var(--text-muted);">vs. last attempt</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Category breakdown -->
+    <div class="card">
+      <div class="card-header"><span class="card-title">Score Breakdown</span></div>
+      <div class="card-body score-breakdown">
+        {% for cat, pct, color in [
+          ('Focus & Attention',    91, '#4f46e5'),
+          ('Problem Solving',      88, '#06b6d4'),
+          ('Critical Thinking',    85, '#8b5cf6'),
+          ('Adaptability',         80, '#10b981'),
+          ('Communication',        78, '#f59e0b'),
+          ('Stress Management',    72, '#ef4444'),
+        ] %}
+        <div class="score-row">
+          <span class="score-row-label">{{ cat }}</span>
+          <div class="score-row-bar">
+            <div class="score-row-fill" data-pct="{{ pct }}" style="background:{{ color }};"></div>
+          </div>
+          <span class="score-row-val">{{ pct }}%</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Strengths & Areas to improve -->
+  <div class="grid-2 mb-4">
+    <div class="card">
+      <div class="card-header"><span class="card-title">💪 Key Strengths</span></div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:.75rem;">
+        {% for strength in ['Strong analytical and logical reasoning skills','Excellent ability to break down complex problems','High focus and sustained attention span','Adaptive thinking in novel situations'] %}
+        <div style="display:flex;gap:.75rem;align-items:flex-start;">
+          <span style="color:var(--success);font-size:1rem;margin-top:1px;">✅</span>
+          <span style="font-size:.92rem;">{{ strength }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">🎯 Areas for Growth</span></div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:.75rem;">
+        {% for area in ['Stress management under pressure could be improved','Communication clarity in ambiguous situations','Emotional self-regulation during high-stakes decisions'] %}
+        <div style="display:flex;gap:.75rem;align-items:flex-start;">
+          <span style="color:var(--warning);font-size:1rem;margin-top:1px;">⚠️</span>
+          <span style="font-size:.92rem;">{{ area }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div style="display:flex;justify-content:center;gap:1rem;flex-wrap:wrap;">
+    <a href="{{ url_for('assessment.recommendations') }}" class="btn btn-primary btn-lg">💡 View Recommendations</a>
+    <a href="{{ url_for('assessment.history') }}"         class="btn btn-secondary btn-lg">📋 Assessment History</a>
+    <a href="{{ url_for('assessment.select') }}"          class="btn btn-outline btn-lg">➕ New Assessment</a>
+  </div>
+
+</div>
+{% endblock %}

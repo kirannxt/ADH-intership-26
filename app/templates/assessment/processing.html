@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Processing — AssessMe{% endblock %}
+{% block navbar %}{% endblock %}
+
+{% block content %}
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#f0f4ff 0%,#faf5ff 100%);">
+  <div class="container-sm text-center">
+
+    <div class="spinner-wrap">
+      <div class="spinner"></div>
+    </div>
+
+    <h2 style="margin-bottom:.5rem;">Analysing your responses…</h2>
+    <p style="margin-bottom:2rem;">Please wait while we process your assessment. This only takes a moment.</p>
+
+    <div class="processing-steps container-sm" style="text-align:left;max-width:420px;margin:0 auto;">
+      <div class="p-step" data-step="1">
+        <span class="p-step-icon">📥</span> Collecting responses
+      </div>
+      <div class="p-step" data-step="2">
+        <span class="p-step-icon">🔍</span> Analysing patterns
+      </div>
+      <div class="p-step" data-step="3">
+        <span class="p-step-icon">📊</span> Calculating scores
+      </div>
+      <div class="p-step" data-step="4">
+        <span class="p-step-icon">💡</span> Generating recommendations
+      </div>
+      <div class="p-step" data-step="5">
+        <span class="p-step-icon">✅</span> Finalising your report
+      </div>
+    </div>
+
+    <!-- Redirect trigger -->
+    <div id="processing-redirect" data-url="{{ url_for('assessment.result') }}" class="hidden"></div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block footer %}{% endblock %}

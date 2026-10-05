@@ -1,5 +1,5 @@
-from flask import render_template
-from flask_login import login_required
+from flask import render_template, redirect, url_for
+from flask_login import login_required, current_user
 
 from app.main import main
 
@@ -7,7 +7,10 @@ from app.main import main
 @main.route("/")
 @main.route("/index")
 def index():
-    return render_template("index.html", title="Home")
+    # Logged-in users go straight to the dashboard
+    if current_user.is_authenticated:
+        return redirect(url_for("main.dashboard"))
+    return render_template("index.html", title="Welcome")
 
 
 @main.route("/dashboard")

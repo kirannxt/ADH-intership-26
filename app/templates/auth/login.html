@@ -1,23 +1,59 @@
 {% extends "base.html" %}
+{% block title %}Login — AssessMe{% endblock %}
 
 {% block content %}
-<div class="form-container">
-  <h2>Login</h2>
-  <form method="POST" action="{{ url_for('auth.login') }}">
-    <div class="form-group">
-      <label for="email">Email</label>
-      <input type="email" id="email" name="email" class="form-control" required autofocus />
+<div class="auth-page">
+  <div class="container-sm">
+    <div class="auth-logo">
+      <div class="logo-icon">🧠</div>
+      <h2>Welcome back</h2>
+      <p>Sign in to continue your assessments</p>
     </div>
-    <div class="form-group">
-      <label for="password">Password</label>
-      <input type="password" id="password" name="password" class="form-control" required />
+
+    <div class="card auth-card">
+      <div class="card-body">
+        <div class="auth-tabs">
+          <div class="auth-tab active" data-target="panel-login">Login</div>
+          <a href="{{ url_for('auth.register') }}" class="auth-tab" style="text-decoration:none;">Register</a>
+        </div>
+
+        <form method="POST" action="{{ url_for('auth.login') }}">
+          <div class="form-group">
+            <label class="form-label" for="email">Email address</label>
+            <input type="email" id="email" name="email" class="form-control"
+                   placeholder="you@example.com" required autofocus />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="password">
+              Password
+              <a href="#" style="font-weight:400;float:right;font-size:.8rem;">Forgot password?</a>
+            </label>
+            <div style="position:relative;">
+              <input type="password" id="password" name="password" class="form-control"
+                     placeholder="••••••••" required />
+              <button type="button" class="pwd-toggle"
+                      data-target="password"
+                      style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1rem;">👁</button>
+            </div>
+          </div>
+          <div class="form-group" style="display:flex;align-items:center;gap:.5rem;">
+            <input type="checkbox" id="remember" name="remember" style="width:16px;height:16px;accent-color:var(--primary);" />
+            <label for="remember" style="font-size:.88rem;color:var(--text-muted);margin:0;">Keep me signed in</label>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block btn-lg">Sign In</button>
+        </form>
+
+        <div class="divider">or continue with</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
+          <button class="btn btn-secondary">🔵 Google</button>
+          <button class="btn btn-secondary">⚫ GitHub</button>
+        </div>
+
+        <p class="text-center mt-3" style="font-size:.88rem;">
+          Don't have an account? <a href="{{ url_for('auth.register') }}">Create one free</a>
+        </p>
+      </div>
     </div>
-    <div class="form-group form-check">
-      <input type="checkbox" id="remember" name="remember" class="form-check-input" />
-      <label for="remember">Remember me</label>
-    </div>
-    <button type="submit" class="btn btn-primary">Login</button>
-  </form>
-  <p class="mt-2">Don't have an account? <a href="{{ url_for('auth.register') }}">Register here</a></p>
+  </div>
 </div>
 {% endblock %}

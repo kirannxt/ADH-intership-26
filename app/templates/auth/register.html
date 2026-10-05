@@ -1,23 +1,70 @@
 {% extends "base.html" %}
+{% block title %}Register — AssessMe{% endblock %}
 
 {% block content %}
-<div class="form-container">
-  <h2>Register</h2>
-  <form method="POST" action="{{ url_for('auth.register') }}">
-    <div class="form-group">
-      <label for="username">Username</label>
-      <input type="text" id="username" name="username" class="form-control" required autofocus />
+<div class="auth-page">
+  <div class="container-sm">
+    <div class="auth-logo">
+      <div class="logo-icon">🧠</div>
+      <h2>Create your account</h2>
+      <p>Start your assessment journey today — it's free</p>
     </div>
-    <div class="form-group">
-      <label for="email">Email</label>
-      <input type="email" id="email" name="email" class="form-control" required />
+
+    <div class="card auth-card">
+      <div class="card-body">
+        <div class="auth-tabs">
+          <a href="{{ url_for('auth.login') }}" class="auth-tab" style="text-decoration:none;">Login</a>
+          <div class="auth-tab active" data-target="panel-register">Register</div>
+        </div>
+
+        <form method="POST" action="{{ url_for('auth.register') }}">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="first_name">First name</label>
+              <input type="text" id="first_name" name="first_name" class="form-control"
+                     placeholder="Alex" required autofocus />
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="last_name">Last name</label>
+              <input type="text" id="last_name" name="last_name" class="form-control"
+                     placeholder="Jordan" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="username">Username</label>
+            <input type="text" id="username" name="username" class="form-control"
+                   placeholder="alexjordan" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="email">Email address</label>
+            <input type="email" id="email" name="email" class="form-control"
+                   placeholder="you@example.com" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="password">Password</label>
+            <div style="position:relative;">
+              <input type="password" id="password" name="password" class="form-control"
+                     placeholder="Min. 8 characters" required minlength="8" />
+              <button type="button" class="pwd-toggle" data-target="password"
+                      style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1rem;">👁</button>
+            </div>
+            <p class="form-hint">Use 8+ characters with a mix of letters and numbers.</p>
+          </div>
+          <div class="form-group" style="display:flex;align-items:flex-start;gap:.5rem;">
+            <input type="checkbox" id="terms" name="terms" required
+                   style="width:16px;height:16px;margin-top:2px;accent-color:var(--primary);" />
+            <label for="terms" style="font-size:.88rem;color:var(--text-muted);margin:0;">
+              I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+            </label>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block btn-lg">Create Account</button>
+        </form>
+
+        <p class="text-center mt-3" style="font-size:.88rem;">
+          Already have an account? <a href="{{ url_for('auth.login') }}">Sign in</a>
+        </p>
+      </div>
     </div>
-    <div class="form-group">
-      <label for="password">Password</label>
-      <input type="password" id="password" name="password" class="form-control" required minlength="8" />
-    </div>
-    <button type="submit" class="btn btn-primary">Create Account</button>
-  </form>
-  <p class="mt-2">Already have an account? <a href="{{ url_for('auth.login') }}">Login here</a></p>
+  </div>
 </div>
 {% endblock %}

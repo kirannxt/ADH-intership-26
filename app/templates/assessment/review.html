@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}Review Answers — AssessMe{% endblock %}
+
+{% block content %}
+<div class="container-md section">
+
+  <div class="steps mb-4">
+    {% for label in ['Select','Personal Info','Questionnaire','Review','Results'] %}
+    <div class="step {% if loop.index < 4 %}completed{% elif loop.index == 4 %}active{% endif %}">
+      <div class="step-circle">{% if loop.index < 4 %}✓{% else %}{{ loop.index }}{% endif %}</div>
+      <span class="step-label">{{ label }}</span>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="text-center mb-4">
+    <h1 class="page-title">Review Your Answers</h1>
+    <p class="page-sub">Check your responses before submitting. You can go back to change any answer.</p>
+  </div>
+
+  <!-- Summary bar -->
+  <div class="card mb-3" style="background:var(--primary-light);border-color:var(--primary);">
+    <div class="card-body" style="display:flex;align-items:center;gap:2rem;flex-wrap:wrap;">
+      <div><span style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--primary);">Assessment</span><br><strong>Cognitive Skills Test</strong></div>
+      <div><span style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--primary);">Questions</span><br><strong>10 of 10 answered</strong></div>
+      <div><span style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--primary);">Est. time spent</span><br><strong>4 min 32 sec</strong></div>
+      <a href="{{ url_for('assessment.questionnaire') }}" class="btn btn-outline btn-sm" style="margin-left:auto;">✏️ Edit answers</a>
+    </div>
+  </div>
+
+  <!-- Answers list -->
+  <div class="card mb-4">
+    <div class="card-header"><span class="card-title">Your Responses</span></div>
+    <div class="card-body" style="display:flex;flex-direction:column;gap:1.25rem;">
+      {% set qa = [
+        (1,'How would you rate your ability to focus on a single task for an extended period?','Good — I stay focused most of the time'),
+        (2,'When facing a complex problem, which approach do you typically take?','Break it into smaller parts methodically'),
+        (3,'How do you handle feedback or criticism about your work?','I welcome it and use it to improve'),
+        (4,'In social situations, you typically feel:','Comfortable but prefer small groups'),
+        (5,'How often do you set specific goals for yourself?','Often — I have goals in mind'),
+        (6,'When working in a team, you prefer to:','Contribute ideas actively'),
+        (7,'How do you manage stress during high-pressure situations?','I stay calm and strategise'),
+        (8,'How quickly do you adapt to new environments or changes?','Fairly quickly with minor adjustment'),
+        (9,'How do you approach learning new skills?','Proactively and consistently'),
+        (10,'Overall, how satisfied are you with your personal and professional development?','Satisfied'),
+      ] %}
+      {% for num, question, answer in qa %}
+      <div style="padding-bottom:1.25rem;{% if not loop.last %}border-bottom:1px solid var(--border);{% endif %}">
+        <div style="display:flex;align-items:flex-start;gap:.75rem;">
+          <span style="width:28px;height:28px;background:var(--primary-light);color:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;flex-shrink:0;margin-top:1px;">{{ num }}</span>
+          <div style="flex:1;">
+            <div style="font-weight:600;font-size:.95rem;color:var(--text);margin-bottom:.4rem;">{{ question }}</div>
+            <div style="display:flex;align-items:center;gap:.5rem;">
+              <span style="color:var(--success);font-size:.9rem;">✅</span>
+              <span style="font-size:.9rem;color:var(--text-muted);">{{ answer }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Submit -->
+  <div class="card" style="background:var(--surface-2);">
+    <div class="card-body text-center">
+      <h3 style="margin-bottom:.5rem;">Ready to submit?</h3>
+      <p style="margin-bottom:1.5rem;">Once submitted your answers cannot be changed. Your results will be calculated immediately.</p>
+      <div style="display:flex;justify-content:center;gap:1rem;flex-wrap:wrap;">
+        <a href="{{ url_for('assessment.questionnaire') }}" class="btn btn-secondary btn-lg">← Go back</a>
+        <a href="{{ url_for('assessment.processing') }}" class="btn btn-primary btn-lg">Submit &amp; Get Results 🚀</a>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
