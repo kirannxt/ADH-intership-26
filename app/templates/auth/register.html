@@ -1,23 +1,7 @@
+{# Register route now renders auth/login.html with open_tab="register" directly from the route.
+   This file is kept as a stub for backwards compatibility. #}
 {% extends "base.html" %}
-
+{% block title %}Create Account — AssessMe{% endblock %}
 {% block content %}
-<div class="form-container">
-  <h2>Register</h2>
-  <form method="POST" action="{{ url_for('auth.register') }}">
-    <div class="form-group">
-      <label for="username">Username</label>
-      <input type="text" id="username" name="username" class="form-control" required autofocus />
-    </div>
-    <div class="form-group">
-      <label for="email">Email</label>
-      <input type="email" id="email" name="email" class="form-control" required />
-    </div>
-    <div class="form-group">
-      <label for="password">Password</label>
-      <input type="password" id="password" name="password" class="form-control" required minlength="8" />
-    </div>
-    <button type="submit" class="btn btn-primary">Create Account</button>
-  </form>
-  <p class="mt-2">Already have an account? <a href="{{ url_for('auth.login') }}">Login here</a></p>
-</div>
+  {# This template is not rendered — route renders login.html with open_tab="register" #}
 {% endblock %}

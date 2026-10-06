@@ -1,23 +1,227 @@
 {% extends "base.html" %}
+{% block title %}Login / Register — AssessMe{% endblock %}
 
 {% block content %}
-<div class="form-container">
-  <h2>Login</h2>
-  <form method="POST" action="{{ url_for('auth.login') }}">
-    <div class="form-group">
-      <label for="email">Email</label>
-      <input type="email" id="email" name="email" class="form-control" required autofocus />
+<div class="auth-page">
+  <div class="container-sm">
+
+    <!-- Logo -->
+    <div class="auth-logo">
+      <div class="logo-icon" aria-hidden="true">🧠</div>
+      <h1 style="font-size:1.75rem;margin-bottom:.25rem;">Welcome to AssessMe</h1>
+      <p>Sign in or create a free account to get started.</p>
     </div>
-    <div class="form-group">
-      <label for="password">Password</label>
-      <input type="password" id="password" name="password" class="form-control" required />
-    </div>
-    <div class="form-group form-check">
-      <input type="checkbox" id="remember" name="remember" class="form-check-input" />
-      <label for="remember">Remember me</label>
-    </div>
-    <button type="submit" class="btn btn-primary">Login</button>
-  </form>
-  <p class="mt-2">Don't have an account? <a href="{{ url_for('auth.register') }}">Register here</a></p>
+
+    <div class="card">
+      <div class="card-body" style="padding-top:1.5rem;">
+
+        <!-- Tabs -->
+        <div class="auth-tabs" role="tablist" aria-label="Login or Register">
+          <button class="auth-tab active"
+                  role="tab" aria-selected="true"
+                  aria-controls="panel-login" id="tab-login"
+                  data-target="panel-login">Sign In</button>
+          <button class="auth-tab"
+                  role="tab" aria-selected="false"
+                  aria-controls="panel-register" id="tab-register"
+                  data-target="panel-register">Create Account</button>
+        </div>
+
+        <!-- ── LOGIN PANEL ── -->
+        <div id="panel-login" class="auth-panel" role="tabpanel" aria-labelledby="tab-login">
+          <form method="POST" action="{{ url_for('auth.login') }}"
+                class="validated" novalidate autocomplete="on">
+
+            <div class="form-group">
+              <label class="form-label" for="login-email">
+                Email address <span class="required-mark" aria-hidden="true">*</span>
+              </label>
+              <input type="email" id="login-email" name="email"
+                     class="form-control" placeholder="you@example.com"
+                     required autofocus autocomplete="email"
+                     aria-required="true" />
+              <p class="form-error" aria-live="polite"></p>
+            </div>
+
+            <div class="form-group">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem;">
+                <label class="form-label" for="login-password" style="margin:0;">
+                  Password <span class="required-mark" aria-hidden="true">*</span>
+                </label>
+                <a href="#" style="font-size:.8rem;color:var(--text-muted);"
+                   aria-label="Forgot your password? (coming soon)">Forgot password?</a>
+              </div>
+              <div style="position:relative;">
+                <input type="password" id="login-password" name="password"
+                       class="form-control" placeholder="••••••••"
+                       required autocomplete="current-password"
+                       aria-required="true" style="padding-right:3rem;" />
+                <button type="button" class="pwd-toggle"
+                        data-target="login-password"
+                        aria-label="Show password"
+                        style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1rem;padding:.2rem;">
+                  <span class="pwd-icon" aria-hidden="true">👁</span>
+                </button>
+              </div>
+              <p class="form-error" aria-live="polite"></p>
+            </div>
+
+            <div class="form-group" style="display:flex;align-items:center;gap:.6rem;">
+              <input type="checkbox" id="remember" name="remember"
+                     style="width:16px;height:16px;accent-color:var(--primary);" />
+              <label for="remember" style="font-size:.88rem;color:var(--text-muted);margin:0;cursor:pointer;">
+                Keep me signed in on this device
+              </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block btn-lg">Sign In</button>
+          </form>
+
+          <div class="divider" aria-hidden="true">or continue with</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
+            <button class="btn btn-secondary" disabled title="Coming soon" aria-label="Sign in with Google (coming soon)">🔵 Google</button>
+            <button class="btn btn-secondary" disabled title="Coming soon" aria-label="Sign in with GitHub (coming soon)">⚫ GitHub</button>
+          </div>
+        </div><!-- /panel-login -->
+
+        <!-- ── REGISTER PANEL ── -->
+        <div id="panel-register" class="auth-panel hidden" role="tabpanel" aria-labelledby="tab-register">
+          <form method="POST" action="{{ url_for('auth.register') }}"
+                class="validated" novalidate autocomplete="on">
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="reg-fname">
+                  First name <span class="required-mark" aria-hidden="true">*</span>
+                </label>
+                <input type="text" id="reg-fname" name="first_name"
+                       class="form-control" placeholder="Alex"
+                       required autocomplete="given-name" aria-required="true" />
+                <p class="form-error" aria-live="polite"></p>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="reg-lname">
+                  Last name <span class="required-mark" aria-hidden="true">*</span>
+                </label>
+                <input type="text" id="reg-lname" name="last_name"
+                       class="form-control" placeholder="Jordan"
+                       required autocomplete="family-name" aria-required="true" />
+                <p class="form-error" aria-live="polite"></p>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="reg-username">
+                Username <span class="required-mark" aria-hidden="true">*</span>
+              </label>
+              <input type="text" id="reg-username" name="username"
+                     class="form-control" placeholder="alexjordan"
+                     required minlength="3" maxlength="64"
+                     autocomplete="username" aria-required="true"
+                     pattern="[A-Za-z0-9_]+"
+                     aria-describedby="username-hint" />
+              <p class="form-hint" id="username-hint">Letters, numbers and underscores only. 3–64 characters.</p>
+              <p class="form-error" aria-live="polite"></p>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="reg-email">
+                Email address <span class="required-mark" aria-hidden="true">*</span>
+              </label>
+              <input type="email" id="reg-email" name="email"
+                     class="form-control" placeholder="you@example.com"
+                     required autocomplete="email" aria-required="true" />
+              <p class="form-error" aria-live="polite"></p>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="password">
+                Password <span class="required-mark" aria-hidden="true">*</span>
+              </label>
+              <div style="position:relative;">
+                <input type="password" id="password" name="password"
+                       class="form-control" placeholder="Min. 8 characters"
+                       required minlength="8" autocomplete="new-password"
+                       aria-required="true" aria-describedby="pwd-strength"
+                       style="padding-right:3rem;" />
+                <button type="button" class="pwd-toggle"
+                        data-target="password"
+                        aria-label="Show password"
+                        style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1rem;padding:.2rem;">
+                  <span class="pwd-icon" aria-hidden="true">👁</span>
+                </button>
+              </div>
+              <!-- Password strength -->
+              <div class="pwd-strength" id="pwd-strength" aria-live="polite">
+                <div class="pwd-strength-bar"><div class="pwd-strength-fill"></div></div>
+                <span class="pwd-strength-text"></span>
+              </div>
+              <p class="form-error" aria-live="polite"></p>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="confirm_password">
+                Confirm password <span class="required-mark" aria-hidden="true">*</span>
+              </label>
+              <div style="position:relative;">
+                <input type="password" id="confirm_password" name="confirm_password"
+                       class="form-control" placeholder="Repeat your password"
+                       required autocomplete="new-password" aria-required="true"
+                       style="padding-right:3rem;" />
+                <button type="button" class="pwd-toggle"
+                        data-target="confirm_password"
+                        aria-label="Show confirm password"
+                        style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1rem;padding:.2rem;">
+                  <span class="pwd-icon" aria-hidden="true">👁</span>
+                </button>
+              </div>
+              <p class="form-error" aria-live="polite"></p>
+            </div>
+
+            <div class="form-group" style="display:flex;align-items:flex-start;gap:.6rem;">
+              <input type="checkbox" id="terms" name="terms" required
+                     style="width:16px;height:16px;margin-top:3px;accent-color:var(--primary);flex-shrink:0;" />
+              <label for="terms" style="font-size:.88rem;color:var(--text-muted);margin:0;cursor:pointer;">
+                I agree to the <a href="{{ url_for('assessment.help_page') }}">Terms of Use</a>
+                and <a href="{{ url_for('assessment.help_page') }}#privacy">Privacy Policy</a>.
+                <span class="required-mark" aria-hidden="true">*</span>
+              </label>
+            </div>
+
+            <!-- Privacy note -->
+            <div class="privacy-note" role="note">
+              <span class="p-icon" aria-hidden="true">🔒</span>
+              <span>Your information is used only to personalise your assessment results.
+              We do not sell or share your data with third parties.
+              See our <a href="{{ url_for('assessment.help_page') }}#privacy">Privacy Policy</a> for details.</span>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top:1rem;">
+              Create Account
+            </button>
+          </form>
+        </div><!-- /panel-register -->
+
+      </div><!-- /card-body -->
+    </div><!-- /card -->
+
+    <p class="text-center mt-3" style="font-size:.85rem;color:var(--text-muted);">
+      By using AssessMe you acknowledge that results are for self-reflection only
+      and do not constitute a clinical or professional assessment.
+      <a href="{{ url_for('assessment.help_page') }}#limitations">Learn more</a>
+    </p>
+
+  </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Pre-open the correct tab based on server flag
+  document.addEventListener("DOMContentLoaded", () => {
+    const target = "{{ open_tab | default('login') }}";
+    const tab = document.querySelector(`.auth-tab[data-target="panel-${target}"]`);
+    if (tab) tab.click();
+  });
+</script>
 {% endblock %}

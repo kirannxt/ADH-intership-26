@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+{% block title %}Your Results — AssessMe{% endblock %}
+
+{% block breadcrumb %}
+<div class="container">
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
+    <span class="breadcrumb-sep" aria-hidden="true">›</span>
+    <span class="current" aria-current="page">Assessment Result</span>
+  </nav>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container section">
+
+  <!-- Result header — uses real variables from route -->
+  <div class="result-header" role="region" aria-label="Assessment result summary">
+    <div style="font-size:.82rem;font-weight:700;letter-spacing:.08em;
+                text-transform:uppercase;opacity:.85;margin-bottom:.5rem;">
+      {{ assessment_info.icon }}  {{ assessment_label }}
+    </div>
+    <h1 style="color:#fff;font-size:1.75rem;margin-bottom:.5rem;">
+      Your Assessment is Complete
+    </h1>
+    <p style="color:rgba(255,255,255,.85);">
+      Based on your self-reported responses. Results are for personal reflection only.
+    </p>
+  </div>
+
+  <!-- Responsible disclaimer — prominent -->
+  <div class="disclaimer-box mb-4" role="note" aria-label="Important disclaimer">
+    <span class="d-icon" aria-hidden="true">⚠️</span>
+    <div>
+      <strong>Please read before interpreting your results:</strong>
+      This is a <em>screening tool</em>, not a diagnostic instrument.
+      Your score reflects your responses on a single occasion and may be influenced
+      by how you felt today. It is <strong>not</strong> a measure of fixed ability or character.
+      Do not use these results to make important decisions without seeking professional advice.
+      <a href="{{ url_for('assessment.help_page') }}#limitations">Learn more about limitations →</a>
+    </div>
+  </div>
+
+  <div class="grid-2 mb-4">
+
+    <!-- Score ring — uses real score variable -->
+    <div class="card" role="region" aria-label="Your overall score">
+      <div class="card-header"><span class="card-title">Overall Indicator</span></div>
+      <div class="card-body flex-center" style="flex-direction:column;gap:1rem;">
+        <div class="score-ring-wrap">
+          <div class="score-ring" aria-label="Score: {{ score }} out of 100">
+            <svg viewBox="0 0 160 160" aria-hidden="true">
+              <circle class="score-ring-track" cx="80" cy="80" r="70" />
+              <circle class="score-ring-fill" cx="80" cy="80" r="70"
+                      data-pct="{{ score }}"
+                      stroke="{% if band == 'High' %}#10b981{% elif band == 'Moderate' %}#f59e0b{% else %}#ef4444{% endif %}" />
+            </svg>
+            <div class="score-ring-text">
+              <span class="score-ring-value" aria-hidden="true">{{ score }}%</span>
+              <span class="score-ring-label" aria-hidden="true">score</span>
+            </div>
+          </div>
+
+          <!-- Plain-language band -->
+          <span class="result-band result-band-{{ band | lower }}"
+                role="status" aria-label="Result band: {{ band }}">
+            {% if band == 'High' %}✅{% elif band == 'Moderate' %}📊{% else %}📉{% endif %}
+            {{ band }} range
+          </span>
+        </div>
+
+        <!-- What this score means -->
+        <div style="text-align:left;width:100%;border-top:1px solid var(--border);padding-top:1rem;">
+          <h4 style="margin-bottom:.5rem;">What does this mean?</h4>
+          {% if band == 'High' %}
+          <p style="font-size:.9rem;">
+            Your responses suggest a relatively <strong>high level</strong> of the trait or skill
+            being measured on this occasion. This may reflect strong self-awareness, current wellbeing,
+            or confidence in the area assessed.
+          </p>
+          {% elif band == 'Moderate' %}
+          <p style="font-size:.9rem;">
+            Your responses suggest a <strong>moderate level</strong>. This is common — most people
+            score in this range. There may be areas of strength alongside areas where further
+            development could be beneficial.
+          </p>
+          {% else %}
+          <p style="font-size:.9rem;">
+            Your responses suggest a <strong>lower score</strong> on this occasion. This does not
+            mean something is wrong — it may reflect how you felt today, a difficult period,
+            or simply areas for growth. Consider speaking with a professional if you have concerns.
+          </p>
+          {% endif %}
+
+          <h4 style="margin-top:1rem;margin-bottom:.5rem;">What this does NOT mean:</h4>
+          <ul style="padding-left:1.25rem;font-size:.88rem;color:var(--text-muted);line-height:1.8;">
+            <li>It is not a clinical diagnosis of any condition.</li>
+            <li>It is not a permanent measure of your ability or character.</li>
+            <li>It should not be used to label yourself or others.</li>
+            <li>It is not a substitute for professional advice.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Response observations -->
+    <div class="card" role="region" aria-label="Response observations">
+      <div class="card-header"><span class="card-title">Response Observations</span></div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:1rem;">
+        <p style="font-size:.88rem;color:var(--text-muted);">
+          The following observations are based solely on the patterns in your responses.
+          They are descriptive, not evaluative.
+        </p>
+        {% if score >= 75 %}
+        <div style="display:flex;gap:.75rem;align-items:flex-start;">
+          <span aria-hidden="true">📌</span>
+          <span style="font-size:.9rem;">Your responses suggest a generally positive orientation toward the area assessed.</span>
+        </div>
+        <div style="display:flex;gap:.75rem;align-items:flex-start;">
+          <span aria-hidden="true">📌</span>
+          <span style="font-size:.9rem;">You appear to approach challenges with a structured or planned mindset.</span>
+        </div>
+        {% elif score >= 50 %}
+        <div style="display:flex;gap:.75rem;align-items:flex-start;">
+          <span aria-hidden="true">📌</span>
+          <span style="font-size:.9rem;">Your responses show a mixed pattern, with both confident and uncertain areas.</span>
+        </div>
+        <div style="display:flex;gap:.75rem;align-items:flex-start;">
+          <span aria-hidden="true">📌</span>
+          <span style="font-size:.9rem;">Some questions received lower ratings — reviewing those areas may be worthwhile.</span>
+        </div>
+        {% else %}
+        <div style="display:flex;gap:.75rem;align-items:flex-start;">
+          <span aria-hidden="true">📌</span>
+          <span style="font-size:.9rem;">Your responses suggest you may be experiencing some difficulty in this area right now.</span>
+        </div>
+        <div style="display:flex;gap:.75rem;align-items:flex-start;">
+          <span aria-hidden="true">📌</span>
+          <span style="font-size:.9rem;">Consider speaking with a trusted person or professional if you feel this reflects an ongoing concern.</span>
+        </div>
+        {% endif %}
+
+        <!-- Suggested next steps -->
+        <div style="border-top:1px solid var(--border);padding-top:1rem;margin-top:.5rem;">
+          <h4 style="margin-bottom:.6rem;">Suggested next steps</h4>
+          <ol style="padding-left:1.25rem;font-size:.88rem;color:var(--text-muted);line-height:2;">
+            <li>Read the <a href="{{ url_for('assessment.recommendations') }}">Guidance &amp; Interpretation</a> page.</li>
+            <li>Reflect on which questions felt most difficult or surprising.</li>
+            <li>Consider discussing results with a mentor, counsellor, or trusted person.</li>
+            <li>Retake the assessment in a few weeks to compare.</li>
+          </ol>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Action row -->
+  <div style="display:flex;justify-content:center;gap:1rem;flex-wrap:wrap;margin-bottom:2rem;">
+    <a href="{{ url_for('assessment.recommendations') }}" class="btn btn-primary btn-lg">
+      💡 View Guidance
+    </a>
+    <a href="{{ url_for('assessment.history') }}" class="btn btn-secondary btn-lg">
+      📋 Assessment History
+    </a>
+    <a href="{{ url_for('assessment.select') }}"  class="btn btn-outline btn-lg">
+      ➕ New Assessment
+    </a>
+    <button onclick="window.print();" class="btn btn-ghost btn-lg"
+            aria-label="Print or save this result">
+      🖨 Print / Save
+    </button>
+  </div>
+
+  <!-- Professional support note -->
+  <div class="info-box" style="max-width:720px;margin:0 auto;" role="note">
+    <span style="font-size:1.1rem;flex-shrink:0;" aria-hidden="true">🩺</span>
+    <div>
+      <strong>When to seek professional support:</strong>
+      <p style="margin-top:.25rem;color:var(--primary-dark);font-size:.88rem;">
+        If your results raise concerns, or if you are experiencing persistent difficulty
+        with mood, anxiety, concentration, or wellbeing, please consider speaking with
+        a qualified professional — such as a GP, psychologist, or counsellor.
+        <a href="{{ url_for('assessment.help_page') }}#support" style="font-weight:700;">
+          Find support resources →
+        </a>
+      </p>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

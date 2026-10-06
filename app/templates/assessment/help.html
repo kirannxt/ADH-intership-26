@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+{% block title %}Help & Information — AssessMe{% endblock %}
+
+{% block breadcrumb %}
+<div class="container">
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="{{ url_for('main.index') }}">Home</a>
+    <span class="breadcrumb-sep" aria-hidden="true">›</span>
+    <span class="current" aria-current="page">Help &amp; Information</span>
+  </nav>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container section">
+
+  <div class="text-center mb-4">
+    <h1 class="page-title">Help &amp; Information</h1>
+    <p class="page-sub">Everything you need to understand AssessMe and use it responsibly.</p>
+  </div>
+
+  <!-- Quick-nav anchors -->
+  <div style="display:flex;gap:.5rem;flex-wrap:wrap;justify-content:center;margin-bottom:2rem;"
+       role="navigation" aria-label="Help sections">
+    {% for label, anchor in [
+      ('What is an assessment?','#what'),
+      ('How it works','#how'),
+      ('Interpreting results','#interpret'),
+      ('Limitations','#limitations'),
+      ('Privacy','#privacy'),
+      ('Support','#support'),
+      ('FAQ','#faq'),
+      ('Contact','#contact'),
+    ] %}
+    <a href="{{ anchor }}" class="btn btn-secondary btn-sm">{{ label }}</a>
+    {% endfor %}
+  </div>
+
+  <!-- WHAT IS A NEUROBEHAVIOURAL ASSESSMENT -->
+  <div class="card mb-4" id="what" tabindex="-1">
+    <div class="card-header"><span class="card-title">🧠 What is a Behavioural Self-Assessment?</span></div>
+    <div class="card-body" style="line-height:1.8;font-size:.95rem;color:var(--text);">
+      <p style="margin-bottom:1rem;">
+        A behavioural self-assessment is a structured set of questions designed to help you
+        reflect on aspects of your thinking, emotions, behaviour, or skills. Assessments like
+        the ones on AssessMe ask you to rate or choose responses that best describe how you
+        typically think, feel, or act.
+      </p>
+      <p>
+        These tools are widely used in educational, occupational, and coaching contexts to
+        support <strong>self-awareness</strong> and <strong>personal development</strong>.
+        They are <em>not</em> diagnostic tests and should not be treated as such.
+      </p>
+    </div>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="card mb-4" id="how" tabindex="-1">
+    <div class="card-header"><span class="card-title">⚙️ How AssessMe Works</span></div>
+    <div class="card-body">
+      <ol style="padding-left:1.25rem;font-size:.92rem;color:var(--text);line-height:2.2;">
+        <li><strong>Choose an assessment</strong> — select the type that matches your goal.</li>
+        <li><strong>Provide context</strong> — enter basic information to help personalise your results.</li>
+        <li><strong>Answer questions</strong> — respond honestly; there are no right or wrong answers.</li>
+        <li><strong>Review your responses</strong> — check your answers before submitting.</li>
+        <li><strong>Receive a report</strong> — view your score and plain-language observations.</li>
+        <li><strong>Read guidance</strong> — access personalised reflection suggestions.</li>
+        <li><strong>Track over time</strong> — revisit your history to observe change.</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- INTERPRETING RESULTS -->
+  <div class="card mb-4" id="interpret" tabindex="-1">
+    <div class="card-header"><span class="card-title">📊 Interpreting Your Results</span></div>
+    <div class="card-body" style="font-size:.92rem;line-height:1.8;color:var(--text);">
+      <p style="margin-bottom:1rem;">
+        Results are presented as a percentage score and a descriptive band
+        (High / Moderate / Low). These bands are general descriptors only.
+      </p>
+      <div style="display:flex;flex-direction:column;gap:.75rem;margin-bottom:1rem;">
+        <div style="display:flex;align-items:center;gap:1rem;">
+          <span class="result-band result-band-high" style="min-width:100px;justify-content:center;">High</span>
+          <span>Responses lean toward the positive or confident end of the scale. This may reflect current strengths, positive mood, or strong self-awareness.</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:1rem;">
+          <span class="result-band result-band-moderate" style="min-width:100px;justify-content:center;">Moderate</span>
+          <span>Mixed responses. This is the most common range and reflects a blend of areas of strength and areas for growth.</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:1rem;">
+          <span class="result-band result-band-low" style="min-width:100px;justify-content:center;">Low</span>
+          <span>Responses lean toward the lower end. This may reflect a difficult period, areas needing attention, or simply how you felt on the day.</span>
+        </div>
+      </div>
+      <div class="info-box" role="note">
+        <span aria-hidden="true">💡</span>
+        <span>Results can vary significantly based on mood, time of day, and how questions are interpreted. A single score does not define you.</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- LIMITATIONS -->
+  <div class="card mb-4" id="limitations" tabindex="-1">
+    <div class="card-header"><span class="card-title">⚠️ Limitations of Automated Assessments</span></div>
+    <div class="card-body">
+      <div class="disclaimer-box" style="margin-bottom:1rem;" role="note">
+        <span class="d-icon" aria-hidden="true">⚠️</span>
+        <span>Understanding these limitations is essential for responsible use of this tool.</span>
+      </div>
+      <ul style="padding-left:1.25rem;font-size:.92rem;color:var(--text);line-height:2.2;">
+        <li><strong>Not a clinical diagnosis:</strong> No automated assessment can diagnose a medical or psychological condition.</li>
+        <li><strong>Self-report bias:</strong> Responses reflect how you see yourself, which may differ from how others perceive you.</li>
+        <li><strong>Moment-in-time snapshot:</strong> Results reflect your state when you answered — they are not fixed or permanent.</li>
+        <li><strong>Cultural and language context:</strong> Questions may carry different meanings across cultural backgrounds.</li>
+        <li><strong>No substitute for professional advice:</strong> If you have concerns about your mental health, please consult a qualified professional.</li>
+        <li><strong>Uncertainty in AI-assisted scoring:</strong> Scoring models are based on general patterns and may not accurately reflect your individual experience.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- PRIVACY -->
+  <div class="card mb-4" id="privacy" tabindex="-1">
+    <div class="card-header"><span class="card-title">🔒 Privacy &amp; Data Use</span></div>
+    <div class="card-body" style="font-size:.92rem;line-height:1.8;color:var(--text);">
+      <ul style="padding-left:1.25rem;line-height:2.2;">
+        <li>We collect only the information needed to generate and contextualise your results.</li>
+        <li>Your assessment responses and results are visible only to you.</li>
+        <li>We do not sell, share, or disclose your data to third parties.</li>
+        <li>You may delete your assessment records at any time from the History page.</li>
+        <li>Your account can be deleted by contacting support.</li>
+        <li>We use standard security practices to protect stored data.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- PROFESSIONAL SUPPORT -->
+  <div class="card mb-4" id="support" tabindex="-1" style="border-color:var(--info);">
+    <div class="card-header" style="background:#dbeafe;">
+      <span class="card-title" style="color:#1e40af;">🩺 Where to Find Professional Support</span>
+    </div>
+    <div class="card-body" style="font-size:.92rem;line-height:1.8;color:var(--text);">
+      <p style="margin-bottom:1rem;">
+        If you are experiencing difficulties with mental health, wellbeing, or personal
+        development, the following types of professionals can help:
+      </p>
+      <ul style="padding-left:1.25rem;line-height:2.2;">
+        <li><strong>General Practitioner (GP / Doctor)</strong> — first point of contact for health concerns.</li>
+        <li><strong>Psychologist or Therapist</strong> — trained in assessment and talking therapies.</li>
+        <li><strong>Counsellor</strong> — support for emotional and personal difficulties.</li>
+        <li><strong>Career advisor or coach</strong> — guidance for career and development questions.</li>
+        <li><strong>School or university counselling services</strong> — free support for students.</li>
+      </ul>
+      <div class="info-box mt-3" role="note">
+        <span aria-hidden="true">📞</span>
+        <span>
+          <strong>In a crisis?</strong> Contact your local emergency services (e.g. 999, 911)
+          or a crisis helpline. In the UK: Samaritans 116 123 (free, 24/7).
+          In the US: 988 Suicide &amp; Crisis Lifeline (call or text 988).
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ -->
+  <div class="card mb-4" id="faq" tabindex="-1">
+    <div class="card-header"><span class="card-title">❓ Frequently Asked Questions</span></div>
+    <div class="card-body" style="padding:0;">
+      {% set faqs = [
+        ('faq1','Is this a real psychological test?',
+         'No. AssessMe provides structured self-reflection questionnaires. They are not standardised psychological tests and have not been clinically validated for diagnostic purposes.'),
+        ('faq2','Can I trust my result?',
+         'Your result reflects your responses on this occasion. It can be a useful starting point for self-reflection, but should not be treated as a definitive measure of your abilities, personality, or mental health.'),
+        ('faq3','Why do my results change between sessions?',
+         'Self-report assessments are sensitive to mood, context, and how you interpret questions. Variation between sessions is normal and expected.'),
+        ('faq4','Who can see my results?',
+         'Only you. Your responses and results are private and not visible to other users or third parties.'),
+        ('faq5','Can I delete my data?',
+         'Yes. You can delete individual assessment records from the History page. To delete your account entirely, please contact support.'),
+        ('faq6','What should I do if my result concerns me?',
+         'Speak with a qualified professional such as a GP, psychologist, or counsellor. Do not make important decisions based solely on an automated assessment result.'),
+        ('faq7','Are the assessments suitable for children?',
+         'AssessMe is designed for adults aged 16 and over. Parental or guardian supervision is recommended for users under 18.'),
+      ] %}
+      {% for id, question, answer in faqs %}
+      <div class="faq-item">
+        <button class="faq-question"
+                aria-expanded="false"
+                data-answer="{{ id }}-answer"
+                id="{{ id }}-btn">
+          {{ question }}
+          <span class="faq-chevron" aria-hidden="true">▾</span>
+        </button>
+        <div class="faq-answer" id="{{ id }}-answer" role="region" aria-labelledby="{{ id }}-btn">
+          {{ answer }}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- CONTACT -->
+  <div class="card" id="contact" tabindex="-1">
+    <div class="card-header"><span class="card-title">📬 Contact &amp; Support</span></div>
+    <div class="card-body" style="font-size:.92rem;color:var(--text);">
+      <p style="margin-bottom:1rem;">
+        If you have questions, technical issues, or concerns about your data,
+        please reach out to us.
+      </p>
+      <div style="display:flex;flex-direction:column;gap:.75rem;">
+        <div style="display:flex;align-items:center;gap:.75rem;">
+          <span aria-hidden="true">📧</span>
+          <span>Email: <a href="mailto:support@assessme.example">support@assessme.example</a></span>
+        </div>
+        <div style="display:flex;align-items:center;gap:.75rem;">
+          <span aria-hidden="true">⏱</span>
+          <span>Response time: within 2 business days.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

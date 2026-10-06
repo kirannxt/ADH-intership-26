@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block title %}Guidance & Interpretation — AssessMe{% endblock %}
+
+{% block breadcrumb %}
+<div class="container">
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
+    <span class="breadcrumb-sep" aria-hidden="true">›</span>
+    <a href="{{ url_for('assessment.result') }}">Result</a>
+    <span class="breadcrumb-sep" aria-hidden="true">›</span>
+    <span class="current" aria-current="page">Guidance</span>
+  </nav>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container section">
+
+  <div class="page-header">
+    <h1 class="page-title">💡 Guidance &amp; Interpretation</h1>
+    <p class="page-sub">{{ assessment_label }} — personalised reflection notes based on your responses.</p>
+  </div>
+
+  <!-- Screening vs diagnosis — top-priority responsible communication -->
+  <div class="disclaimer-box mb-4" role="note" aria-label="Important notice about assessment results">
+    <span class="d-icon" aria-hidden="true">⚠️</span>
+    <div>
+      <strong>Screening tool, not a diagnosis.</strong>
+      This guidance is based on a brief self-report assessment and reflects patterns in your
+      responses at a single point in time. It is <em>not</em> a clinical evaluation, a
+      psychological diagnosis, or a professional opinion. Language used here is intentionally
+      neutral and descriptive — not prescriptive. If anything raises a concern for you,
+      please speak with a qualified health or wellbeing professional.
+      <a href="{{ url_for('assessment.help_page') }}#limitations">Read more about limitations →</a>
+    </div>
+  </div>
+
+  <!-- Filter tabs — functional via JS .rec-filter-btn -->
+  <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.75rem;"
+       role="group" aria-label="Filter guidance by category">
+    {% for tag in ['All','Reflect','Learn','Act','Support'] %}
+    <button class="btn rec-filter-btn {% if loop.first %}btn-primary{% else %}btn-secondary{% endif %} btn-sm"
+            data-filter="{{ tag }}"
+            aria-pressed="{{ 'true' if loop.first else 'false' }}">{{ tag }}</button>
+    {% endfor %}
+  </div>
+
+  <!-- Guidance cards -->
+  <div style="display:flex;flex-direction:column;gap:1rem;margin-bottom:2rem;">
+
+    {% set guidance = [
+      ('Reflect','🪞','#ede9fe','#4f46e5',
+       'Take time to reflect on your responses',
+       'Look back at any questions you found difficult or surprising. Noticing a pattern — even without a score — can be a useful starting point for self-understanding.',
+       '5–10 min', 'Low effort'),
+      ('Learn','📚','#dbeafe','#1e40af',
+       'Read about the area being assessed',
+       'Understanding what the assessed area involves — such as cognitive flexibility, emotional regulation, or stress responses — can help you interpret your results more accurately.',
+       '30 min', 'Moderate effort'),
+      ('Reflect','📓','#d1fae5','#065f46',
+       'Keep a short reflection journal',
+       'Writing a few sentences each day about your thoughts, decisions, or feelings can build self-awareness over time. No special format is needed.',
+       '5 min/day', 'Low effort'),
+      ('Act','🚶','#fef3c7','#92400e',
+       'Take one small, concrete step',
+       'Rather than trying to change everything at once, identify one area from your results and choose one small action this week. Consistency matters more than scale.',
+       'Ongoing', 'Low effort'),
+      ('Support','🩺','#fee2e2','#991b1b',
+       'Consider speaking with a professional',
+       'If your results or the process of reflection has raised any concerns about your wellbeing, mental health, or personal development, a qualified counsellor or psychologist can offer personalised support.',
+       'As needed', 'Important'),
+      ('Learn','🎓','#f3e8ff','#6d28d9',
+       'Explore a structured learning resource',
+       'Many free and accessible resources exist on topics such as mindfulness, communication, goal-setting, and emotional regulation. Libraries, community centres, and online platforms are good starting points.',
+       'Flexible', 'Optional'),
+    ] %}
+
+    {% for filter, icon, bg, color, title, desc, effort, priority in guidance %}
+    <div class="rec-card" data-filter="{{ filter }}"
+         role="article" aria-label="{{ title }}">
+      <div class="rec-icon" style="background:{{ bg }};color:{{ color }};"
+           aria-hidden="true">{{ icon }}</div>
+      <div class="rec-body" style="flex:1;">
+        <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem;flex-wrap:wrap;">
+          <h4>{{ title }}</h4>
+          <span class="badge badge-gray">{{ filter }}</span>
+          <span class="badge badge-{% if priority == 'Important' %}danger{% elif priority == 'Low effort' %}success{% else %}primary{% endif %}">
+            {{ priority }}
+          </span>
+        </div>
+        <p style="font-size:.88rem;">{{ desc }}</p>
+        <div style="margin-top:.5rem;font-size:.8rem;color:var(--text-muted);">
+          ⏱ {{ effort }}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+
+  </div>
+
+  <!-- Professional referral section -->
+  <div class="card mb-4" style="border-color:var(--info);" role="region"
+       aria-label="Professional support information">
+    <div class="card-header" style="background:#dbeafe;border-color:var(--info);">
+      <span class="card-title" style="color:#1e40af;">🩺 When to Seek Professional Support</span>
+    </div>
+    <div class="card-body">
+      <p style="margin-bottom:1rem;">
+        Automated assessments have significant limitations. Consider speaking with a qualified
+        professional if any of the following apply:
+      </p>
+      <ul style="padding-left:1.25rem;color:var(--text-muted);font-size:.9rem;line-height:2;">
+        <li>You are experiencing persistent low mood, anxiety, or difficulty coping.</li>
+        <li>Your results surprised you or raised concerns you did not expect.</li>
+        <li>You want to understand your results in a personal context.</li>
+        <li>You are making an important life or career decision and want professional input.</li>
+        <li>You are supporting someone else who may need help.</li>
+      </ul>
+      <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1.25rem;">
+        <a href="{{ url_for('assessment.help_page') }}#support" class="btn btn-outline btn-sm">
+          Find support resources →
+        </a>
+        <a href="{{ url_for('assessment.help_page') }}" class="btn btn-ghost btn-sm">
+          About assessments →
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div style="display:flex;justify-content:center;gap:1rem;flex-wrap:wrap;">
+    <a href="{{ url_for('assessment.result') }}"  class="btn btn-secondary btn-lg">← Back to Results</a>
+    <a href="{{ url_for('assessment.history') }}" class="btn btn-primary btn-lg">View History →</a>
+    <a href="{{ url_for('assessment.select') }}"  class="btn btn-outline btn-lg">New Assessment</a>
+  </div>
+
+</div>
+{% endblock %}

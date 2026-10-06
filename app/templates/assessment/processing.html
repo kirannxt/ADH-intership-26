@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}Processing — AssessMe{% endblock %}
+{% block navbar %}{% endblock %}
+{% block footer %}{% endblock %}
+
+{% block content %}
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;
+            background:linear-gradient(135deg,#f0f4ff 0%,#faf5ff 100%);padding:2rem;">
+  <div class="container-sm text-center">
+
+    <!-- Spinner -->
+    <div class="spinner-wrap" aria-live="polite" aria-label="Processing your responses">
+      <div class="spinner" role="status" aria-label="Loading"></div>
+    </div>
+
+    <h1 style="font-size:1.6rem;margin-bottom:.5rem;">Calculating your results…</h1>
+    <p style="margin-bottom:.5rem;">
+      Please wait while we compile your report. This usually takes a few seconds.
+    </p>
+    <p style="font-size:.82rem;color:var(--text-muted);margin-bottom:2rem;">
+      Do not close or refresh this page.
+    </p>
+
+    <!-- Processing steps -->
+    <div class="processing-steps" style="max-width:420px;margin:0 auto 2rem;"
+         role="status" aria-live="polite" aria-label="Processing steps">
+      <div class="p-step">
+        <span class="p-step-icon" aria-hidden="true">📥</span>
+        Collecting your responses
+      </div>
+      <div class="p-step">
+        <span class="p-step-icon" aria-hidden="true">🔍</span>
+        Reviewing response patterns
+      </div>
+      <div class="p-step">
+        <span class="p-step-icon" aria-hidden="true">📊</span>
+        Compiling your score
+      </div>
+      <div class="p-step">
+        <span class="p-step-icon" aria-hidden="true">💡</span>
+        Preparing personalised notes
+      </div>
+      <div class="p-step">
+        <span class="p-step-icon" aria-hidden="true">✅</span>
+        Finalising your report
+      </div>
+    </div>
+
+    <!-- Responsible note -->
+    <div class="disclaimer-box" style="max-width:480px;margin:0 auto 2rem;text-align:left;" role="note">
+      <span class="d-icon" aria-hidden="true">⚠️</span>
+      <span style="font-size:.82rem;">
+        Your results are based on your self-reported responses at this point in time.
+        They are intended as a personal reflection tool — not a definitive assessment
+        of your abilities or mental health. Results may vary between sessions.
+      </span>
+    </div>
+
+    <!-- Error state (shown after 15 s timeout via JS) -->
+    <div id="processing-error" class="card hidden"
+         style="max-width:420px;margin:0 auto;border-color:var(--danger);"
+         role="alert" aria-live="assertive">
+      <div class="card-body text-center">
+        <div style="font-size:2rem;margin-bottom:.5rem;" aria-hidden="true">⚠️</div>
+        <h3 style="color:var(--danger);margin-bottom:.5rem;">Something went wrong</h3>
+        <p style="margin-bottom:1rem;">
+          We were unable to complete processing. Your answers have been saved.
+          Please try again or contact support if the problem continues.
+        </p>
+        <div style="display:flex;gap:.75rem;justify-content:center;flex-wrap:wrap;">
+          <a href="{{ url_for('assessment.review') }}" class="btn btn-secondary">← Back to Review</a>
+          <a href="{{ url_for('assessment.result') }}"  class="btn btn-primary">Try viewing result →</a>
+        </div>
+        <p style="margin-top:1rem;font-size:.8rem;color:var(--text-muted);">
+          Need help? <a href="{{ url_for('assessment.help_page') }}#contact">Contact support →</a>
+        </p>
+      </div>
+    </div>
+
+    <!-- Redirect trigger -->
+    <div id="processing-redirect"
+         data-url="{{ url_for('assessment.result') }}"
+         style="display:none;" aria-hidden="true"></div>
+
+  </div>
+</div>
+{% endblock %}
