@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="AssessMe — science-backed behavioural assessments with personalised guidance." />
   <title>{% block title %}AssessMe{% endblock %}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -11,39 +12,92 @@
 </head>
 <body>
 
+  <!-- ── Navbar ─────────────────────────────── -->
   {% block navbar %}
-  <nav class="navbar">
-    <a href="{{ url_for('main.index') }}" class="navbar-brand">
-      <span class="brand-icon">🧠</span>
+  <nav class="navbar" role="navigation" aria-label="Main navigation">
+    <a href="{{ url_for('main.index') }}" class="navbar-brand" aria-label="AssessMe home">
+      <span class="brand-icon" aria-hidden="true">🧠</span>
       AssessMe
     </a>
-    <ul class="navbar-nav">
+
+    <!-- Desktop nav -->
+    <ul class="navbar-nav" role="list">
       {% if current_user.is_authenticated %}
-        <li><a href="{{ url_for('main.dashboard') }}"        class="nav-link {% if request.endpoint == 'main.dashboard' %}active{% endif %}">Dashboard</a></li>
-        <li><a href="{{ url_for('assessment.select') }}"     class="nav-link {% if request.endpoint == 'assessment.select' %}active{% endif %}">New Assessment</a></li>
-        <li><a href="{{ url_for('assessment.history') }}"    class="nav-link {% if request.endpoint == 'assessment.history' %}active{% endif %}">History</a></li>
+        <li><a href="{{ url_for('main.dashboard') }}"
+               class="nav-link {% if request.endpoint == 'main.dashboard' %}active{% endif %}"
+               aria-current="{% if request.endpoint == 'main.dashboard' %}page{% endif %}">Dashboard</a></li>
+        <li><a href="{{ url_for('assessment.select') }}"
+               class="nav-link {% if request.endpoint == 'assessment.select' %}active{% endif %}"
+               aria-current="{% if request.endpoint == 'assessment.select' %}page{% endif %}">New Assessment</a></li>
+        <li><a href="{{ url_for('assessment.history') }}"
+               class="nav-link {% if request.endpoint == 'assessment.history' %}active{% endif %}"
+               aria-current="{% if request.endpoint == 'assessment.history' %}page{% endif %}">History</a></li>
+        <li><a href="{{ url_for('assessment.progress') }}"
+               class="nav-link {% if request.endpoint == 'assessment.progress' %}active{% endif %}"
+               aria-current="{% if request.endpoint == 'assessment.progress' %}page{% endif %}">Progress</a></li>
       {% endif %}
+      <li><a href="{{ url_for('assessment.help_page') }}"
+             class="nav-link {% if request.endpoint == 'assessment.help_page' %}active{% endif %}"
+             aria-current="{% if request.endpoint == 'assessment.help_page' %}page{% endif %}">Help</a></li>
     </ul>
+
+    <!-- User controls -->
     <div class="navbar-user">
       {% if current_user.is_authenticated %}
-        <div class="avatar" title="{{ current_user.username }}">{{ current_user.username[0].upper() }}</div>
+        <div class="avatar" role="img"
+             aria-label="{{ current_user.username }}, logged in"
+             title="{{ current_user.username }}">{{ current_user.username[0].upper() }}</div>
         <a href="{{ url_for('auth.logout') }}" class="btn btn-ghost btn-sm">Logout</a>
       {% else %}
         <a href="{{ url_for('auth.login') }}"    class="btn btn-ghost btn-sm">Login</a>
         <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-sm">Sign up</a>
       {% endif %}
     </div>
+
+    <!-- Hamburger (mobile) -->
+    <button class="hamburger" id="hamburger"
+            aria-label="Toggle navigation menu"
+            aria-expanded="false"
+            aria-controls="mobile-nav">
+      <span></span><span></span><span></span>
+    </button>
   </nav>
+
+  <!-- Mobile nav panel -->
+  <div class="mobile-nav" id="mobile-nav" role="navigation" aria-label="Mobile navigation">
+    {% if current_user.is_authenticated %}
+      <a href="{{ url_for('main.dashboard') }}"     class="nav-link">Dashboard</a>
+      <a href="{{ url_for('assessment.select') }}"  class="nav-link">New Assessment</a>
+      <a href="{{ url_for('assessment.history') }}" class="nav-link">History</a>
+      <a href="{{ url_for('assessment.progress') }}" class="nav-link">Progress</a>
+    {% endif %}
+    <a href="{{ url_for('assessment.help_page') }}" class="nav-link">Help</a>
+    {% if current_user.is_authenticated %}
+      <a href="{{ url_for('auth.logout') }}" class="nav-link" style="color:var(--danger);">Logout</a>
+    {% else %}
+      <a href="{{ url_for('auth.login') }}"    class="nav-link">Login</a>
+      <a href="{{ url_for('auth.register') }}" class="nav-link">Sign up</a>
+    {% endif %}
+  </div>
   {% endblock %}
 
-  <main>
+  <!-- ── Skip link (accessibility) ──────────── -->
+  <a href="#main-content" class="hidden" style="position:absolute;top:4px;left:4px;z-index:999;background:var(--primary);color:#fff;padding:.4rem .8rem;border-radius:var(--radius-sm);font-size:.85rem;">
+    Skip to content
+  </a>
+
+  <main id="main-content">
+    <!-- Breadcrumb slot -->
+    {% block breadcrumb %}{% endblock %}
+
+    <!-- Flash messages -->
     {% block flash %}
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
-        <div class="container mt-2">
+        <div class="container" style="padding-top:.75rem;">
           {% for cat, msg in messages %}
-            <div class="alert alert-{{ cat }}">
-              <span>{% if cat == 'success' %}✅{% elif cat == 'danger' %}❌{% elif cat == 'warning' %}⚠️{% else %}ℹ️{% endif %}</span>
+            <div class="alert alert-{{ cat }}" role="alert">
+              <span aria-hidden="true">{% if cat == 'success' %}✅{% elif cat == 'danger' %}❌{% elif cat == 'warning' %}⚠️{% else %}ℹ️{% endif %}</span>
               {{ msg }}
             </div>
           {% endfor %}
@@ -55,9 +109,23 @@
     {% block content %}{% endblock %}
   </main>
 
+  <!-- ── Footer ─────────────────────────────── -->
   {% block footer %}
-  <footer class="footer">
-    <p>© 2026 AssessMe · Empowering you with insight</p>
+  <footer class="footer" role="contentinfo">
+    <p>© 2026 AssessMe &nbsp;·&nbsp; Empowering you with insight</p>
+    <nav class="footer-links" aria-label="Footer links">
+      <a href="{{ url_for('assessment.help_page') }}">Help &amp; FAQ</a>
+      <a href="{{ url_for('assessment.help_page') }}#privacy">Privacy</a>
+      <a href="{{ url_for('assessment.help_page') }}#limitations">Limitations</a>
+      <a href="{{ url_for('assessment.help_page') }}#contact">Contact</a>
+      {% if current_user.is_authenticated %}
+        <a href="{{ url_for('assessment.history') }}">My Assessments</a>
+      {% endif %}
+    </nav>
+    <p style="margin-top:.5rem;font-size:.75rem;color:var(--text-light);">
+      AssessMe provides self-assessment tools for personal insight only.
+      Results are <strong>not</strong> a clinical diagnosis. Consult a qualified professional for medical or psychological advice.
+    </p>
   </footer>
   {% endblock %}
 

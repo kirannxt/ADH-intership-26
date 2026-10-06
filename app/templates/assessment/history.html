@@ -1,91 +1,145 @@
 {% extends "base.html" %}
 {% block title %}Assessment History — AssessMe{% endblock %}
 
+{% block breadcrumb %}
+<div class="container">
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
+    <span class="breadcrumb-sep" aria-hidden="true">›</span>
+    <span class="current" aria-current="page">Assessment History</span>
+  </nav>
+</div>
+{% endblock %}
+
 {% block content %}
 <div class="container section">
 
-  <div class="flex-between mb-4">
+  <div class="flex-between mb-4" style="flex-wrap:wrap;gap:1rem;">
     <div>
       <h1 class="page-title">📋 Assessment History</h1>
-      <p class="page-sub">All your past assessments in one place.</p>
+      <p class="page-sub">A record of your completed and in-progress assessments.</p>
     </div>
     <a href="{{ url_for('assessment.select') }}" class="btn btn-primary">➕ New Assessment</a>
   </div>
 
+  <!-- Privacy note -->
+  <div class="privacy-note mb-4" role="note">
+    <span class="p-icon" aria-hidden="true">🔒</span>
+    <span>
+      Your assessment records are private and visible only to you.
+      You may delete individual records at any time using the delete button on each entry.
+      Deleted records cannot be recovered.
+      <a href="{{ url_for('assessment.help_page') }}#privacy">Privacy policy →</a>
+    </span>
+  </div>
+
   <!-- Filter bar -->
-  <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;margin-bottom:1.5rem;">
+  <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;margin-bottom:1.5rem;"
+       role="search" aria-label="Filter assessments">
     <div style="flex:1;min-width:200px;">
-      <input type="text" class="form-control" placeholder="🔍  Search assessments…" style="max-width:320px;" />
+      <label for="history-search" class="visually-hidden">Search assessments</label>
+      <input type="text" id="history-search" class="form-control"
+             placeholder="🔍  Search by assessment name…"
+             style="max-width:320px;"
+             aria-label="Search assessments by name" />
     </div>
-    <select class="form-control" style="width:auto;">
-      <option>All Types</option>
-      <option>Cognitive</option>
-      <option>Personality</option>
-      <option>Emotional IQ</option>
-      <option>Leadership</option>
-      <option>Stress</option>
-      <option>Career</option>
+    <label for="filter-type" class="visually-hidden">Filter by type</label>
+    <select id="filter-type" class="form-control" style="width:auto;" aria-label="Filter by assessment type">
+      <option value="all">All Types</option>
+      <option value="cognitive">Cognitive Skills</option>
+      <option value="personality">Personality</option>
+      <option value="emotional">Emotional Intelligence</option>
+      <option value="leadership">Leadership</option>
+      <option value="stress">Stress &amp; Wellbeing</option>
+      <option value="career">Career Aptitude</option>
     </select>
-    <select class="form-control" style="width:auto;">
-      <option>All Time</option>
-      <option>This Week</option>
-      <option>This Month</option>
-      <option>Last 3 Months</option>
-    </select>
-    <select class="form-control" style="width:auto;">
-      <option>All Status</option>
-      <option>Completed</option>
-      <option>In Progress</option>
+    <label for="filter-status" class="visually-hidden">Filter by status</label>
+    <select id="filter-status" class="form-control" style="width:auto;" aria-label="Filter by status">
+      <option value="all">All Status</option>
+      <option value="completed">Completed</option>
+      <option value="in progress">In Progress</option>
     </select>
   </div>
 
-  <!-- Summary row -->
-  <div class="grid-4 mb-4">
-    {% for val, label, bg in [('12','Total','#ede9fe'),('9','Completed','#d1fae5'),('3','In Progress','#fef3c7'),('84%','Avg Score','#dbeafe')] %}
-    <div style="background:{{ bg }};border-radius:var(--radius-lg);padding:1.1rem 1.25rem;text-align:center;">
-      <div style="font-size:1.75rem;font-weight:800;color:var(--text);">{{ val }}</div>
-      <div style="font-size:.82rem;color:var(--text-muted);font-weight:600;">{{ label }}</div>
-    </div>
-    {% endfor %}
-  </div>
+  <!-- History list card -->
+  <div class="card" role="region" aria-label="Assessment history list">
 
-  <!-- History list -->
-  <div class="card">
-    <div class="card-header flex-between">
-      <span class="card-title">All Assessments</span>
-      <span style="font-size:.85rem;color:var(--text-muted);">12 results</span>
+    <!-- Empty state — always shown when no real DB data -->
+    <div class="empty-state" id="history-empty" role="status" aria-live="polite">
+      <div class="empty-icon" aria-hidden="true">📂</div>
+      <h3>No assessments found</h3>
+      <p>
+        You haven't completed any assessments yet, or none match your current filters.
+        Start an assessment to see your history here.
+      </p>
+      <a href="{{ url_for('assessment.select') }}" class="btn btn-primary">Start an Assessment</a>
     </div>
 
-    {% set history = [
-      ('🧠','#ede9fe','Cognitive Skills','Oct 3, 2026','4 min 32s','91%','#4f46e5','Completed','success'),
-      ('🌟','#fef3c7','Personality Profile','Sep 28, 2026','7 min 15s','78%','#f59e0b','Completed','success'),
-      ('❤️','#fee2e2','Emotional Intelligence','Sep 20, 2026','11 min 4s','82%','#ef4444','Completed','success'),
-      ('🧑‍💼','#d1fae5','Leadership Aptitude','Oct 5, 2026','—','35%','#10b981','In Progress','warning'),
-      ('🧘','#e0f2fe','Stress & Wellbeing','Sep 12, 2026','5 min 50s','65%','#06b6d4','Completed','danger'),
-      ('💼','#f3e8ff','Career Aptitude','Sep 5, 2026','9 min 22s','88%','#8b5cf6','Completed','success'),
-      ('🧠','#ede9fe','Cognitive Skills','Aug 25, 2026','5 min 11s','86%','#4f46e5','Completed','success'),
-      ('🌟','#fef3c7','Personality Profile','Aug 10, 2026','8 min 30s','75%','#f59e0b','Completed','warning'),
-      ('❤️','#fee2e2','Emotional Intelligence','Jul 30, 2026','10 min 45s','74%','#ef4444','Completed','warning'),
+    {# ── Demo rows — each has data-* for JS filtering and delete form ── #}
+    {% set demo_history = [
+      ('🧠','#ede9fe','Cognitive Skills',   'cognitive',  'Oct 3, 2026', '4m 32s', '84%', '#4f46e5', 'Completed',   'success', 1),
+      ('🌟','#fef3c7','Personality Profile','personality','Sep 28, 2026','7m 15s', '72%', '#f59e0b', 'Completed',   'success', 2),
+      ('❤️','#fee2e2','Emotional IQ',       'emotional',  'Sep 20, 2026','11m 4s', '78%', '#ef4444', 'Completed',   'success', 3),
+      ('🧑‍💼','#d1fae5','Leadership',         'leadership', 'Oct 5, 2026', '—',     '35%', '#10b981', 'In Progress', 'warning', 4),
+      ('🧘','#e0f2fe','Stress & Wellbeing',  'stress',     'Sep 12, 2026','5m 50s', '61%', '#06b6d4', 'Completed',   'danger',  5),
     ] %}
 
-    {% for icon, bg, name, date, dur, score, color, status, badge in history %}
-    <div class="history-item">
-      <div class="h-icon" style="background:{{ bg }};">{{ icon }}</div>
+    {# Show demo rows only as illustration — hide empty state if rows present #}
+    <script>
+      // Hide the empty state if there are demo rows
+      document.addEventListener("DOMContentLoaded", () => {
+        const emptyEl = document.getElementById("history-empty");
+        const rows = document.querySelectorAll(".history-item[data-name]");
+        if (rows.length > 0 && emptyEl) emptyEl.classList.add("hidden");
+      });
+    </script>
+
+    {% for icon, bg, name, type_key, date, dur, score, color, status, badge, rid in demo_history %}
+    <div class="history-item"
+         data-name="{{ name | lower }}"
+         data-type="{{ type_key }}"
+         data-status="{{ status | lower }}"
+         role="listitem"
+         aria-label="{{ name }}, {{ status }}, {{ score }}">
+
+      <div class="h-icon" style="background:{{ bg }};" aria-hidden="true">{{ icon }}</div>
+
       <div class="h-info">
         <h4>{{ name }}</h4>
         <p>{{ date }} &nbsp;·&nbsp; {{ dur }}</p>
       </div>
-      <div style="display:flex;align-items:center;gap:1.5rem;">
-        <span class="badge badge-{{ badge }}">{{ status }}</span>
-        <div class="h-score">
+
+      <div style="display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap;">
+        <span class="badge badge-{{ badge }}" aria-label="Status: {{ status }}">{{ status }}</span>
+
+        <div class="h-score" aria-label="Score: {{ score }}">
           <div class="score-val" style="color:{{ color }};">{{ score }}</div>
         </div>
-        <div style="display:flex;gap:.4rem;">
-          <a href="{{ url_for('assessment.result') }}"          class="btn btn-ghost btn-sm" title="View Result">📊</a>
-          <a href="{{ url_for('assessment.recommendations') }}" class="btn btn-ghost btn-sm" title="Recommendations">💡</a>
+
+        <div style="display:flex;gap:.4rem;" role="group" aria-label="Actions for {{ name }}">
+          <a href="{{ url_for('assessment.result') }}"
+             class="btn btn-ghost btn-sm" title="View result"
+             aria-label="View result for {{ name }}">📊</a>
+          <a href="{{ url_for('assessment.recommendations') }}"
+             class="btn btn-ghost btn-sm" title="View guidance"
+             aria-label="View guidance for {{ name }}">💡</a>
           {% if status == 'In Progress' %}
-          <a href="{{ url_for('assessment.questionnaire') }}"   class="btn btn-primary btn-sm">Resume</a>
+          <a href="{{ url_for('assessment.questionnaire') }}"
+             class="btn btn-primary btn-sm"
+             aria-label="Resume {{ name }}">Resume</a>
           {% endif %}
+
+          <!-- Delete button — POST form for CSRF safety -->
+          <form method="POST"
+                action="{{ url_for('assessment.delete_assessment', assessment_id=rid) }}"
+                style="margin:0;"
+                onsubmit="return confirm('Delete this assessment record? This cannot be undone.');">
+            <button type="submit"
+                    class="btn btn-ghost btn-sm"
+                    style="color:var(--danger);"
+                    title="Delete record"
+                    aria-label="Delete {{ name }} record">🗑</button>
+          </form>
         </div>
       </div>
     </div>
@@ -93,13 +147,14 @@
 
   </div>
 
-  <!-- Pagination -->
-  <div style="display:flex;justify-content:center;align-items:center;gap:.5rem;margin-top:1.5rem;">
-    <button class="btn btn-secondary btn-sm" disabled>← Prev</button>
-    {% for p in range(1,4) %}
-    <button class="btn {% if p == 1 %}btn-primary{% else %}btn-secondary{% endif %} btn-sm">{{ p }}</button>
-    {% endfor %}
-    <button class="btn btn-secondary btn-sm">Next →</button>
+  <!-- Responsible note at bottom -->
+  <div class="disclaimer-box mt-4" role="note">
+    <span class="d-icon" aria-hidden="true">⚠️</span>
+    <span style="font-size:.82rem;">
+      Scores shown are based on your self-reported responses. They are indicators for
+      personal reflection and may vary between sessions. Do not use historical scores
+      to make important decisions without professional guidance.
+    </span>
   </div>
 
 </div>

@@ -1,13 +1,28 @@
 {% extends "base.html" %}
 {% block title %}Review Answers — AssessMe{% endblock %}
 
+{% block breadcrumb %}
+<div class="container-md">
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
+    <span class="breadcrumb-sep" aria-hidden="true">›</span>
+    <a href="{{ url_for('assessment.select') }}">Choose Assessment</a>
+    <span class="breadcrumb-sep" aria-hidden="true">›</span>
+    <a href="{{ url_for('assessment.questionnaire') }}">Questionnaire</a>
+    <span class="breadcrumb-sep" aria-hidden="true">›</span>
+    <span class="current" aria-current="page">Review</span>
+  </nav>
+</div>
+{% endblock %}
+
 {% block content %}
 <div class="container-md section">
 
-  <div class="steps mb-4">
-    {% for label in ['Select','Personal Info','Questionnaire','Review','Results'] %}
-    <div class="step {% if loop.index < 4 %}completed{% elif loop.index == 4 %}active{% endif %}">
-      <div class="step-circle">{% if loop.index < 4 %}✓{% else %}{{ loop.index }}{% endif %}</div>
+  <!-- Step indicator -->
+  <div id="step-indicator" data-active="3" class="steps mb-4" aria-label="Assessment steps">
+    {% for label in ['Select','Personal Info','Questions','Review','Results'] %}
+    <div class="step" aria-label="Step {{ loop.index }}: {{ label }}">
+      <div class="step-circle" aria-hidden="true">{{ loop.index }}</div>
       <span class="step-label">{{ label }}</span>
     </div>
     {% endfor %}
@@ -15,45 +30,93 @@
 
   <div class="text-center mb-4">
     <h1 class="page-title">Review Your Answers</h1>
-    <p class="page-sub">Check your responses before submitting. You can go back to change any answer.</p>
+    <p class="page-sub">Check your responses carefully before submitting. You can go back and change any answer.</p>
   </div>
 
-  <!-- Summary bar -->
-  <div class="card mb-3" style="background:var(--primary-light);border-color:var(--primary);">
+  <!-- Summary bar using real session variables -->
+  <div class="card mb-3" style="background:var(--primary-light);border-color:var(--primary);"
+       role="region" aria-label="Assessment summary">
     <div class="card-body" style="display:flex;align-items:center;gap:2rem;flex-wrap:wrap;">
-      <div><span style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--primary);">Assessment</span><br><strong>Cognitive Skills Test</strong></div>
-      <div><span style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--primary);">Questions</span><br><strong>10 of 10 answered</strong></div>
-      <div><span style="font-size:.8rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--primary);">Est. time spent</span><br><strong>4 min 32 sec</strong></div>
-      <a href="{{ url_for('assessment.questionnaire') }}" class="btn btn-outline btn-sm" style="margin-left:auto;">✏️ Edit answers</a>
+      <div>
+        <span style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--primary);">Assessment</span><br>
+        <strong>{{ assessment_label }}</strong>
+      </div>
+      <div>
+        <span style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--primary);">Answered</span><br>
+        <strong>{{ answered_count }} of {{ total_q }} questions</strong>
+      </div>
+      <div>
+        <span style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--primary);">Status</span><br>
+        {% if answered_count == total_q %}
+          <span class="badge badge-success">✅ All answered</span>
+        {% else %}
+          <span class="badge badge-warning">⚠️ {{ total_q - answered_count }} unanswered</span>
+        {% endif %}
+      </div>
+      <a href="{{ url_for('assessment.questionnaire') }}" class="btn btn-outline btn-sm"
+         style="margin-left:auto;" aria-label="Go back and edit your answers">
+        ✏️ Edit answers
+      </a>
     </div>
   </div>
 
-  <!-- Answers list -->
+  <!-- Unanswered warning -->
+  {% if answered_count < total_q %}
+  <div class="alert alert-warning" role="alert" aria-live="assertive">
+    ⚠️ You have <strong>{{ total_q - answered_count }} unanswered question(s)</strong>.
+    Please go back and answer all questions before submitting.
+  </div>
+  {% endif %}
+
+  <!-- Answers list — reads from session['answers'] -->
   <div class="card mb-4">
-    <div class="card-header"><span class="card-title">Your Responses</span></div>
-    <div class="card-body" style="display:flex;flex-direction:column;gap:1.25rem;">
-      {% set qa = [
-        (1,'How would you rate your ability to focus on a single task for an extended period?','Good — I stay focused most of the time'),
-        (2,'When facing a complex problem, which approach do you typically take?','Break it into smaller parts methodically'),
-        (3,'How do you handle feedback or criticism about your work?','I welcome it and use it to improve'),
-        (4,'In social situations, you typically feel:','Comfortable but prefer small groups'),
-        (5,'How often do you set specific goals for yourself?','Often — I have goals in mind'),
-        (6,'When working in a team, you prefer to:','Contribute ideas actively'),
-        (7,'How do you manage stress during high-pressure situations?','I stay calm and strategise'),
-        (8,'How quickly do you adapt to new environments or changes?','Fairly quickly with minor adjustment'),
-        (9,'How do you approach learning new skills?','Proactively and consistently'),
-        (10,'Overall, how satisfied are you with your personal and professional development?','Satisfied'),
+    <div class="card-header">
+      <span class="card-title">Your Responses</span>
+    </div>
+    <div class="card-body" style="display:flex;flex-direction:column;gap:1.25rem;"
+         role="list" aria-label="Your answers">
+
+      {% set questions = [
+        (1,  'How would you rate your ability to focus on a single task for an extended period?'),
+        (2,  'Do you usually plan your day or week in advance?'),
+        (3,  'On a scale of 1–5, how well do you handle unexpected changes or setbacks?'),
+        (4,  'Over the past two weeks, how often have you felt overwhelmed by your responsibilities?'),
+        (5,  'When facing a difficult problem, which approach do you most naturally take?'),
+        (6,  'How comfortable are you expressing your emotions to people you trust? (1–5)'),
+        (7,  'Do you generally feel that your work or studies align with your personal values?'),
+        (8,  'How often do you take time to reflect on your own thoughts and actions?'),
+        (9,  'In a group setting, which role do you most naturally take on?'),
+        (10, 'Overall, how satisfied are you with your personal development over the past year? (1–5)'),
       ] %}
-      {% for num, question, answer in qa %}
-      <div style="padding-bottom:1.25rem;{% if not loop.last %}border-bottom:1px solid var(--border);{% endif %}">
+
+      {% for num, question in questions %}
+      {% set answer = answers.get('q' ~ num) %}
+      <div style="padding-bottom:1.25rem;
+                  {% if not loop.last %}border-bottom:1px solid var(--border);{% endif %}"
+           role="listitem">
         <div style="display:flex;align-items:flex-start;gap:.75rem;">
-          <span style="width:28px;height:28px;background:var(--primary-light);color:var(--primary);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;flex-shrink:0;margin-top:1px;">{{ num }}</span>
+          <span style="width:28px;height:28px;background:var(--primary-light);color:var(--primary);
+                       border-radius:50%;display:flex;align-items:center;justify-content:center;
+                       font-size:.8rem;font-weight:700;flex-shrink:0;margin-top:2px;"
+                aria-hidden="true">{{ num }}</span>
           <div style="flex:1;">
-            <div style="font-weight:600;font-size:.95rem;color:var(--text);margin-bottom:.4rem;">{{ question }}</div>
+            <div style="font-weight:600;font-size:.95rem;color:var(--text);margin-bottom:.4rem;">
+              {{ question }}
+            </div>
+            {% if answer %}
             <div style="display:flex;align-items:center;gap:.5rem;">
-              <span style="color:var(--success);font-size:.9rem;">✅</span>
+              <span style="color:var(--success);" aria-hidden="true">✅</span>
               <span style="font-size:.9rem;color:var(--text-muted);">{{ answer }}</span>
             </div>
+            {% else %}
+            <div style="display:flex;align-items:center;gap:.5rem;">
+              <span style="color:var(--warning);" aria-hidden="true">⚠️</span>
+              <span style="font-size:.9rem;color:var(--warning);font-weight:600;">
+                Not answered —
+                <a href="{{ url_for('assessment.questionnaire') }}" aria-label="Answer question {{ num }}">answer now</a>
+              </span>
+            </div>
+            {% endif %}
           </div>
         </div>
       </div>
@@ -61,17 +124,74 @@
     </div>
   </div>
 
-  <!-- Submit -->
+  <!-- Submit section — POST form with confirmation modal -->
   <div class="card" style="background:var(--surface-2);">
     <div class="card-body text-center">
       <h3 style="margin-bottom:.5rem;">Ready to submit?</h3>
-      <p style="margin-bottom:1.5rem;">Once submitted your answers cannot be changed. Your results will be calculated immediately.</p>
+      <p style="margin-bottom:.5rem;">
+        Once submitted, your answers <strong>cannot be changed</strong>.
+        Your results will be calculated immediately.
+      </p>
+      <p style="font-size:.85rem;color:var(--text-muted);margin-bottom:1.5rem;">
+        This assessment provides indicators for personal reflection only —
+        not a professional or clinical evaluation.
+      </p>
       <div style="display:flex;justify-content:center;gap:1rem;flex-wrap:wrap;">
-        <a href="{{ url_for('assessment.questionnaire') }}" class="btn btn-secondary btn-lg">← Go back</a>
-        <a href="{{ url_for('assessment.processing') }}" class="btn btn-primary btn-lg">Submit &amp; Get Results 🚀</a>
+        <a href="{{ url_for('assessment.questionnaire') }}" class="btn btn-secondary btn-lg">
+          ← Go back
+        </a>
+        {% if answered_count == total_q %}
+        <button type="button" class="btn btn-primary btn-lg"
+                data-modal-open="confirm-submit-modal"
+                aria-label="Submit assessment — opens confirmation dialog">
+          Submit Assessment 🚀
+        </button>
+        {% else %}
+        <button type="button" class="btn btn-primary btn-lg" disabled
+                aria-disabled="true"
+                title="Answer all {{ total_q }} questions before submitting">
+          Submit Assessment 🚀
+        </button>
+        {% endif %}
       </div>
     </div>
   </div>
 
 </div>
+
+<!-- Confirmation modal -->
+<div class="modal-overlay" id="confirm-submit-modal"
+     aria-hidden="true" role="dialog"
+     aria-modal="true" aria-labelledby="confirm-modal-title">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="confirm-modal-title">Confirm Submission</span>
+      <button class="modal-close" aria-label="Cancel and close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p style="margin-bottom:1rem;">
+        You are about to submit your <strong>{{ assessment_label }}</strong> assessment.
+        This action cannot be undone.
+      </p>
+      <div class="disclaimer-box" role="note">
+        <span class="d-icon" aria-hidden="true">⚠️</span>
+        <span>
+          Your results are for <strong>personal insight only</strong> and do not
+          constitute a clinical, medical, or professional assessment.
+          Please interpret them accordingly.
+        </span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
+      <!-- Actual POST submit form inside modal -->
+      <form method="POST" action="{{ url_for('assessment.review') }}" style="margin:0;">
+        <button type="submit" class="btn btn-primary">
+          Yes, Submit →
+        </button>
+      </form>
+    </div>
+  </div>
+</div>
+
 {% endblock %}

@@ -1,107 +1,111 @@
 {% extends "base.html" %}
 {% block title %}Progress Tracking — AssessMe{% endblock %}
 
+{% block breadcrumb %}
+<div class="container">
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
+    <span class="breadcrumb-sep" aria-hidden="true">›</span>
+    <span class="current" aria-current="page">Progress Tracking</span>
+  </nav>
+</div>
+{% endblock %}
+
 {% block content %}
 <div class="container section">
 
-  <div class="page-header">
-    <h1 class="page-title">📈 Your Progress</h1>
-    <p class="page-sub">Track how your scores have evolved across all assessments.</p>
+  <div class="flex-between mb-4" style="flex-wrap:wrap;gap:1rem;">
+    <div>
+      <h1 class="page-title">📈 Progress Tracking</h1>
+      <p class="page-sub">An overview of your assessment activity and development over time.</p>
+    </div>
+    <a href="{{ url_for('assessment.select') }}" class="btn btn-primary">➕ New Assessment</a>
   </div>
 
-  <!-- Overall progress summary -->
+  <!-- Responsible note -->
+  <div class="disclaimer-box mb-4" role="note">
+    <span class="d-icon" aria-hidden="true">⚠️</span>
+    <span>
+      Scores shown here reflect your self-reported responses at the time of each assessment.
+      They are indicators for personal reflection — not clinical measurements.
+      Changes between sessions may reflect how you felt that day rather than permanent traits.
+    </span>
+  </div>
+
+  <!-- Summary stats — empty state when no real data -->
   <div class="grid-4 mb-4">
-    {% for val, label, icon, color, bg in [
-      ('84%','Average Score','🏆','#4f46e5','#ede9fe'),
-      ('9','Completed','✅','#10b981','#d1fae5'),
-      ('3','In Progress','⏳','#f59e0b','#fef3c7'),
-      ('+12%','Improvement','📈','#3b82f6','#dbeafe'),
+    {% for val, label, icon, bg in [
+      ('—', 'Assessments Taken', '📋', '#ede9ve'),
+      ('—', 'Completed',         '✅', '#d1fae5'),
+      ('—', 'In Progress',       '⏳', '#fef3c7'),
+      ('—', 'Avg. Score',        '📊', '#dbeafe'),
     ] %}
-    <div class="stat-card">
-      <div class="stat-icon" style="background:{{ bg }};color:{{ color }};">{{ icon }}</div>
-      <div class="stat-value" style="color:{{ color }};">{{ val }}</div>
+    <div class="stat-card" role="region" aria-label="{{ label }}">
+      <div class="stat-icon" style="background:{{ bg }};" aria-hidden="true">{{ icon }}</div>
+      <div class="stat-value">{{ val }}</div>
       <div class="stat-label">{{ label }}</div>
     </div>
     {% endfor %}
   </div>
 
-  <div class="grid-2">
+  <!-- Empty state (shown when user has no history yet) -->
+  <div class="card mb-4">
+    <div class="empty-state" role="status" aria-label="No assessment history">
+      <div class="empty-icon" aria-hidden="true">📊</div>
+      <h3>No assessment data yet</h3>
+      <p>
+        Complete your first assessment to start tracking your progress.
+        Your scores and trends will appear here once you have results.
+      </p>
+      <a href="{{ url_for('assessment.select') }}" class="btn btn-primary">Start an Assessment</a>
+    </div>
+  </div>
 
-    <!-- Score breakdown per category -->
+  <!-- Score breakdown (placeholder — will populate from DB) -->
+  <div class="grid-2">
     <div class="card">
       <div class="card-header"><span class="card-title">Score by Category</span></div>
-      <div class="card-body score-breakdown">
-        {% for cat, pct, color in [
-          ('Cognitive Skills', 91, '#4f46e5'),
-          ('Personality', 78, '#06b6d4'),
-          ('Emotional IQ', 82, '#f59e0b'),
-          ('Leadership', 70, '#10b981'),
-          ('Stress & Wellbeing', 65, '#ef4444'),
-          ('Career Aptitude', 88, '#8b5cf6'),
-        ] %}
-        <div class="score-row">
-          <span class="score-row-label">{{ cat }}</span>
-          <div class="score-row-bar">
-            <div class="score-row-fill" data-pct="{{ pct }}" style="background:{{ color }};"></div>
-          </div>
-          <span class="score-row-val">{{ pct }}%</span>
+      <div class="card-body">
+        <div class="empty-state" style="padding:2rem;" aria-label="No category scores yet">
+          <div class="empty-icon" style="font-size:2rem;" aria-hidden="true">📉</div>
+          <p>Category scores will appear here after you complete an assessment.</p>
         </div>
-        {% endfor %}
       </div>
     </div>
 
-    <!-- Milestones -->
     <div class="card">
       <div class="card-header"><span class="card-title">🎯 Milestones</span></div>
-      <div class="card-body" style="display:flex;flex-direction:column;gap:.8rem;">
+      <div class="card-body" style="display:flex;flex-direction:column;gap:.75rem;">
         {% for title, desc, done in [
-          ('First Assessment','Complete your first assessment',True),
-          ('Perfect Score','Score 100% on any assessment',False),
-          ('Consistent Learner','Complete 5 assessments',True),
-          ('Top Performer','Score above 90% twice in a row',False),
-          ('Well-Rounded','Complete all 6 assessment types',False),
-          ('Streak: 3 days','Complete assessments 3 days running',True),
+          ('First Assessment',    'Complete your first assessment',              False),
+          ('Honest Responder',    'Complete any assessment without skipping',    False),
+          ('Consistent Learner',  'Complete 3 assessments',                      False),
+          ('Explorer',            'Try 3 different assessment types',            False),
+          ('Well-Rounded',        'Complete all 6 assessment types',             False),
         ] %}
-        <div style="display:flex;align-items:center;gap:.85rem;padding:.75rem 1rem;border-radius:var(--radius);background:{% if done %}#d1fae5{% else %}var(--surface-2){% endif %};border:1px solid {% if done %}var(--success){% else %}var(--border){% endif %};">
-          <span style="font-size:1.2rem;">{% if done %}✅{% else %}🔒{% endif %}</span>
+        <div style="display:flex;align-items:center;gap:.85rem;padding:.75rem 1rem;
+                    border-radius:var(--radius);
+                    background:{% if done %}#d1fae5{% else %}var(--surface-2){% endif %};
+                    border:1px solid {% if done %}var(--success){% else %}var(--border){% endif %};"
+             role="listitem" aria-label="{{ title }}: {{ 'achieved' if done else 'not yet achieved' }}">
+          <span style="font-size:1.2rem;" aria-hidden="true">{% if done %}✅{% else %}🔒{% endif %}</span>
           <div>
-            <div style="font-weight:700;font-size:.9rem;color:{% if done %}#065f46{% else %}var(--text){% endif %};">{{ title }}</div>
+            <div style="font-weight:700;font-size:.9rem;color:{% if done %}#065f46{% else %}var(--text){% endif %};">
+              {{ title }}
+            </div>
             <div style="font-size:.8rem;color:var(--text-muted);">{{ desc }}</div>
           </div>
         </div>
         {% endfor %}
       </div>
     </div>
-
   </div>
 
-  <!-- Timeline -->
-  <div class="card mt-4">
-    <div class="card-header"><span class="card-title">📅 Assessment Timeline</span></div>
-    <div class="table-wrap" style="border:none;border-radius:0;">
-      <table>
-        <thead>
-          <tr><th>Assessment</th><th>Started</th><th>Completed</th><th>Duration</th><th>Score</th><th>Change</th></tr>
-        </thead>
-        <tbody>
-          {% for row in [
-            ('Cognitive Skills','Oct 1','Oct 3','2d','91%','+5%','success'),
-            ('Personality Profile','Sep 26','Sep 28','2d','78%','+2%','success'),
-            ('Stress & Wellbeing','Sep 19','Sep 20','1d','65%','-3%','danger'),
-            ('Emotional Intelligence','Sep 10','Sep 12','2d','82%','+8%','success'),
-          ] %}
-          <tr>
-            <td><strong>{{ row[0] }}</strong></td>
-            <td style="color:var(--text-muted);">{{ row[1] }}</td>
-            <td style="color:var(--text-muted);">{{ row[2] }}</td>
-            <td>{{ row[3] }}</td>
-            <td><strong>{{ row[4] }}</strong></td>
-            <td><span class="badge badge-{{ row[6] }}">{{ row[5] }}</span></td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+  <!-- Link to history -->
+  <div class="text-center mt-4">
+    <a href="{{ url_for('assessment.history') }}" class="btn btn-outline btn-lg">
+      View Full Assessment History →
+    </a>
   </div>
 
 </div>

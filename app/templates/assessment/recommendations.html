@@ -1,96 +1,137 @@
 {% extends "base.html" %}
-{% block title %}Recommendations — AssessMe{% endblock %}
+{% block title %}Guidance & Interpretation — AssessMe{% endblock %}
+
+{% block breadcrumb %}
+<div class="container">
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
+    <span class="breadcrumb-sep" aria-hidden="true">›</span>
+    <a href="{{ url_for('assessment.result') }}">Result</a>
+    <span class="breadcrumb-sep" aria-hidden="true">›</span>
+    <span class="current" aria-current="page">Guidance</span>
+  </nav>
+</div>
+{% endblock %}
 
 {% block content %}
 <div class="container section">
 
   <div class="page-header">
-    <h1 class="page-title">💡 Personalised Recommendations</h1>
-    <p class="page-sub">Based on your Cognitive Skills assessment · Oct 5, 2026</p>
+    <h1 class="page-title">💡 Guidance &amp; Interpretation</h1>
+    <p class="page-sub">{{ assessment_label }} — personalised reflection notes based on your responses.</p>
   </div>
 
-  <!-- Priority highlight -->
-  <div class="card mb-4" style="background:linear-gradient(135deg,#667eea,#764ba2);border:none;">
-    <div class="card-body" style="color:#fff;display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;">
-      <div style="font-size:2.5rem;">🏆</div>
-      <div>
-        <h3 style="color:#fff;margin-bottom:.3rem;">You're in the Top 18% of test-takers!</h3>
-        <p style="color:rgba(255,255,255,.85);">Your cognitive profile shows strong analytical skills. Focus on the areas below to reach the top 5%.</p>
-      </div>
-      <a href="{{ url_for('assessment.select') }}" class="btn btn-white" style="margin-left:auto;white-space:nowrap;">Take Next Assessment</a>
+  <!-- Screening vs diagnosis — top-priority responsible communication -->
+  <div class="disclaimer-box mb-4" role="note" aria-label="Important notice about assessment results">
+    <span class="d-icon" aria-hidden="true">⚠️</span>
+    <div>
+      <strong>Screening tool, not a diagnosis.</strong>
+      This guidance is based on a brief self-report assessment and reflects patterns in your
+      responses at a single point in time. It is <em>not</em> a clinical evaluation, a
+      psychological diagnosis, or a professional opinion. Language used here is intentionally
+      neutral and descriptive — not prescriptive. If anything raises a concern for you,
+      please speak with a qualified health or wellbeing professional.
+      <a href="{{ url_for('assessment.help_page') }}#limitations">Read more about limitations →</a>
     </div>
   </div>
 
-  <!-- Category tabs filter -->
-  <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.75rem;">
-    {% for tag in ['All','Immediate','This week','Long-term','Resources'] %}
-    <button class="btn {% if loop.first %}btn-primary{% else %}btn-secondary{% endif %} btn-sm">{{ tag }}</button>
+  <!-- Filter tabs — functional via JS .rec-filter-btn -->
+  <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.75rem;"
+       role="group" aria-label="Filter guidance by category">
+    {% for tag in ['All','Reflect','Learn','Act','Support'] %}
+    <button class="btn rec-filter-btn {% if loop.first %}btn-primary{% else %}btn-secondary{% endif %} btn-sm"
+            data-filter="{{ tag }}"
+            aria-pressed="{{ 'true' if loop.first else 'false' }}">{{ tag }}</button>
     {% endfor %}
   </div>
 
-  <!-- Recommendation cards -->
+  <!-- Guidance cards -->
   <div style="display:flex;flex-direction:column;gap:1rem;margin-bottom:2rem;">
 
-    {% set recs = [
-      ('🧘','#fef3c7','#92400e','Immediate','Practice Stress-Relief Techniques','Your stress management score (72%) indicates this is your biggest growth area. Start with 5-minute daily mindfulness sessions.','5 min/day','High priority'),
-      ('📚','#dbeafe','#1e40af','This week','Read: "Thinking, Fast and Slow"','Reinforce your analytical strengths and learn about cognitive biases that affect decision-making.','2–3 hrs','Recommended'),
-      ('🗣️','#d1fae5','#065f46','This week','Join a Public Speaking Group','Improve communication clarity. Toastmasters or similar groups offer structured practice.','1 hr/week','Moderate'),
-      ('🎯','#ede9fe','#4f46e5','Long-term','Set a 90-Day Learning Goal','Use your goal-setting strength to build a structured self-improvement plan across all cognitive domains.','Ongoing','Strategic'),
-      ('💻','#fee2e2','#991b1b','Resources','Try Brain-Training Apps','Apps like Lumosity or Elevate provide daily cognitive exercises targeting your specific weak areas.','10 min/day','Optional'),
-      ('🧩','#f0fdf4','#166534','Long-term','Enrol in a Critical Thinking Course','A structured course will formalise the analytical skills you already have and teach advanced reasoning frameworks.','4–6 weeks','Highly recommended'),
+    {% set guidance = [
+      ('Reflect','🪞','#ede9fe','#4f46e5',
+       'Take time to reflect on your responses',
+       'Look back at any questions you found difficult or surprising. Noticing a pattern — even without a score — can be a useful starting point for self-understanding.',
+       '5–10 min', 'Low effort'),
+      ('Learn','📚','#dbeafe','#1e40af',
+       'Read about the area being assessed',
+       'Understanding what the assessed area involves — such as cognitive flexibility, emotional regulation, or stress responses — can help you interpret your results more accurately.',
+       '30 min', 'Moderate effort'),
+      ('Reflect','📓','#d1fae5','#065f46',
+       'Keep a short reflection journal',
+       'Writing a few sentences each day about your thoughts, decisions, or feelings can build self-awareness over time. No special format is needed.',
+       '5 min/day', 'Low effort'),
+      ('Act','🚶','#fef3c7','#92400e',
+       'Take one small, concrete step',
+       'Rather than trying to change everything at once, identify one area from your results and choose one small action this week. Consistency matters more than scale.',
+       'Ongoing', 'Low effort'),
+      ('Support','🩺','#fee2e2','#991b1b',
+       'Consider speaking with a professional',
+       'If your results or the process of reflection has raised any concerns about your wellbeing, mental health, or personal development, a qualified counsellor or psychologist can offer personalised support.',
+       'As needed', 'Important'),
+      ('Learn','🎓','#f3e8ff','#6d28d9',
+       'Explore a structured learning resource',
+       'Many free and accessible resources exist on topics such as mindfulness, communication, goal-setting, and emotional regulation. Libraries, community centres, and online platforms are good starting points.',
+       'Flexible', 'Optional'),
     ] %}
 
-    {% for icon, bg, color, tag, title, desc, effort, priority in recs %}
-    <div class="rec-card">
-      <div class="rec-icon" style="background:{{ bg }};color:{{ color }};">{{ icon }}</div>
+    {% for filter, icon, bg, color, title, desc, effort, priority in guidance %}
+    <div class="rec-card" data-filter="{{ filter }}"
+         role="article" aria-label="{{ title }}">
+      <div class="rec-icon" style="background:{{ bg }};color:{{ color }};"
+           aria-hidden="true">{{ icon }}</div>
       <div class="rec-body" style="flex:1;">
-        <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem;flex-wrap:wrap;">
           <h4>{{ title }}</h4>
-          <span class="badge badge-gray">{{ tag }}</span>
-          <span class="badge badge-primary">{{ priority }}</span>
+          <span class="badge badge-gray">{{ filter }}</span>
+          <span class="badge badge-{% if priority == 'Important' %}danger{% elif priority == 'Low effort' %}success{% else %}primary{% endif %}">
+            {{ priority }}
+          </span>
         </div>
-        <p>{{ desc }}</p>
-        <div style="margin-top:.6rem;font-size:.82rem;color:var(--text-muted);">⏱ Effort: <strong>{{ effort }}</strong></div>
-      </div>
-      <div style="display:flex;flex-direction:column;gap:.5rem;align-items:flex-end;justify-content:center;">
-        <button class="btn btn-primary btn-sm">Start</button>
-        <button class="btn btn-ghost btn-sm">Save</button>
+        <p style="font-size:.88rem;">{{ desc }}</p>
+        <div style="margin-top:.5rem;font-size:.8rem;color:var(--text-muted);">
+          ⏱ {{ effort }}
+        </div>
       </div>
     </div>
     {% endfor %}
 
   </div>
 
-  <!-- Related resources -->
-  <div class="card">
-    <div class="card-header"><span class="card-title">📖 Curated Resources</span></div>
+  <!-- Professional referral section -->
+  <div class="card mb-4" style="border-color:var(--info);" role="region"
+       aria-label="Professional support information">
+    <div class="card-header" style="background:#dbeafe;border-color:var(--info);">
+      <span class="card-title" style="color:#1e40af;">🩺 When to Seek Professional Support</span>
+    </div>
     <div class="card-body">
-      <div class="grid-3">
-        {% for icon, title, type, color in [
-          ('🎧','Mindfulness for Cognitive Performance','Podcast','#ede9fe'),
-          ('📝','Daily Journaling Prompts for Self-Reflection','Template','#d1fae5'),
-          ('🎬','TEDx: The Surprising Habits of Original Thinkers','Video','#fee2e2'),
-          ('📊','Cognitive Performance Tracker','Spreadsheet','#dbeafe'),
-          ('🔗','Khan Academy — Logic & Critical Thinking','Course','#fef3c7'),
-          ('📰','Research: How Sleep Impacts Cognitive Function','Article','#f3e8ff'),
-        ] %}
-        <a href="#" style="display:flex;flex-direction:column;gap:.6rem;padding:1.1rem;border:1px solid var(--border);border-radius:var(--radius);text-decoration:none;transition:all .2s;color:var(--text);"
-           onmouseover="this.style.borderColor='var(--primary)';this.style.background='var(--primary-light)'"
-           onmouseout="this.style.borderColor='var(--border)';this.style.background=''">
-          <span style="width:40px;height:40px;background:{{ color }};border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;">{{ icon }}</span>
-          <div>
-            <div style="font-weight:600;font-size:.88rem;margin-bottom:.2rem;">{{ title }}</div>
-            <span class="badge badge-gray">{{ type }}</span>
-          </div>
+      <p style="margin-bottom:1rem;">
+        Automated assessments have significant limitations. Consider speaking with a qualified
+        professional if any of the following apply:
+      </p>
+      <ul style="padding-left:1.25rem;color:var(--text-muted);font-size:.9rem;line-height:2;">
+        <li>You are experiencing persistent low mood, anxiety, or difficulty coping.</li>
+        <li>Your results surprised you or raised concerns you did not expect.</li>
+        <li>You want to understand your results in a personal context.</li>
+        <li>You are making an important life or career decision and want professional input.</li>
+        <li>You are supporting someone else who may need help.</li>
+      </ul>
+      <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1.25rem;">
+        <a href="{{ url_for('assessment.help_page') }}#support" class="btn btn-outline btn-sm">
+          Find support resources →
         </a>
-        {% endfor %}
+        <a href="{{ url_for('assessment.help_page') }}" class="btn btn-ghost btn-sm">
+          About assessments →
+        </a>
       </div>
     </div>
   </div>
 
-  <div style="display:flex;justify-content:center;gap:1rem;flex-wrap:wrap;margin-top:2rem;">
+  <!-- Navigation -->
+  <div style="display:flex;justify-content:center;gap:1rem;flex-wrap:wrap;">
     <a href="{{ url_for('assessment.result') }}"  class="btn btn-secondary btn-lg">← Back to Results</a>
     <a href="{{ url_for('assessment.history') }}" class="btn btn-primary btn-lg">View History →</a>
+    <a href="{{ url_for('assessment.select') }}"  class="btn btn-outline btn-lg">New Assessment</a>
   </div>
 
 </div>

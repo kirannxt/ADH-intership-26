@@ -25,7 +25,7 @@ def login():
 
         flash("Invalid email or password. Please try again.", "danger")
 
-    return render_template("auth/login.html", title="Login")
+    return render_template("auth/login.html", title="Login", open_tab="login")
 
 
 @auth.route("/register", methods=["GET", "POST"])
@@ -58,7 +58,7 @@ def register():
         flash("Account created! You can now sign in.", "success")
         return redirect(url_for("auth.login"))
 
-    return render_template("auth/register.html", title="Register")
+    return render_template("auth/login.html", title="Create Account", open_tab="register")
 
 
 @auth.route("/logout")

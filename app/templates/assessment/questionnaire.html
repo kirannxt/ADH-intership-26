@@ -1,217 +1,268 @@
 {% extends "base.html" %}
 {% block title %}Questionnaire — AssessMe{% endblock %}
 
+{% block breadcrumb %}
+<div class="container-md">
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
+    <span class="breadcrumb-sep" aria-hidden="true">›</span>
+    <a href="{{ url_for('assessment.select') }}">Choose Assessment</a>
+    <span class="breadcrumb-sep" aria-hidden="true">›</span>
+    <span class="current" aria-current="page">Questionnaire</span>
+  </nav>
+</div>
+{% endblock %}
+
 {% block content %}
 <div class="container-md section">
 
   <!-- Step indicator -->
-  <div class="steps mb-3">
-    {% for label in ['Select','Personal Info','Questionnaire','Review','Results'] %}
-    <div class="step {% if loop.index < 3 %}completed{% elif loop.index == 3 %}active{% endif %}">
-      <div class="step-circle">{% if loop.index < 3 %}✓{% else %}{{ loop.index }}{% endif %}</div>
+  <div id="step-indicator" data-active="2" class="steps mb-3" aria-label="Assessment steps">
+    {% for label in ['Select','Personal Info','Questions','Review','Results'] %}
+    <div class="step" aria-label="Step {{ loop.index }}: {{ label }}">
+      <div class="step-circle" aria-hidden="true">{{ loop.index }}</div>
       <span class="step-label">{{ label }}</span>
     </div>
     {% endfor %}
   </div>
 
   <!-- Progress bar -->
-  <div class="progress-wrapper">
+  <div class="progress-wrapper" aria-label="Questionnaire progress">
     <div class="progress-info">
       <span>Question <strong id="q-current">1</strong> of <strong>10</strong></span>
-      <span id="q-pct">10%</span>
+      <span id="q-pct" aria-live="polite">10%</span>
     </div>
-    <div class="progress-bar-bg">
+    <div class="progress-bar-bg" role="progressbar"
+         aria-valuemin="0" aria-valuemax="100" aria-valuenow="10"
+         aria-label="Assessment progress">
       <div class="progress-bar-fill" id="q-progress" style="width:10%;"></div>
     </div>
   </div>
 
-  <!-- Question card -->
-  <form method="POST" action="{{ url_for('assessment.review') }}" id="quiz-form">
+  <!-- Answer summary mini-map -->
+  <div style="margin-bottom:1.25rem;">
+    <div style="font-size:.78rem;font-weight:600;color:var(--text-muted);margin-bottom:.4rem;">
+      Answered: <span id="answered-count">0</span> / 10 &nbsp;·&nbsp;
+      Remaining: <span id="remaining-count">10</span>
+    </div>
+    <div class="answer-map" role="navigation" aria-label="Jump to question">
+      {% for i in range(1, 11) %}
+      <button class="answer-dot" data-qnum="{{ i }}"
+              aria-label="Go to question {{ i }}"
+              type="button">{{ i }}</button>
+      {% endfor %}
+    </div>
+  </div>
 
-    <!-- Question 1 -->
-    <div class="question-card" id="q-1">
-      <div class="question-number">Question 1 of 10</div>
-      <div class="question-text">How would you rate your ability to focus on a single task for an extended period?</div>
-      <div class="option-group">
-        {% for opt in ['Excellent — I rarely get distracted','Good — I stay focused most of the time','Average — I sometimes lose focus','Below average — I get distracted easily','Poor — I struggle to concentrate'] %}
+  <!-- FORM — POSTs to /assessment/questionnaire -->
+  <form method="POST" action="{{ url_for('assessment.questionnaire') }}" id="quiz-form">
+
+    {# ── Q1 Multiple choice ── #}
+    <div class="question-card" data-qnum="1" tabindex="-1">
+      <span class="q-type-tag q-type-mc" aria-label="Question type: Multiple choice">⊙ Multiple choice</span>
+      <div class="question-number">Question 1 of 10 <span class="required-mark" aria-hidden="true">*</span></div>
+      <div class="question-text" id="q1-label">How would you rate your ability to focus on a single task for an extended period?</div>
+      <div class="option-group" role="radiogroup" aria-labelledby="q1-label">
+        {% for opt in [
+          'Excellent — I rarely lose focus',
+          'Good — I stay on task most of the time',
+          'Average — I sometimes get distracted',
+          'Below average — I find it hard to stay focused',
+          'Poor — I struggle to concentrate for long'
+        ] %}
         <label class="option-item">
-          <input type="radio" name="q1" value="{{ loop.index }}" />
+          <input type="radio" name="q1" value="{{ opt }}" {% if saved_answers.get('q1') == opt %}checked{% endif %} />
           <span class="option-label">{{ opt }}</span>
         </label>
         {% endfor %}
       </div>
     </div>
 
-    <!-- Question 2 -->
-    <div class="question-card hidden" id="q-2">
-      <div class="question-number">Question 2 of 10</div>
-      <div class="question-text">When facing a complex problem, which approach do you typically take?</div>
-      <div class="option-group">
-        {% for opt in ['Break it into smaller parts methodically','Rely on intuition and experience','Seek advice from others first','Try multiple random approaches','Avoid it until necessary'] %}
+    {# ── Q2 Yes / No ── #}
+    <div class="question-card hidden" data-qnum="2" tabindex="-1">
+      <span class="q-type-tag q-type-yn" aria-label="Question type: Yes or No">✓ Yes / No</span>
+      <div class="question-number">Question 2 of 10 <span class="required-mark" aria-hidden="true">*</span></div>
+      <div class="question-text" id="q2-label">Do you usually plan your day or week in advance?</div>
+      <input type="hidden" name="q2" value="{{ saved_answers.get('q2', '') }}" />
+      <div class="yesno-group" role="group" aria-labelledby="q2-label">
+        <button type="button" class="yesno-btn {% if saved_answers.get('q2') == 'Yes' %}selected{% endif %}"
+                data-value="Yes" aria-pressed="{{ 'true' if saved_answers.get('q2') == 'Yes' else 'false' }}">
+          👍 Yes
+        </button>
+        <button type="button" class="yesno-btn {% if saved_answers.get('q2') == 'No' %}selected{% endif %}"
+                data-value="No" aria-pressed="{{ 'true' if saved_answers.get('q2') == 'No' else 'false' }}">
+          👎 No
+        </button>
+      </div>
+    </div>
+
+    {# ── Q3 Rating scale ── #}
+    <div class="question-card hidden" data-qnum="3" tabindex="-1">
+      <span class="q-type-tag q-type-rate" aria-label="Question type: Rating scale">★ Rating scale</span>
+      <div class="question-number">Question 3 of 10 <span class="required-mark" aria-hidden="true">*</span></div>
+      <div class="question-text" id="q3-label">On a scale of 1–5, how well do you handle unexpected changes or setbacks?</div>
+      <input type="hidden" name="q3" value="{{ saved_answers.get('q3', '') }}" />
+      <div class="rating-group" role="group" aria-labelledby="q3-label">
+        {% for n in range(1, 6) %}
+        <button type="button" class="rating-btn {% if saved_answers.get('q3') == n|string %}selected{% endif %}"
+                data-value="{{ n }}"
+                aria-label="{{ n }} out of 5"
+                aria-pressed="{{ 'true' if saved_answers.get('q3') == n|string else 'false' }}">{{ n }}</button>
+        {% endfor %}
+      </div>
+      <div class="rating-labels">
+        <span>1 = Very poorly</span>
+        <span>5 = Very well</span>
+      </div>
+    </div>
+
+    {# ── Q4 Frequency ── #}
+    <div class="question-card hidden" data-qnum="4" tabindex="-1">
+      <span class="q-type-tag q-type-freq" aria-label="Question type: Frequency">↻ Frequency</span>
+      <div class="question-number">Question 4 of 10 <span class="required-mark" aria-hidden="true">*</span></div>
+      <div class="question-text" id="q4-label">Over the past two weeks, how often have you felt overwhelmed by your responsibilities?</div>
+      <input type="hidden" name="q4" value="{{ saved_answers.get('q4', '') }}" />
+      <div class="freq-group" role="group" aria-labelledby="q4-label">
+        {% for opt in ['Never','Rarely','Sometimes','Often','Almost always'] %}
+        <button type="button" class="freq-btn {% if saved_answers.get('q4') == opt %}selected{% endif %}"
+                data-value="{{ opt }}"
+                aria-pressed="{{ 'true' if saved_answers.get('q4') == opt else 'false' }}">{{ opt }}</button>
+        {% endfor %}
+      </div>
+    </div>
+
+    {# ── Q5 Multiple choice ── #}
+    <div class="question-card hidden" data-qnum="5" tabindex="-1">
+      <span class="q-type-tag q-type-mc">⊙ Multiple choice</span>
+      <div class="question-number">Question 5 of 10 <span class="required-mark" aria-hidden="true">*</span></div>
+      <div class="question-text" id="q5-label">When facing a difficult problem, which approach do you most naturally take?</div>
+      <div class="option-group" role="radiogroup" aria-labelledby="q5-label">
+        {% for opt in [
+          'Break it down into smaller steps',
+          'Seek advice from others first',
+          'Try several approaches until one works',
+          'Step back and reflect before acting',
+          'Put it aside and return to it later'
+        ] %}
         <label class="option-item">
-          <input type="radio" name="q2" value="{{ loop.index }}" />
+          <input type="radio" name="q5" value="{{ opt }}" {% if saved_answers.get('q5') == opt %}checked{% endif %} />
           <span class="option-label">{{ opt }}</span>
         </label>
         {% endfor %}
       </div>
     </div>
 
-    <!-- Question 3 -->
-    <div class="question-card hidden" id="q-3">
-      <div class="question-number">Question 3 of 10</div>
-      <div class="question-text">How do you handle feedback or criticism about your work?</div>
-      <div class="option-group">
-        {% for opt in ['I welcome it and use it to improve','I accept it but need time to process','I feel defensive initially but come around','I find it difficult to accept','I rarely receive feedback'] %}
+    {# ── Q6 Rating scale ── #}
+    <div class="question-card hidden" data-qnum="6" tabindex="-1">
+      <span class="q-type-tag q-type-rate">★ Rating scale</span>
+      <div class="question-number">Question 6 of 10 <span class="required-mark" aria-hidden="true">*</span></div>
+      <div class="question-text" id="q6-label">How comfortable are you expressing your emotions to people you trust?</div>
+      <input type="hidden" name="q6" value="{{ saved_answers.get('q6', '') }}" />
+      <div class="rating-group" role="group" aria-labelledby="q6-label">
+        {% for n in range(1, 6) %}
+        <button type="button" class="rating-btn {% if saved_answers.get('q6') == n|string %}selected{% endif %}"
+                data-value="{{ n }}"
+                aria-label="{{ n }} out of 5"
+                aria-pressed="{{ 'true' if saved_answers.get('q6') == n|string else 'false' }}">{{ n }}</button>
+        {% endfor %}
+      </div>
+      <div class="rating-labels">
+        <span>1 = Very uncomfortable</span>
+        <span>5 = Very comfortable</span>
+      </div>
+    </div>
+
+    {# ── Q7 Yes / No ── #}
+    <div class="question-card hidden" data-qnum="7" tabindex="-1">
+      <span class="q-type-tag q-type-yn">✓ Yes / No</span>
+      <div class="question-number">Question 7 of 10 <span class="required-mark" aria-hidden="true">*</span></div>
+      <div class="question-text" id="q7-label">Do you generally feel that your work or studies align with your personal values?</div>
+      <input type="hidden" name="q7" value="{{ saved_answers.get('q7', '') }}" />
+      <div class="yesno-group" role="group" aria-labelledby="q7-label">
+        <button type="button" class="yesno-btn {% if saved_answers.get('q7') == 'Yes' %}selected{% endif %}"
+                data-value="Yes" aria-pressed="{{ 'true' if saved_answers.get('q7') == 'Yes' else 'false' }}">
+          👍 Yes
+        </button>
+        <button type="button" class="yesno-btn {% if saved_answers.get('q7') == 'No' %}selected{% endif %}"
+                data-value="No" aria-pressed="{{ 'true' if saved_answers.get('q7') == 'No' else 'false' }}">
+          👎 No
+        </button>
+      </div>
+    </div>
+
+    {# ── Q8 Frequency ── #}
+    <div class="question-card hidden" data-qnum="8" tabindex="-1">
+      <span class="q-type-tag q-type-freq">↻ Frequency</span>
+      <div class="question-number">Question 8 of 10 <span class="required-mark" aria-hidden="true">*</span></div>
+      <div class="question-text" id="q8-label">How often do you take time to reflect on your own thoughts and actions?</div>
+      <input type="hidden" name="q8" value="{{ saved_answers.get('q8', '') }}" />
+      <div class="freq-group" role="group" aria-labelledby="q8-label">
+        {% for opt in ['Never','Rarely','Sometimes','Often','Almost always'] %}
+        <button type="button" class="freq-btn {% if saved_answers.get('q8') == opt %}selected{% endif %}"
+                data-value="{{ opt }}"
+                aria-pressed="{{ 'true' if saved_answers.get('q8') == opt else 'false' }}">{{ opt }}</button>
+        {% endfor %}
+      </div>
+    </div>
+
+    {# ── Q9 Multiple choice ── #}
+    <div class="question-card hidden" data-qnum="9" tabindex="-1">
+      <span class="q-type-tag q-type-mc">⊙ Multiple choice</span>
+      <div class="question-number">Question 9 of 10 <span class="required-mark" aria-hidden="true">*</span></div>
+      <div class="question-text" id="q9-label">In a group setting, which role do you most naturally take on?</div>
+      <div class="option-group" role="radiogroup" aria-labelledby="q9-label">
+        {% for opt in [
+          'Leader — I tend to organise and direct',
+          'Contributor — I actively share ideas',
+          'Supporter — I help others and follow direction',
+          'Observer — I prefer to listen before speaking',
+          'It depends on the situation'
+        ] %}
         <label class="option-item">
-          <input type="radio" name="q3" value="{{ loop.index }}" />
+          <input type="radio" name="q9" value="{{ opt }}" {% if saved_answers.get('q9') == opt %}checked{% endif %} />
           <span class="option-label">{{ opt }}</span>
         </label>
         {% endfor %}
       </div>
     </div>
 
-    <!-- Question 4 -->
-    <div class="question-card hidden" id="q-4">
-      <div class="question-number">Question 4 of 10</div>
-      <div class="question-text">In social situations, you typically feel:</div>
-      <div class="option-group">
-        {% for opt in ['Energised and at ease','Comfortable but prefer small groups','Neutral — depends on the situation','Slightly uncomfortable','Anxious and prefer to avoid them'] %}
-        <label class="option-item">
-          <input type="radio" name="q4" value="{{ loop.index }}" />
-          <span class="option-label">{{ opt }}</span>
-        </label>
+    {# ── Q10 Rating scale ── #}
+    <div class="question-card hidden" data-qnum="10" tabindex="-1">
+      <span class="q-type-tag q-type-rate">★ Rating scale</span>
+      <div class="question-number">Question 10 of 10 <span class="required-mark" aria-hidden="true">*</span></div>
+      <div class="question-text" id="q10-label">Overall, how satisfied are you with your personal development over the past year?</div>
+      <input type="hidden" name="q10" value="{{ saved_answers.get('q10', '') }}" />
+      <div class="rating-group" role="group" aria-labelledby="q10-label">
+        {% for n in range(1, 6) %}
+        <button type="button" class="rating-btn {% if saved_answers.get('q10') == n|string %}selected{% endif %}"
+                data-value="{{ n }}"
+                aria-label="{{ n }} out of 5"
+                aria-pressed="{{ 'true' if saved_answers.get('q10') == n|string else 'false' }}">{{ n }}</button>
         {% endfor %}
+      </div>
+      <div class="rating-labels">
+        <span>1 = Not at all satisfied</span>
+        <span>5 = Very satisfied</span>
       </div>
     </div>
 
-    <!-- Question 5 -->
-    <div class="question-card hidden" id="q-5">
-      <div class="question-number">Question 5 of 10</div>
-      <div class="question-text">How often do you set specific goals for yourself?</div>
-      <div class="option-group">
-        {% for opt in ['Always — I have clear written goals','Often — I have goals in mind','Sometimes — when it feels necessary','Rarely','Never'] %}
-        <label class="option-item">
-          <input type="radio" name="q5" value="{{ loop.index }}" />
-          <span class="option-label">{{ opt }}</span>
-        </label>
-        {% endfor %}
-      </div>
+    <!-- Navigation -->
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.75rem;margin-top:1.75rem;">
+      <button type="button" id="btn-prev" class="btn btn-secondary" disabled
+              aria-label="Previous question">← Previous</button>
+      <span style="font-size:.82rem;color:var(--text-muted);" aria-hidden="true">
+        Use ← → arrow keys to navigate
+      </span>
+      <button type="button" id="btn-next" class="btn btn-primary"
+              aria-label="Next question">Next →</button>
     </div>
 
-    <!-- Question 6 -->
-    <div class="question-card hidden" id="q-6">
-      <div class="question-number">Question 6 of 10</div>
-      <div class="question-text">When working in a team, you prefer to:</div>
-      <div class="option-group">
-        {% for opt in ['Lead and coordinate the group','Contribute ideas actively','Support others and follow direction','Work independently within the team','Observe and participate when asked'] %}
-        <label class="option-item">
-          <input type="radio" name="q6" value="{{ loop.index }}" />
-          <span class="option-label">{{ opt }}</span>
-        </label>
-        {% endfor %}
-      </div>
-    </div>
+    <!-- Save note -->
+    <p style="text-align:center;margin-top:1rem;font-size:.8rem;color:var(--text-muted);"
+       aria-live="polite" id="save-indicator">
+      💾 Your answers are saved automatically as you go.
+    </p>
 
-    <!-- Question 7 -->
-    <div class="question-card hidden" id="q-7">
-      <div class="question-number">Question 7 of 10</div>
-      <div class="question-text">How do you manage stress during high-pressure situations?</div>
-      <div class="option-group">
-        {% for opt in ['I stay calm and strategise','I push through with determination','I take breaks to reset','I feel overwhelmed but manage','Stress significantly impacts my performance'] %}
-        <label class="option-item">
-          <input type="radio" name="q7" value="{{ loop.index }}" />
-          <span class="option-label">{{ opt }}</span>
-        </label>
-        {% endfor %}
-      </div>
-    </div>
-
-    <!-- Question 8 -->
-    <div class="question-card hidden" id="q-8">
-      <div class="question-number">Question 8 of 10</div>
-      <div class="question-text">How quickly do you adapt to new environments or changes?</div>
-      <div class="option-group">
-        {% for opt in ['Very quickly — I embrace change','Fairly quickly with minor adjustment','At an average pace','Slowly — I need time','I struggle significantly with change'] %}
-        <label class="option-item">
-          <input type="radio" name="q8" value="{{ loop.index }}" />
-          <span class="option-label">{{ opt }}</span>
-        </label>
-        {% endfor %}
-      </div>
-    </div>
-
-    <!-- Question 9 -->
-    <div class="question-card hidden" id="q-9">
-      <div class="question-number">Question 9 of 10</div>
-      <div class="question-text">How do you approach learning new skills?</div>
-      <div class="option-group">
-        {% for opt in ['Proactively and consistently','When opportunities arise','Only when required','Reluctantly','I rarely seek to learn new skills'] %}
-        <label class="option-item">
-          <input type="radio" name="q9" value="{{ loop.index }}" />
-          <span class="option-label">{{ opt }}</span>
-        </label>
-        {% endfor %}
-      </div>
-    </div>
-
-    <!-- Question 10 -->
-    <div class="question-card hidden" id="q-10">
-      <div class="question-number">Question 10 of 10</div>
-      <div class="question-text">Overall, how satisfied are you with your personal and professional development?</div>
-      <div class="option-group">
-        {% for opt in ['Very satisfied','Satisfied','Neutral','Dissatisfied','Very dissatisfied'] %}
-        <label class="option-item">
-          <input type="radio" name="q10" value="{{ loop.index }}" />
-          <span class="option-label">{{ opt }}</span>
-        </label>
-        {% endfor %}
-      </div>
-    </div>
-
-    <!-- Navigation buttons -->
-    <div style="display:flex;justify-content:space-between;margin-top:1.75rem;align-items:center;">
-      <button type="button" class="btn btn-secondary" id="btn-prev" disabled onclick="changeQ(-1)">← Previous</button>
-      <span style="font-size:.85rem;color:var(--text-muted);">Use buttons or click an answer to advance</span>
-      <button type="button" class="btn btn-primary" id="btn-next" onclick="changeQ(1)">Next →</button>
-    </div>
   </form>
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-  let current = 1;
-  const total = 10;
-
-  function changeQ(dir) {
-    const next = current + dir;
-    if (next < 1 || next > total) return;
-    document.getElementById('q-' + current).classList.add('hidden');
-    current = next;
-    document.getElementById('q-' + current).classList.remove('hidden');
-
-    const pct = Math.round((current / total) * 100);
-    document.getElementById('q-progress').style.width = pct + '%';
-    document.getElementById('q-pct').textContent = pct + '%';
-    document.getElementById('q-current').textContent = current;
-
-    document.getElementById('btn-prev').disabled = (current === 1);
-
-    const nextBtn = document.getElementById('btn-next');
-    if (current === total) {
-      nextBtn.textContent = 'Review Answers →';
-      nextBtn.onclick = function() { document.getElementById('quiz-form').submit(); };
-    } else {
-      nextBtn.textContent = 'Next →';
-      nextBtn.onclick = function() { changeQ(1); };
-    }
-  }
-
-  // Auto-advance on option click
-  document.querySelectorAll('.option-item').forEach(item => {
-    item.addEventListener('click', () => {
-      setTimeout(() => { if (current < total) changeQ(1); }, 350);
-    });
-  });
-</script>
 {% endblock %}
