@@ -29,12 +29,6 @@
         <li><a href="{{ url_for('assessment.select') }}"
                class="nav-link {% if request.endpoint == 'assessment.select' %}active{% endif %}"
                aria-current="{% if request.endpoint == 'assessment.select' %}page{% endif %}">New Assessment</a></li>
-        <li><a href="{{ url_for('assessment.history') }}"
-               class="nav-link {% if request.endpoint == 'assessment.history' %}active{% endif %}"
-               aria-current="{% if request.endpoint == 'assessment.history' %}page{% endif %}">History</a></li>
-        <li><a href="{{ url_for('assessment.progress') }}"
-               class="nav-link {% if request.endpoint == 'assessment.progress' %}active{% endif %}"
-               aria-current="{% if request.endpoint == 'assessment.progress' %}page{% endif %}">Progress</a></li>
       {% endif %}
       <li><a href="{{ url_for('assessment.help_page') }}"
              class="nav-link {% if request.endpoint == 'assessment.help_page' %}active{% endif %}"
@@ -68,8 +62,6 @@
     {% if current_user.is_authenticated %}
       <a href="{{ url_for('main.dashboard') }}"     class="nav-link">Dashboard</a>
       <a href="{{ url_for('assessment.select') }}"  class="nav-link">New Assessment</a>
-      <a href="{{ url_for('assessment.history') }}" class="nav-link">History</a>
-      <a href="{{ url_for('assessment.progress') }}" class="nav-link">Progress</a>
     {% endif %}
     <a href="{{ url_for('assessment.help_page') }}" class="nav-link">Help</a>
     {% if current_user.is_authenticated %}
@@ -118,9 +110,6 @@
       <a href="{{ url_for('assessment.help_page') }}#privacy">Privacy</a>
       <a href="{{ url_for('assessment.help_page') }}#limitations">Limitations</a>
       <a href="{{ url_for('assessment.help_page') }}#contact">Contact</a>
-      {% if current_user.is_authenticated %}
-        <a href="{{ url_for('assessment.history') }}">My Assessments</a>
-      {% endif %}
     </nav>
     <p style="margin-top:.5rem;font-size:.75rem;color:var(--text-light);">
       AssessMe provides self-assessment tools for personal insight only.

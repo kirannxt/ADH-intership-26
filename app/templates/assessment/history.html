@@ -19,7 +19,7 @@
       <h1 class="page-title">📋 Assessment History</h1>
       <p class="page-sub">A record of your completed and in-progress assessments.</p>
     </div>
-    <a href="{{ url_for('assessment.select') }}" class="btn btn-primary">➕ New Assessment</a>
+    <a href="{{ url_for('assessment.select') }}" class="btn btn-primary">New Assessment</a>
   </div>
 
   <!-- Privacy note -->
@@ -119,10 +119,10 @@
         <div style="display:flex;gap:.4rem;" role="group" aria-label="Actions for {{ name }}">
           <a href="{{ url_for('assessment.result') }}"
              class="btn btn-ghost btn-sm" title="View result"
-             aria-label="View result for {{ name }}">📊</a>
+             aria-label="View result for {{ name }}">Result</a>
           <a href="{{ url_for('assessment.recommendations') }}"
              class="btn btn-ghost btn-sm" title="View guidance"
-             aria-label="View guidance for {{ name }}">💡</a>
+             aria-label="View guidance for {{ name }}">Guidance</a>
           {% if status == 'In Progress' %}
           <a href="{{ url_for('assessment.questionnaire') }}"
              class="btn btn-primary btn-sm"
@@ -138,7 +138,7 @@
                     class="btn btn-ghost btn-sm"
                     style="color:var(--danger);"
                     title="Delete record"
-                    aria-label="Delete {{ name }} record">🗑</button>
+                    aria-label="Delete {{ name }} record">Delete</button>
           </form>
         </div>
       </div>

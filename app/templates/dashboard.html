@@ -21,7 +21,7 @@
       <p class="page-sub" id="greeting-sub">Here's a snapshot of your activity.</p>
     </div>
     <a href="{{ url_for('assessment.select') }}" class="btn btn-primary btn-lg">
-      ➕ Start New Assessment
+      Start New Assessment
     </a>
   </div>
 
@@ -44,10 +44,8 @@
     </div>
     <div class="stat-card" role="region" aria-label="View progress tracking">
       <div class="stat-icon" style="background:#dbeafe;" aria-hidden="true">📈</div>
-      <div class="stat-value">
-        <a href="{{ url_for('assessment.progress') }}" style="font-size:1rem;font-weight:700;color:var(--info);">View →</a>
-      </div>
-      <div class="stat-label">Progress Tracking</div>
+      <div class="stat-value">—</div>
+      <div class="stat-label">Coming Soon</div>
     </div>
   </div>
 
@@ -57,7 +55,7 @@
     <div class="card">
       <div class="card-header flex-between">
         <span class="card-title">Recent Assessments</span>
-        <a href="{{ url_for('assessment.history') }}" class="btn btn-ghost btn-sm">View all →</a>
+        <a href="{{ url_for('assessment.history') }}" class="btn btn-ghost btn-sm">View all</a>
       </div>
 
       <!-- Empty state (shown when no history exists) -->
@@ -99,7 +97,7 @@
           </a>
           {% endfor %}
           <a href="{{ url_for('assessment.select') }}" class="btn btn-outline btn-sm" style="margin-top:.25rem;">
-            See all assessments →
+            See all assessments
           </a>
         </div>
       </div>
