@@ -73,27 +73,22 @@
       <!-- Quick start card -->
       <div class="card">
         <div class="card-header">
-          <span class="card-title">🚀 Quick Start</span>
-          <p class="card-text" style="margin-top:.2rem;">Choose a popular assessment to begin right now.</p>
+          <span class="card-title">Quick Start</span>
+          <p class="card-text" style="margin-top:.2rem;">Choose an assessment to begin right now.</p>
         </div>
         <div class="card-body" style="display:flex;flex-direction:column;gap:.6rem;">
-          {% for label, icon, color, val in [
-            ('Cognitive Skills Test',   '🧠', '#ede9fe', 'cognitive'),
-            ('Emotional Intelligence',  '❤️', '#fee2e2', 'emotional'),
-            ('Stress & Wellbeing',      '🧘', '#e0f2fe', 'stress'),
-          ] %}
+          {% for key, cfg in assessment_types.items() %}
           <a href="{{ url_for('assessment.select') }}"
              style="display:flex;align-items:center;gap:.85rem;padding:.8rem 1rem;
                     border:1px solid var(--border);border-radius:var(--radius);
                     text-decoration:none;transition:all .2s;color:var(--text);"
              onmouseover="this.style.borderColor='var(--primary)';this.style.background='var(--primary-light)'"
              onmouseout="this.style.borderColor='var(--border)';this.style.background=''"
-             aria-label="Start {{ label }}">
-            <span style="width:36px;height:36px;background:{{ color }};border-radius:8px;
+             aria-label="Start {{ cfg.label }}">
+            <span style="width:36px;height:36px;background:{{ cfg.color }};border-radius:8px;
                          display:flex;align-items:center;justify-content:center;font-size:1.1rem;"
-                  aria-hidden="true">{{ icon }}</span>
-            <span style="font-weight:600;font-size:.9rem;">{{ label }}</span>
-            <span style="margin-left:auto;color:var(--text-muted);" aria-hidden="true">→</span>
+                  aria-hidden="true">{{ cfg.icon }}</span>
+            <span style="font-weight:600;font-size:.9rem;">{{ cfg.label }}</span>
           </a>
           {% endfor %}
           <a href="{{ url_for('assessment.select') }}" class="btn btn-outline btn-sm" style="margin-top:.25rem;">
