@@ -55,7 +55,7 @@
       </div>
       <a href="{{ url_for('assessment.questionnaire') }}" class="btn btn-outline btn-sm"
          style="margin-left:auto;" aria-label="Go back and edit your answers">
-        ✏️ Edit answers
+        Edit answers
       </a>
     </div>
   </div>
@@ -76,21 +76,10 @@
     <div class="card-body" style="display:flex;flex-direction:column;gap:1.25rem;"
          role="list" aria-label="Your answers">
 
-      {% set questions = [
-        (1,  'How would you rate your ability to focus on a single task for an extended period?'),
-        (2,  'Do you usually plan your day or week in advance?'),
-        (3,  'On a scale of 1–5, how well do you handle unexpected changes or setbacks?'),
-        (4,  'Over the past two weeks, how often have you felt overwhelmed by your responsibilities?'),
-        (5,  'When facing a difficult problem, which approach do you most naturally take?'),
-        (6,  'How comfortable are you expressing your emotions to people you trust? (1–5)'),
-        (7,  'Do you generally feel that your work or studies align with your personal values?'),
-        (8,  'How often do you take time to reflect on your own thoughts and actions?'),
-        (9,  'In a group setting, which role do you most naturally take on?'),
-        (10, 'Overall, how satisfied are you with your personal development over the past year? (1–5)'),
-      ] %}
-
-      {% for num, question in questions %}
-      {% set answer = answers.get('q' ~ num) %}
+      {% set questions_list = questions %}
+      {% for q in questions_list %}
+      {% set qnum = loop.index %}
+      {% set answer = answers.get('q' ~ qnum) %}
       <div style="padding-bottom:1.25rem;
                   {% if not loop.last %}border-bottom:1px solid var(--border);{% endif %}"
            role="listitem">
@@ -98,10 +87,10 @@
           <span style="width:28px;height:28px;background:var(--primary-light);color:var(--primary);
                        border-radius:50%;display:flex;align-items:center;justify-content:center;
                        font-size:.8rem;font-weight:700;flex-shrink:0;margin-top:2px;"
-                aria-hidden="true">{{ num }}</span>
+                aria-hidden="true">{{ qnum }}</span>
           <div style="flex:1;">
             <div style="font-weight:600;font-size:.95rem;color:var(--text);margin-bottom:.4rem;">
-              {{ question }}
+              {{ q.text }}
             </div>
             {% if answer %}
             <div style="display:flex;align-items:center;gap:.5rem;">
@@ -113,7 +102,8 @@
               <span style="color:var(--warning);" aria-hidden="true">⚠️</span>
               <span style="font-size:.9rem;color:var(--warning);font-weight:600;">
                 Not answered —
-                <a href="{{ url_for('assessment.questionnaire') }}" aria-label="Answer question {{ num }}">answer now</a>
+                <a href="{{ url_for('assessment.questionnaire') }}"
+                   aria-label="Answer question {{ qnum }}">answer now</a>
               </span>
             </div>
             {% endif %}
@@ -138,21 +128,18 @@
       </p>
       <div style="display:flex;justify-content:center;gap:1rem;flex-wrap:wrap;">
         <a href="{{ url_for('assessment.questionnaire') }}" class="btn btn-secondary btn-lg">
-          ← Go back
+          Go back
         </a>
-        {% if answered_count == total_q %}
-        <button type="button" class="btn btn-primary btn-lg"
-                data-modal-open="confirm-submit-modal"
-                aria-label="Submit assessment — opens confirmation dialog">
-          Submit Assessment 🚀
-        </button>
-        {% else %}
+        <!-- Final submission is temporarily disabled -->
         <button type="button" class="btn btn-primary btn-lg" disabled
                 aria-disabled="true"
-                title="Answer all {{ total_q }} questions before submitting">
-          Submit Assessment 🚀
+                title="Submission is temporarily unavailable">
+          Submit Assessment
         </button>
-        {% endif %}
+      </div>
+
+      <div class="alert alert-info mt-3" role="status" style="justify-content:center;">
+        ℹ️ Final submission is temporarily disabled. You can still review and edit your answers.
       </div>
     </div>
   </div>
@@ -187,7 +174,7 @@
       <!-- Actual POST submit form inside modal -->
       <form method="POST" action="{{ url_for('assessment.review') }}" style="margin:0;">
         <button type="submit" class="btn btn-primary">
-          Yes, Submit →
+          Yes, Submit
         </button>
       </form>
     </div>

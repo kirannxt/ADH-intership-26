@@ -338,7 +338,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (prev) prev.disabled = (n === 1);
       if (next) {
         if (n === total) {
-          next.textContent = "Review Answers →";
+          next.textContent = "Review Answers";
           next.dataset.last = "true";
         } else {
           next.textContent = "Next →";

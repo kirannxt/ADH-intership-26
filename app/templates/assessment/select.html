@@ -17,7 +17,7 @@
   <!-- Step indicator -->
   <div id="step-indicator" data-active="0" class="steps mb-4" aria-label="Assessment steps">
     {% for label in ['Select','Personal Info','Questions','Review','Results'] %}
-    <div class="step" aria-label="Step {{ loop.index }}: {{ label }}">
+    <div class="step">
       <div class="step-circle" aria-hidden="true">{{ loop.index }}</div>
       <span class="step-label">{{ label }}</span>
     </div>
@@ -26,131 +26,134 @@
 
   <div class="text-center mb-4">
     <h1 class="page-title">Choose Your Assessment</h1>
-    <p class="page-sub">Select the assessment that best matches your goal. Read the description carefully before starting.</p>
+    <p class="page-sub">Each tool is a structured self-report screen — not a clinical diagnosis. Read the description and instructions before starting.</p>
   </div>
 
-  <!-- Instructions info box -->
-  <div class="info-box mb-4" role="note" aria-label="Instructions">
-    <span aria-hidden="true" style="font-size:1.1rem;flex-shrink:0;">ℹ️</span>
+  <!-- Important notice -->
+  <div class="disclaimer-box mb-4" role="note">
+    <span class="d-icon" aria-hidden="true">⚠️</span>
     <div>
-      <strong>Before you begin:</strong> Each assessment takes 6–15 minutes to complete.
-      Answer honestly — there are no right or wrong answers. Your responses are used only to
-      generate your personal report. You can
-      <a href="{{ url_for('assessment.help_page') }}">learn more about how assessments work</a>
-      before starting.
+      <strong>These are screening tools only.</strong>
+      They are not substitutes for professional evaluation. If you are experiencing
+      significant distress — particularly with the Anxiety, Depression, or Stress screens —
+      please consider speaking with a qualified health professional.
+      <a href="{{ url_for('assessment.help_page') }}#limitations">Learn about limitations →</a>
     </div>
   </div>
 
   <form method="POST" action="{{ url_for('assessment.select') }}" id="select-form">
     <input type="hidden" id="selected-assessment" name="assessment_type" value="" />
 
-    <!-- Assessment cards grid -->
     <div class="grid-3 mb-4" role="radiogroup" aria-label="Available assessments" aria-required="true">
-      {% set assessments = [
-        ('cognitive',   '🧠', '#ede9fe', 'Cognitive Skills',
-         'Measures memory, attention, problem-solving, and logical reasoning ability.',
-         '~10 min', '10 questions', 'Beginner friendly',
-         'You will answer questions about how you think and solve problems.'),
-        ('personality', '🌟', '#fef3c7', 'Personality Profile',
-         'Explores your personality traits using a structured self-report approach.',
-         '~8 min',  '10 questions', 'Reflective',
-         'You will rate how well statements describe your typical behaviour and feelings.'),
-        ('emotional',   '❤️', '#fee2e2', 'Emotional Intelligence',
-         'Assesses self-awareness, empathy, and how you recognise and manage emotions.',
-         '~12 min', '10 questions', 'Self-awareness focus',
-         'You will respond to scenarios and statements about emotions and relationships.'),
-        ('leadership',  '🧑‍💼', '#d1fae5', 'Leadership Aptitude',
-         'Evaluates decision-making style, communication approach, and team orientation.',
-         '~15 min', '10 questions', 'Intermediate',
-         'You will answer situational questions about how you lead and collaborate.'),
-        ('stress',      '🧘', '#e0f2fe', 'Stress & Wellbeing',
-         'Identifies stress patterns and explores your current wellbeing and coping strategies.',
-         '~6 min',  '10 questions', 'Self-care focus',
-         'You will rate the frequency of thoughts and feelings over the past two weeks.'),
-        ('career',      '💼', '#f3e8ff', 'Career Aptitude',
-         'Explores your work values, strengths, and potential career direction areas.',
-         '~10 min', '10 questions', 'Career focused',
-         'You will reflect on work preferences, skills, and what motivates you.'),
-      ] %}
 
-      {% for val, icon, color, title, desc, time, qs, tag, preview in assessments %}
+      {% for key, cfg in assessment_types.items() %}
       <div class="assessment-card"
-           data-value="{{ val }}"
+           data-value="{{ key }}"
            role="radio"
            aria-checked="false"
            tabindex="0"
-           aria-label="{{ title }} — {{ desc }} {{ time }}, {{ qs }}.">
+           aria-label="{{ cfg.label }}">
         <div class="check-mark" aria-hidden="true">✓</div>
-        <div class="a-icon" style="background:{{ color }};" aria-hidden="true">{{ icon }}</div>
-        <h3>{{ title }}</h3>
-        <p>{{ desc }}</p>
-        <div class="assessment-meta">
-          <span class="badge badge-gray" aria-label="Duration: {{ time }}">⏱ {{ time }}</span>
-          <span class="badge badge-gray" aria-label="{{ qs }}">❓ {{ qs }}</span>
-          <span class="badge badge-primary">{{ tag }}</span>
+
+        <!-- Icon + colour from real config -->
+        <div class="a-icon" style="background:{{ cfg.color }};" aria-hidden="true">{{ cfg.icon }}</div>
+
+        <h3>{{ cfg.label }}</h3>
+        <p>{{ cfg.description }}</p>
+
+        <!-- Section tags -->
+        <div class="assessment-meta" style="margin-bottom:.6rem;">
+          <span class="badge badge-gray">⏱ {{ cfg.time }}</span>
+          <span class="badge badge-gray">❓ {{ cfg.question_count }} questions</span>
         </div>
+        <div style="display:flex;gap:.4rem;flex-wrap:wrap;">
+          {% for section in cfg.sections %}
+          <span class="badge badge-primary" style="font-size:.7rem;">{{ section }}</span>
+          {% endfor %}
+        </div>
+
         <!-- Preview button -->
         <button type="button"
                 class="btn btn-ghost btn-sm"
-                style="margin-top:.85rem;width:100%;justify-content:center;"
-                data-modal-open="modal-{{ val }}"
+                style="margin-top:.9rem;width:100%;justify-content:center;"
+                data-modal-open="modal-{{ key }}"
                 onclick="event.stopPropagation();"
-                aria-label="Preview {{ title }} details">
-          Preview details ↗
+                aria-label="Preview {{ cfg.label }}">
+          View details
         </button>
       </div>
 
-      <!-- Per-assessment preview modal -->
-      <div class="modal-overlay" id="modal-{{ val }}" aria-hidden="true" role="dialog"
-           aria-modal="true" aria-labelledby="modal-title-{{ val }}">
-        <div class="modal">
+      <!-- Preview modal for this assessment -->
+      <div class="modal-overlay" id="modal-{{ key }}"
+           aria-hidden="true" role="dialog"
+           aria-modal="true" aria-labelledby="modal-title-{{ key }}">
+        <div class="modal modal-lg">
           <div class="modal-header">
-            <div>
-              <span style="font-size:1.5rem;" aria-hidden="true">{{ icon }}</span>
-              <span class="modal-title" id="modal-title-{{ val }}" style="margin-left:.5rem;">{{ title }}</span>
+            <div style="display:flex;align-items:center;gap:.6rem;">
+              <span style="font-size:1.5rem;" aria-hidden="true">{{ cfg.icon }}</span>
+              <span class="modal-title" id="modal-title-{{ key }}">{{ cfg.label }}</span>
             </div>
-            <button class="modal-close" aria-label="Close preview">&times;</button>
+            <button class="modal-close" aria-label="Close">&times;</button>
           </div>
-          <div class="modal-body">
-            <p style="margin-bottom:1rem;">{{ desc }}</p>
-            <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-bottom:1rem;">
-              <span class="badge badge-gray">⏱ {{ time }}</span>
-              <span class="badge badge-gray">❓ {{ qs }}</span>
-              <span class="badge badge-primary">{{ tag }}</span>
+          <div class="modal-body" style="display:flex;flex-direction:column;gap:1rem;">
+
+            <div style="display:flex;gap:.6rem;flex-wrap:wrap;">
+              <span class="badge badge-gray">⏱ {{ cfg.time }}</span>
+              <span class="badge badge-gray">❓ {{ cfg.question_count }} questions</span>
+              {% for section in cfg.sections %}
+              <span class="badge badge-primary">{{ section }}</span>
+              {% endfor %}
             </div>
-            <div class="info-box" style="margin-bottom:1rem;">
+
+            <p style="color:var(--text);">{{ cfg.description }}</p>
+
+            <div class="info-box">
               <span aria-hidden="true" style="flex-shrink:0;">📋</span>
-              <span><strong>What to expect:</strong> {{ preview }}</span>
+              <div>
+                <strong>Instructions:</strong>
+                <p style="color:var(--primary-dark);margin-top:.25rem;">{{ cfg.instructions }}</p>
+              </div>
             </div>
+
+            <div class="info-box" style="background:#f0fdf4;border-color:#10b981;">
+              <span aria-hidden="true" style="flex-shrink:0;">🔬</span>
+              <div>
+                <strong>About this tool:</strong>
+                <p style="color:#065f46;margin-top:.25rem;">{{ cfg.purpose }}</p>
+              </div>
+            </div>
+
             <div class="disclaimer-box">
               <span class="d-icon" aria-hidden="true">⚠️</span>
-              <span>This is a self-assessment tool, not a clinical evaluation.
-              Results are for personal reflection only.
-              <a href="{{ url_for('assessment.help_page') }}#limitations">See limitations.</a></span>
+              <span>
+                This is a self-report screening tool. It cannot diagnose any condition.
+                Results are for personal reflection only.
+                <a href="{{ url_for('assessment.help_page') }}#limitations">See limitations.</a>
+              </span>
             </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-modal-close>Cancel</button>
             <button type="button" class="btn btn-primary"
-                    onclick="selectAndStart('{{ val }}')">
-              Select &amp; Continue →
+                    onclick="selectAndStart('{{ key }}')">
+              Select &amp; Continue
             </button>
           </div>
         </div>
       </div>
       {% endfor %}
-    </div>
 
-    <!-- Validation message -->
+    </div><!-- /grid -->
+
+    <!-- Validation error -->
     <div id="select-error" class="alert alert-warning" style="display:none;" role="alert">
       ⚠️ Please select an assessment before continuing.
     </div>
 
     <div class="text-center">
       <button type="submit" class="btn btn-primary btn-lg"
-              onclick="return validateSelection(event);"
-              aria-describedby="select-error">
-        Continue →
+              onclick="return validateSelection(event);">
+        Continue
       </button>
     </div>
   </form>
@@ -173,18 +176,13 @@
   }
 
   function selectAndStart(val) {
-    // Select the card visually
     document.querySelectorAll(".assessment-card").forEach(c => {
       c.classList.remove("selected");
       c.setAttribute("aria-checked", "false");
     });
     const card = document.querySelector(`.assessment-card[data-value="${val}"]`);
-    if (card) {
-      card.classList.add("selected");
-      card.setAttribute("aria-checked", "true");
-    }
+    if (card) { card.classList.add("selected"); card.setAttribute("aria-checked", "true"); }
     document.getElementById("selected-assessment").value = val;
-    // Close modal then submit
     document.querySelectorAll(".modal-overlay.open").forEach(o => closeModal(o.id));
     setTimeout(() => document.getElementById("select-form").submit(), 200);
   }
