@@ -903,6 +903,311 @@ ASSESSMENT_TYPES = {
             ]
         }
     },
+
+    # ── 7. ASD Assessment-Support System ─────────────────────────────────
+    "asd": {
+        "label":       "ASD Assessment-Support",
+        "icon":        "🧩",
+        "color":       "#ecfdf5",
+        "time":        "~15 min",
+        "sections":    ["Social Communication", "Social Interaction",
+                        "Repetitive Patterns", "Focused Interests", "Sensory Experiences"],
+        "description": (
+            "A structured observation-based support screen across five core "
+            "ASD-related behavioural areas. Suitable for parents, caregivers, "
+            "teachers, or self-reporting adults."
+        ),
+        "instructions": (
+            "The following questions ask about behaviours and traits observed "
+            "over the past year. For each item, choose the option that most "
+            "accurately reflects typical behaviour — not an occasional or "
+            "unusual occurrence. Answer as honestly as possible. "
+            "This is a support screen only and cannot diagnose autism."
+        ),
+        "purpose": (
+            "Inspired by established ASD behavioural screening frameworks "
+            "(including elements of the Social Communication Questionnaire, "
+            "SRS-2 and the DSM-5 criteria). A positive screen indicates it "
+            "may be worth seeking a professional evaluation — it is not a "
+            "diagnosis and does not confirm the presence of autism."
+        ),
+        "questions": [
+
+            # ── DOMAIN 1: Social Communication (Q1–Q4) ───────────────────
+            {
+                "text": "How often does this person have difficulty starting or maintaining a two-way conversation?",
+                "type": "freq5",
+                "key":  "social_comm",
+                "options": [
+                    ("Never",       0),
+                    ("Rarely",      1),
+                    ("Sometimes",   2),
+                    ("Often",       3),
+                    ("Very often",  4),
+                ]
+            },
+            {
+                "text": "How often does this person take things said to them too literally, missing sarcasm, jokes, or implied meaning?",
+                "type": "freq5",
+                "key":  "social_comm",
+                "options": [
+                    ("Never",       0),
+                    ("Rarely",      1),
+                    ("Sometimes",   2),
+                    ("Often",       3),
+                    ("Very often",  4),
+                ]
+            },
+            {
+                "text": "How often does this person have difficulty adjusting their communication style depending on the listener (e.g. speaking to a child vs. an adult)?",
+                "type": "freq5",
+                "key":  "social_comm",
+                "options": [
+                    ("Never",       0),
+                    ("Rarely",      1),
+                    ("Sometimes",   2),
+                    ("Often",       3),
+                    ("Very often",  4),
+                ]
+            },
+            {
+                "text": "How often does this person use unusual or overly formal language that seems out of place for the social situation?",
+                "type": "freq5",
+                "key":  "social_comm",
+                "options": [
+                    ("Never",       0),
+                    ("Rarely",      1),
+                    ("Sometimes",   2),
+                    ("Often",       3),
+                    ("Very often",  4),
+                ]
+            },
+
+            # ── DOMAIN 2: Social Interaction (Q5–Q8) ─────────────────────
+            {
+                "text": "How often does this person seem unaware of, or uninterested in, what others are thinking or feeling?",
+                "type": "freq5",
+                "key":  "social_interact",
+                "options": [
+                    ("Never",       0),
+                    ("Rarely",      1),
+                    ("Sometimes",   2),
+                    ("Often",       3),
+                    ("Very often",  4),
+                ]
+            },
+            {
+                "text": "How often does this person have difficulty making or keeping friends of a similar age?",
+                "type": "freq5",
+                "key":  "social_interact",
+                "options": [
+                    ("Never",       0),
+                    ("Rarely",      1),
+                    ("Sometimes",   2),
+                    ("Often",       3),
+                    ("Very often",  4),
+                ]
+            },
+            {
+                "text": "How often does this person avoid or show discomfort with eye contact?",
+                "type": "freq5",
+                "key":  "social_interact",
+                "options": [
+                    ("Never",       0),
+                    ("Rarely",      1),
+                    ("Sometimes",   2),
+                    ("Often",       3),
+                    ("Very often",  4),
+                ]
+            },
+            {
+                "text": "How often does this person appear to prefer being alone rather than spending time with peers or family?",
+                "type": "freq5",
+                "key":  "social_interact",
+                "options": [
+                    ("Never",       0),
+                    ("Rarely",      1),
+                    ("Sometimes",   2),
+                    ("Often",       3),
+                    ("Very often",  4),
+                ]
+            },
+
+            # ── DOMAIN 3: Repetitive Patterns / Behaviours (Q9–Q12) ──────
+            {
+                "text": "How often does this person insist on following the same routine or become very upset when routines change unexpectedly?",
+                "type": "freq5",
+                "key":  "repetitive",
+                "options": [
+                    ("Never",       0),
+                    ("Rarely",      1),
+                    ("Sometimes",   2),
+                    ("Often",       3),
+                    ("Very often",  4),
+                ]
+            },
+            {
+                "text": "How often does this person repeat the same movements, words, or phrases (e.g. rocking, hand-flapping, echoing words)?",
+                "type": "freq5",
+                "key":  "repetitive",
+                "options": [
+                    ("Never",       0),
+                    ("Rarely",      1),
+                    ("Sometimes",   2),
+                    ("Often",       3),
+                    ("Very often",  4),
+                ]
+            },
+            {
+                "text": "How often does this person become highly distressed by small changes to their environment (e.g. furniture moved, different route taken)?",
+                "type": "freq5",
+                "key":  "repetitive",
+                "options": [
+                    ("Never",       0),
+                    ("Rarely",      1),
+                    ("Sometimes",   2),
+                    ("Often",       3),
+                    ("Very often",  4),
+                ]
+            },
+            {
+                "text": "How often does this person arrange objects in lines or patterns, or become upset when these are disturbed?",
+                "type": "freq5",
+                "key":  "repetitive",
+                "options": [
+                    ("Never",       0),
+                    ("Rarely",      1),
+                    ("Sometimes",   2),
+                    ("Often",       3),
+                    ("Very often",  4),
+                ]
+            },
+
+            # ── DOMAIN 4: Focused Interests (Q13–Q16) ────────────────────
+            {
+                "text": "How often does this person talk about or focus on one or two topics to the exclusion of most others?",
+                "type": "freq5",
+                "key":  "focused",
+                "options": [
+                    ("Never",       0),
+                    ("Rarely",      1),
+                    ("Sometimes",   2),
+                    ("Often",       3),
+                    ("Very often",  4),
+                ]
+            },
+            {
+                "text": "How often does this person demonstrate an unusually deep level of knowledge about a very specific topic?",
+                "type": "freq5",
+                "key":  "focused",
+                "options": [
+                    ("Never",       0),
+                    ("Rarely",      1),
+                    ("Sometimes",   2),
+                    ("Often",       3),
+                    ("Very often",  4),
+                ]
+            },
+            {
+                "text": "How often does this person have difficulty shifting attention away from a preferred activity when asked?",
+                "type": "freq5",
+                "key":  "focused",
+                "options": [
+                    ("Never",       0),
+                    ("Rarely",      1),
+                    ("Sometimes",   2),
+                    ("Often",       3),
+                    ("Very often",  4),
+                ]
+            },
+            {
+                "text": "How often does this person use objects in repetitive or unusual ways (e.g. spinning wheels, lining up toys)?",
+                "type": "freq5",
+                "key":  "focused",
+                "options": [
+                    ("Never",       0),
+                    ("Rarely",      1),
+                    ("Sometimes",   2),
+                    ("Often",       3),
+                    ("Very often",  4),
+                ]
+            },
+
+            # ── DOMAIN 5: Sensory Experiences (Q17–Q20) ──────────────────
+            {
+                "text": "How often does this person show an unusually strong reaction to sounds (e.g. covering ears, becoming very distressed by everyday noises)?",
+                "type": "freq5",
+                "key":  "sensory",
+                "options": [
+                    ("Never",       0),
+                    ("Rarely",      1),
+                    ("Sometimes",   2),
+                    ("Often",       3),
+                    ("Very often",  4),
+                ]
+            },
+            {
+                "text": "How often does this person appear unusually sensitive or insensitive to textures, tastes, smells, or physical touch?",
+                "type": "freq5",
+                "key":  "sensory",
+                "options": [
+                    ("Never",       0),
+                    ("Rarely",      1),
+                    ("Sometimes",   2),
+                    ("Often",       3),
+                    ("Very often",  4),
+                ]
+            },
+            {
+                "text": "How often does this person seem to seek out strong sensory experiences (e.g. spinning, pressing against surfaces, sniffing objects)?",
+                "type": "freq5",
+                "key":  "sensory",
+                "options": [
+                    ("Never",       0),
+                    ("Rarely",      1),
+                    ("Sometimes",   2),
+                    ("Often",       3),
+                    ("Very often",  4),
+                ]
+            },
+            {
+                "text": "How often does this person show an unusually strong reaction to visual stimuli (e.g. bright lights, certain colours, or moving objects)?",
+                "type": "freq5",
+                "key":  "sensory",
+                "options": [
+                    ("Never",       0),
+                    ("Rarely",      1),
+                    ("Sometimes",   2),
+                    ("Often",       3),
+                    ("Very often",  4),
+                ]
+            },
+        ],
+        "scoring": {
+            "method": "asd",
+            "max": 80,       # 20 questions × max 4 points each
+            "bands": [
+                # Lower Indication — few traits reported
+                (0,  26, "Lower Indication",     "asd_lower",
+                 "Responses across the five areas suggest few traits associated with autism "
+                 "at this time. This does not rule out autism — many individuals present "
+                 "differently across environments. Continue awareness and seek professional "
+                 "guidance if concerns remain."),
+                # Requires Attention — moderate pattern
+                (27, 53, "Requires Attention",   "asd_attention",
+                 "Responses suggest a moderate number of traits across one or more ASD-related "
+                 "areas. This does not confirm autism, but the overall pattern warrants "
+                 "consideration. We recommend discussing these observations with a qualified "
+                 "professional — such as a paediatrician, psychologist, or autism specialist."),
+                # Higher Indication — strong pattern across multiple domains
+                (54, 80, "Higher Indication",    "asd_higher",
+                 "Responses suggest a higher number of traits across multiple ASD-related "
+                 "areas. This is a screening tool only and cannot diagnose autism. However, "
+                 "this result indicates that a professional evaluation would be strongly "
+                 "advisable. Please seek a formal assessment from a qualified clinician."),
+            ]
+        }
+    },
 }
 
 
@@ -910,7 +1215,7 @@ def compute_score(a_type, answers):
     """
     Compute a numeric score and band from session answers.
     Returns (raw_score, pct_score, band_label, band_colour, interpretation, extra).
-    extra is used for VARK dominant style.
+    extra carries VARK tally or ASD domain breakdown.
     """
     cfg = ASSESSMENT_TYPES.get(a_type)
     if not cfg:
@@ -924,7 +1229,44 @@ def compute_score(a_type, answers):
     raw = 0
     extra = {}
 
-    if method == "vark":
+    # ── ASD: domain-by-domain tally ───────────────────────────────────────
+    if method == "asd":
+        DOMAIN_LABELS = {
+            "social_comm":    "Social Communication",
+            "social_interact":"Social Interaction",
+            "repetitive":     "Repetitive Patterns",
+            "focused":        "Focused Interests",
+            "sensory":        "Sensory Experiences",
+        }
+        domain_scores = {d: 0 for d in DOMAIN_LABELS}
+        domain_max    = {d: 0 for d in DOMAIN_LABELS}
+
+        for i, q in enumerate(questions, start=1):
+            ans   = answers.get(f"q{i}", "")
+            domain = q["key"]
+            for label, score_val in q["options"]:
+                if label == ans:
+                    domain_scores[domain] = domain_scores.get(domain, 0) + score_val
+                    break
+            # max possible per question = highest option score
+            domain_max[domain] = domain_max.get(domain, 0) + max(v for _, v in q["options"])
+
+        raw = sum(domain_scores.values())
+
+        # Domain percentages (0–100 each)
+        domain_pct = {
+            d: round((domain_scores[d] / domain_max[d]) * 100) if domain_max[d] else 0
+            for d in DOMAIN_LABELS
+        }
+        extra = {
+            "domain_scores": domain_scores,
+            "domain_max":    domain_max,
+            "domain_pct":    domain_pct,
+            "domain_labels": DOMAIN_LABELS,
+        }
+
+    # ── VARK: category tally ─────────────────────────────────────────────
+    elif method == "vark":
         tally = {"visual": 0, "auditory": 0, "read_write": 0, "kinaesthetic": 0}
         for i, q in enumerate(questions, start=1):
             ans = answers.get(f"q{i}", "")
@@ -936,7 +1278,8 @@ def compute_score(a_type, answers):
         raw = tally[dominant]
         extra = {"tally": tally, "dominant": dominant}
 
-    else:  # "sum"
+    # ── Standard sum ─────────────────────────────────────────────────────
+    else:
         for i, q in enumerate(questions, start=1):
             ans = answers.get(f"q{i}", "")
             for label, score_val in q["options"]:
@@ -947,8 +1290,8 @@ def compute_score(a_type, answers):
     pct = round((raw / max_score) * 100) if max_score else 0
     pct = max(0, min(100, pct))
 
-    band_label   = "N/A"
-    band_colour  = "primary"
+    band_label     = "N/A"
+    band_colour    = "primary"
     interpretation = ""
     for lo, hi, bl, bc, interp in scoring["bands"]:
         if lo <= raw <= hi:
@@ -1000,23 +1343,46 @@ def personal_info():
         flash("Please select an assessment first.", "warning")
         return redirect(url_for("assessment.select"))
 
+    a_type  = session.get("assessment_type", "")
+    is_asd  = (a_type == "asd")
+
     if request.method == "POST":
-        session["personal_info"] = {
+        info = {
             "first_name": request.form.get("first_name",  "").strip(),
             "last_name":  request.form.get("last_name",   "").strip(),
-            "age_group":  request.form.get("age_group",   ""),
-            "gender":     request.form.get("gender",      ""),
-            "education":  request.form.get("education",   ""),
-            "occupation": request.form.get("occupation",  "").strip(),
             "goal":       request.form.get("goal",        ""),
             "notes":      request.form.get("notes",       "").strip(),
         }
+
+        if is_asd:
+            # ASD-specific fields
+            info["responder_role"]       = request.form.get("responder_role",       "").strip()
+            info["subject_name"]         = request.form.get("subject_name",         "").strip()
+            info["subject_age_group"]    = request.form.get("subject_age_group",    "")
+            info["subject_gender"]       = request.form.get("subject_gender",       "")
+            info["previous_assessment"]  = request.form.get("previous_assessment",  "")
+            info["developmental_notes"]  = request.form.get("developmental_notes",  "").strip()
+
+            if not info["responder_role"]:
+                flash("Please select who is completing this screen.", "warning")
+                return redirect(url_for("assessment.personal_info"))
+            if not info["subject_age_group"]:
+                flash("Please select the age group of the person being assessed.", "warning")
+                return redirect(url_for("assessment.personal_info"))
+        else:
+            # Standard fields
+            info["age_group"]  = request.form.get("age_group",  "")
+            info["gender"]     = request.form.get("gender",     "")
+            info["education"]  = request.form.get("education",  "")
+            info["occupation"] = request.form.get("occupation", "").strip()
+
+        session["personal_info"] = info
         return redirect(url_for("assessment.questionnaire"))
 
-    a_type = session.get("assessment_type", "")
     return render_template("assessment/personal_info.html",
                            title="Personal Information",
-                           assessment_label=ASSESSMENT_TYPES.get(a_type, {}).get("label", "Assessment"))
+                           assessment_label=ASSESSMENT_TYPES.get(a_type, {}).get("label", "Assessment"),
+                           is_asd=is_asd)
 
 
 # ── Questionnaire ─────────────────────────────────────────────────────────
@@ -1129,6 +1495,7 @@ def result():
         assessment_info=cfg,
         answers=answers,
         extra=extra,
+        personal_info=session.get("personal_info", {}),
     )
 
 
@@ -1138,11 +1505,22 @@ def result():
 def recommendations():
     a_type  = session.get("assessment_type", "")
     a_label = session.get("assessment_label", "Assessment")
+    answers = session.get("answers", {})
+    cfg     = ASSESSMENT_TYPES.get(a_type, {})
+
+    # Re-use compute_score so the guidance page has full band context
+    raw, pct, band, band_color, interpretation, extra = compute_score(a_type, answers)
+
     return render_template(
         "assessment/recommendations.html",
         title="Guidance & Interpretation",
         assessment_type=a_type,
         assessment_label=a_label,
+        band=band,
+        band_color=band_color,
+        interpretation=interpretation,
+        extra=extra,
+        personal_info=session.get("personal_info", {}),
     )
 
 

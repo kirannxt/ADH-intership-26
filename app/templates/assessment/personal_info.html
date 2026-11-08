@@ -31,12 +31,11 @@
     <span class="p-icon" aria-hidden="true">🔒</span>
     <span>
       <strong>Why do we collect this?</strong>
-      The information below helps us contextualise your results — for example,
-      age group and education background can affect how certain scores are interpreted.
+      The information below helps us contextualise your results.
       <strong>We do not share this data with third parties</strong> and it is not used
       to identify you. Fields marked <span class="required-mark" aria-hidden="true">*</span>
       are required. All others are optional.
-      <a href="{{ url_for('assessment.help_page') }}#privacy">Privacy policy →</a>
+      <a href="{{ url_for('assessment.help_page') }}#privacy">Privacy policy</a>
     </span>
   </div>
 
@@ -52,14 +51,125 @@
     </div>
 
     <div class="card-body">
-      <!-- POST to personal_info route (fixes the routing bug) -->
       <form method="POST" action="{{ url_for('assessment.personal_info') }}"
             class="validated" novalidate>
 
+        {# ══ ASD-SPECIFIC: Responder Role Selection ══════════════════════ #}
+        {% if is_asd %}
+        <div class="asd-role-section mb-4">
+          <div class="asd-role-header">
+            <span class="asd-role-icon" aria-hidden="true">🧩</span>
+            <div>
+              <h3 style="margin-bottom:.2rem;">Who is completing this screen?</h3>
+              <p style="font-size:.88rem;color:var(--text-muted);">
+                This helps us tailor the language and context of your report.
+                Select the role that best describes you.
+              </p>
+            </div>
+          </div>
+
+          <div class="asd-role-grid" role="radiogroup" aria-label="Responder role" aria-required="true">
+            {% for role_val, role_label, role_desc, role_icon in [
+              ('parent',    'Parent',       'Completing on behalf of your child',         '👪'),
+              ('caregiver', 'Caregiver',    'Completing on behalf of someone in your care','🤲'),
+              ('teacher',   'Teacher / Professional', 'Completing based on classroom or professional observation', '🏫'),
+              ('individual','Self (Adult)', 'Completing for yourself as an adult',        '🙋'),
+            ] %}
+            <label class="asd-role-card" id="role-card-{{ role_val }}">
+              <input type="radio" name="responder_role" value="{{ role_val }}"
+                     required aria-required="true"
+                     onchange="document.querySelectorAll('.asd-role-card').forEach(c=>c.classList.remove('selected'));
+                               document.getElementById('role-card-{{ role_val }}').classList.add('selected');" />
+              <span class="asd-role-card-icon" aria-hidden="true">{{ role_icon }}</span>
+              <span class="asd-role-card-label">{{ role_label }}</span>
+              <span class="asd-role-card-desc">{{ role_desc }}</span>
+            </label>
+            {% endfor %}
+          </div>
+          <p class="form-error" aria-live="polite" id="role-error"></p>
+        </div>
+
+        <!-- ASD: Child/Subject profile section -->
+        <div class="card mb-4" style="background:var(--surface-2);border-style:dashed;" id="asd-subject-section">
+          <div class="card-body">
+            <h4 style="margin-bottom:1rem;">Profile of the person being observed</h4>
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="subject_name">
+                  First name (person being assessed) <span class="optional-tag">(optional)</span>
+                </label>
+                <input type="text" id="subject_name" name="subject_name"
+                       class="form-control" placeholder="e.g. Sam"
+                       maxlength="64" autocomplete="off" />
+                <p class="form-hint">Used only to personalise the report. Not stored for identification.</p>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="subject_age_group">
+                  Age group of the person being assessed <span class="required-mark" aria-hidden="true">*</span>
+                </label>
+                <select id="subject_age_group" name="subject_age_group"
+                        class="form-control" required aria-required="true">
+                  <option value="" disabled selected>Select age range…</option>
+                  <option value="under_3">Under 3 years</option>
+                  <option value="3_5">3–5 years</option>
+                  <option value="6_11">6–11 years</option>
+                  <option value="12_17">12–17 years</option>
+                  <option value="18_plus">18 years and over</option>
+                </select>
+                <p class="form-error" aria-live="polite"></p>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="subject_gender">
+                  Gender of person being assessed <span class="optional-tag">(optional)</span>
+                </label>
+                <select id="subject_gender" name="subject_gender" class="form-control">
+                  <option value="" selected>Prefer not to say</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="non_binary">Non-binary</option>
+                  <option value="other">Other / Self-describe</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="previous_assessment">
+                  Has this person had a previous professional ASD assessment?
+                  <span class="optional-tag">(optional)</span>
+                </label>
+                <select id="previous_assessment" name="previous_assessment" class="form-control">
+                  <option value="" selected>Not sure / Prefer not to say</option>
+                  <option value="no">No</option>
+                  <option value="yes_inconclusive">Yes — inconclusive</option>
+                  <option value="yes_asd">Yes — autism confirmed</option>
+                  <option value="yes_not_asd">Yes — autism not found</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label" for="developmental_notes">
+                Any relevant developmental history or additional context?
+                <span class="optional-tag">(optional)</span>
+              </label>
+              <textarea id="developmental_notes" name="developmental_notes"
+                        class="form-control" rows="3"
+                        placeholder="e.g. late to speak, attends specialist school, previous diagnoses, relevant medical history…"
+                        maxlength="600"></textarea>
+              <p class="form-hint">Do not include sensitive medical or identifying information. Max 600 characters.</p>
+            </div>
+          </div>
+        </div>
+        {% endif %}
+        {# ══ END ASD-SPECIFIC ════════════════════════════════════════════ #}
+
+        {# ══ STANDARD fields (shown for all assessments including ASD) ══ #}
         <div class="form-row">
           <div class="form-group">
             <label class="form-label" for="first_name">
-              First Name <span class="required-mark" aria-hidden="true">*</span>
+              {% if is_asd %}Your first name (respondent){% else %}First Name{% endif %}
+              <span class="required-mark" aria-hidden="true">*</span>
             </label>
             <input type="text" id="first_name" name="first_name"
                    class="form-control"
@@ -70,7 +180,8 @@
           </div>
           <div class="form-group">
             <label class="form-label" for="last_name">
-              Last Name <span class="required-mark" aria-hidden="true">*</span>
+              {% if is_asd %}Your last name (respondent){% else %}Last Name{% endif %}
+              <span class="required-mark" aria-hidden="true">*</span>
             </label>
             <input type="text" id="last_name" name="last_name"
                    class="form-control" placeholder="e.g. Smith"
@@ -80,6 +191,7 @@
           </div>
         </div>
 
+        {% if not is_asd %}
         <div class="form-row">
           <div class="form-group">
             <label class="form-label" for="age_group">
@@ -140,20 +252,31 @@
                    autocomplete="organization-title" maxlength="100" />
           </div>
         </div>
+        {% endif %}
 
         <div class="form-group">
           <label class="form-label" for="goal">
-            What is your main goal for this assessment? <span class="required-mark" aria-hidden="true">*</span>
+            What is your main goal for this assessment?
+            <span class="required-mark" aria-hidden="true">*</span>
           </label>
           <select id="goal" name="goal" class="form-control"
                   required aria-required="true">
             <option value="" disabled selected>Select a goal…</option>
+            {% if is_asd %}
+            <option value="seek_evaluation">Deciding whether to seek a professional evaluation</option>
+            <option value="support_planning">Planning support strategies</option>
+            <option value="understand_behaviour">Understanding observed behaviours better</option>
+            <option value="school_support">Supporting a child at school</option>
+            <option value="self_understanding">Personal self-understanding (adult)</option>
+            <option value="other">Other</option>
+            {% else %}
             <option value="self_improvement">Personal self-improvement</option>
             <option value="career_guidance">Career or study guidance</option>
             <option value="academic">Academic / educational purpose</option>
             <option value="curiosity">Curiosity or personal insight</option>
             <option value="wellbeing">Mental health awareness</option>
             <option value="other">Other</option>
+            {% endif %}
           </select>
           <p class="form-error" aria-live="polite"></p>
         </div>
@@ -171,8 +294,14 @@
         <div class="disclaimer-box" style="margin-bottom:1.5rem;" role="note">
           <span class="d-icon" aria-hidden="true">⚠️</span>
           <span>
+            {% if is_asd %}
+            The information you provide is used only to generate this support report.
+            This is a <strong>screening tool only</strong> — it cannot diagnose autism or any other condition.
+            Results should not be shared with others without consent.
+            {% else %}
             The information you provide is used only to personalise your assessment report.
             This is a self-assessment tool — not a clinical evaluation.
+            {% endif %}
             Do not include confidential medical or identifying information.
           </span>
         </div>

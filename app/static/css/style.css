@@ -1006,3 +1006,271 @@ tbody tr:hover td { background: var(--surface-2); }
   .rating-group { gap: .3rem; }
   .rating-btn { width: 40px; height: 40px; font-size: .9rem; }
 }
+
+/* ══════════════════════════════════════════
+   ASD ASSESSMENT-SUPPORT SYSTEM STYLES
+   ══════════════════════════════════════════ */
+
+/* ── ASD colour tokens ── */
+:root {
+  --asd-lower-bg:       #d1fae5;
+  --asd-lower-border:   #059669;
+  --asd-lower-text:     #065f46;
+  --asd-lower-dot:      #059669;
+
+  --asd-attention-bg:   #fef3c7;
+  --asd-attention-border:#d97706;
+  --asd-attention-text: #92400e;
+  --asd-attention-dot:  #d97706;
+
+  --asd-higher-bg:      #fee2e2;
+  --asd-higher-border:  #dc2626;
+  --asd-higher-text:    #991b1b;
+  --asd-higher-dot:     #dc2626;
+
+  --asd-purple:         #7c3aed;
+  --asd-purple-light:   #f5f3ff;
+  --asd-purple-dark:    #5b21b6;
+}
+
+/* ── ASD Result header banner ── */
+.asd-result-header {
+  background: linear-gradient(135deg, #7c3aed 0%, #4f46e5 100%);
+  border-radius: var(--radius-xl);
+  padding: 2rem 2.5rem;
+  margin-bottom: 1.5rem;
+  color: #fff;
+}
+
+/* ── ASD Critical disclaimer (stronger than standard) ── */
+.asd-disclaimer {
+  background: #fffbeb;
+  border: 2px solid var(--asd-attention-border);
+  border-left: 6px solid var(--asd-attention-border);
+  border-radius: var(--radius);
+  padding: 1.1rem 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+/* ── ASD Outcome section ── */
+.asd-outcome-section h2 {
+  color: var(--text);
+}
+
+.asd-outcome-card {
+  border-radius: var(--radius-lg);
+  padding: 1.5rem 1.75rem;
+  border: 2px solid transparent;
+  margin-bottom: .5rem;
+}
+
+/* Outcome band colour variants */
+.asd-outcome-asd_lower {
+  background: var(--asd-lower-bg);
+  border-color: var(--asd-lower-border);
+}
+.asd-outcome-asd_attention {
+  background: var(--asd-attention-bg);
+  border-color: var(--asd-attention-border);
+}
+.asd-outcome-asd_higher {
+  background: var(--asd-higher-bg);
+  border-color: var(--asd-higher-border);
+}
+
+.asd-outcome-indicator {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  margin-bottom: .65rem;
+}
+
+.asd-outcome-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  margin: 0;
+}
+.asd-outcome-asd_lower    .asd-outcome-title { color: var(--asd-lower-text); }
+.asd-outcome-asd_attention .asd-outcome-title { color: var(--asd-attention-text); }
+.asd-outcome-asd_higher   .asd-outcome-title { color: var(--asd-higher-text); }
+
+.asd-outcome-text {
+  font-size: .92rem;
+  line-height: 1.7;
+  margin: 0;
+}
+.asd-outcome-asd_lower    .asd-outcome-text { color: var(--asd-lower-text); }
+.asd-outcome-asd_attention .asd-outcome-text { color: var(--asd-attention-text); }
+.asd-outcome-asd_higher   .asd-outcome-text { color: var(--asd-higher-text); }
+
+/* ── Outcome indicator dot ── */
+.asd-outcome-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: inline-block;
+}
+.asd-dot-lower     { background: var(--asd-lower-dot); }
+.asd-dot-attention { background: var(--asd-attention-dot); }
+.asd-dot-higher    { background: var(--asd-higher-dot); }
+
+/* ── ASD Band scale (visual spectrum bar) ── */
+.asd-band-scale {
+  position: relative;
+  margin-top: 1.25rem;
+}
+.asd-band-scale-bar {
+  display: flex;
+  height: 28px;
+  border-radius: 99px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.asd-band-zone {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .03em;
+}
+.asd-zone-lower     { background: var(--asd-lower-bg);     color: var(--asd-lower-text); }
+.asd-zone-attention { background: var(--asd-attention-bg); color: var(--asd-attention-text); }
+.asd-zone-higher    { background: var(--asd-higher-bg);    color: var(--asd-higher-text); }
+
+.asd-band-marker {
+  position: absolute;
+  top: -6px;
+  transform: translateX(-50%);
+  font-size: .85rem;
+  color: var(--text);
+  font-weight: 900;
+  pointer-events: none;
+  transition: left .6s ease;
+}
+
+/* ── ASD Domain breakdown grid ── */
+.asd-domain-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1rem;
+}
+.asd-domain-card {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem .85rem;
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+}
+.asd-domain-name {
+  font-size: .8rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+  min-height: 2rem;
+}
+.asd-domain-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+.asd-domain-bar-bg {
+  flex: 1;
+  height: 10px;
+  background: var(--border);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.asd-domain-pct {
+  font-size: .78rem;
+  font-weight: 700;
+  color: var(--text);
+  width: 32px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* ── ASD Role selector (personal_info) ── */
+.asd-role-section {
+  border: 2px dashed #7c3aed;
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  background: var(--asd-purple-light);
+}
+.asd-role-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+.asd-role-icon {
+  font-size: 1.75rem;
+  flex-shrink: 0;
+  margin-top: .1rem;
+}
+.asd-role-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: .75rem;
+}
+.asd-role-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .5rem;
+  padding: 1.1rem .75rem;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  background: var(--surface);
+  transition: all var(--transition);
+  text-align: center;
+  position: relative;
+}
+.asd-role-card:hover {
+  border-color: var(--asd-purple);
+  background: var(--asd-purple-light);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow);
+}
+.asd-role-card.selected,
+.asd-role-card:has(input:checked) {
+  border-color: var(--asd-purple);
+  background: var(--asd-purple-light);
+  box-shadow: 0 0 0 3px rgba(124,58,237,.15);
+}
+.asd-role-card input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.asd-role-card-icon {
+  font-size: 1.75rem;
+  line-height: 1;
+}
+.asd-role-card-label {
+  font-size: .9rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.asd-role-card-desc {
+  font-size: .75rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* ── Responsive: ASD domain grid ── */
+@media (max-width: 900px) {
+  .asd-domain-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 600px) {
+  .asd-domain-grid { grid-template-columns: repeat(2, 1fr); }
+  .asd-role-grid   { grid-template-columns: repeat(2, 1fr); }
+  .asd-band-zone   { font-size: .6rem; }
+  .asd-result-header { padding: 1.25rem 1.25rem; }
+}

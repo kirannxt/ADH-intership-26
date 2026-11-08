@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Guidance & Interpretation — AssessMe{% endblock %}
+{% block title %}Guidance &amp; Interpretation — AssessMe{% endblock %}
 
 {% block breadcrumb %}
 <div class="container">
@@ -17,120 +17,394 @@
 <div class="container section">
 
   <div class="page-header">
-    <h1 class="page-title">💡 Guidance &amp; Interpretation</h1>
-    <p class="page-sub">{{ assessment_label }} — personalised reflection notes based on your responses.</p>
+    <h1 class="page-title">Guidance &amp; Interpretation</h1>
+    <p class="page-sub">{{ assessment_label }} — support notes based on your responses.</p>
   </div>
 
-  <!-- Screening vs diagnosis — top-priority responsible communication -->
-  <div class="disclaimer-box mb-4" role="note" aria-label="Important notice about assessment results">
-    <span class="d-icon" aria-hidden="true">⚠️</span>
-    <div>
-      <strong>Screening tool, not a diagnosis.</strong>
-      This guidance is based on a brief self-report assessment and reflects patterns in your
-      responses at a single point in time. It is <em>not</em> a clinical evaluation, a
-      psychological diagnosis, or a professional opinion. Language used here is intentionally
-      neutral and descriptive — not prescriptive. If anything raises a concern for you,
-      please speak with a qualified health or wellbeing professional.
-      <a href="{{ url_for('assessment.help_page') }}#limitations">Read more about limitations →</a>
+  {# ═══════════════════════════════════════════════════════════════════════
+     ASD GUIDANCE PATH
+  ═══════════════════════════════════════════════════════════════════════ #}
+  {% if assessment_type == 'asd' %}
+
+    {% set pinfo      = personal_info %}
+    {% set role       = pinfo.get('responder_role', 'individual') %}
+    {% set subject    = pinfo.get('subject_name', '') %}
+    {% set role_label = {
+        'parent':    'Parent',
+        'caregiver': 'Caregiver',
+        'teacher':   'Teacher / Professional',
+        'individual':'Individual (Self)'
+    }.get(role, 'Respondent') %}
+
+    <!-- Critical ASD disclaimer -->
+    <div class="asd-disclaimer mb-4" role="alert">
+      <div style="display:flex;gap:.75rem;align-items:flex-start;">
+        <span style="font-size:1.4rem;flex-shrink:0;" aria-hidden="true">⚠️</span>
+        <div>
+          <strong style="font-size:1rem;">Screening tool — not a diagnosis.</strong>
+          <p style="margin-top:.3rem;margin-bottom:0;font-size:.88rem;color:#92400e;">
+            This guidance reflects observed patterns at a single point in time.
+            It cannot confirm or rule out autism spectrum disorder (ASD).
+            Only a qualified clinician conducting a full multidisciplinary assessment can diagnose autism.
+            Use this guidance as a starting point for conversation — not as a conclusion.
+          </p>
+        </div>
+      </div>
     </div>
-  </div>
 
-  <!-- Filter tabs — functional via JS .rec-filter-btn -->
-  <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.75rem;"
-       role="group" aria-label="Filter guidance by category">
-    {% for tag in ['All','Reflect','Learn','Act','Support'] %}
-    <button class="btn rec-filter-btn {% if loop.first %}btn-primary{% else %}btn-secondary{% endif %} btn-sm"
-            data-filter="{{ tag }}"
-            aria-pressed="{{ 'true' if loop.first else 'false' }}">{{ tag }}</button>
-    {% endfor %}
-  </div>
+    <!-- Outcome-specific summary banner -->
+    <div class="asd-outcome-card asd-outcome-{{ band_color }} mb-4"
+         role="status" aria-label="Outcome: {{ band }}">
+      <div class="asd-outcome-indicator">
+        <span class="asd-outcome-dot asd-dot-{{ band_color.replace('asd_','') }}"
+              aria-hidden="true"></span>
+        <h3 class="asd-outcome-title">{{ band }}</h3>
+      </div>
+      <p class="asd-outcome-text">{{ interpretation }}</p>
+    </div>
 
-  <!-- Guidance cards -->
-  <div style="display:flex;flex-direction:column;gap:1rem;margin-bottom:2rem;">
+    <!-- Outcome-specific guidance cards -->
+    <h2 style="font-size:1.15rem;margin-bottom:1rem;">
+      Guidance for: <em>{{ role_label }}</em>{% if subject %} — {{ subject }}{% endif %}
+    </h2>
 
-    {% set guidance = [
-      ('Reflect','🪞','#ede9fe','#4f46e5',
-       'Take time to reflect on your responses',
-       'Look back at any questions you found difficult or surprising. Noticing a pattern — even without a score — can be a useful starting point for self-understanding.',
-       '5–10 min', 'Low effort'),
-      ('Learn','📚','#dbeafe','#1e40af',
-       'Read about the area being assessed',
-       'Understanding what the assessed area involves — such as cognitive flexibility, emotional regulation, or stress responses — can help you interpret your results more accurately.',
-       '30 min', 'Moderate effort'),
-      ('Reflect','📓','#d1fae5','#065f46',
-       'Keep a short reflection journal',
-       'Writing a few sentences each day about your thoughts, decisions, or feelings can build self-awareness over time. No special format is needed.',
-       '5 min/day', 'Low effort'),
-      ('Act','🚶','#fef3c7','#92400e',
-       'Take one small, concrete step',
-       'Rather than trying to change everything at once, identify one area from your results and choose one small action this week. Consistency matters more than scale.',
-       'Ongoing', 'Low effort'),
-      ('Support','🩺','#fee2e2','#991b1b',
-       'Consider speaking with a professional',
-       'If your results or the process of reflection has raised any concerns about your wellbeing, mental health, or personal development, a qualified counsellor or psychologist can offer personalised support.',
-       'As needed', 'Important'),
-      ('Learn','🎓','#f3e8ff','#6d28d9',
-       'Explore a structured learning resource',
-       'Many free and accessible resources exist on topics such as mindfulness, communication, goal-setting, and emotional regulation. Libraries, community centres, and online platforms are good starting points.',
-       'Flexible', 'Optional'),
-    ] %}
+    <!-- Filter tabs -->
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.5rem;"
+         role="group" aria-label="Filter guidance">
+      {% for tag in ['All','Understand','Observe','Act','Support','Resources'] %}
+      <button class="btn rec-filter-btn {% if loop.first %}btn-primary{% else %}btn-secondary{% endif %} btn-sm"
+              data-filter="{{ tag }}"
+              aria-pressed="{{ 'true' if loop.first else 'false' }}">{{ tag }}</button>
+      {% endfor %}
+    </div>
 
-    {% for filter, icon, bg, color, title, desc, effort, priority in guidance %}
-    <div class="rec-card" data-filter="{{ filter }}"
-         role="article" aria-label="{{ title }}">
-      <div class="rec-icon" style="background:{{ bg }};color:{{ color }};"
-           aria-hidden="true">{{ icon }}</div>
-      <div class="rec-body" style="flex:1;">
-        <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem;flex-wrap:wrap;">
-          <h4>{{ title }}</h4>
-          <span class="badge badge-gray">{{ filter }}</span>
-          <span class="badge badge-{% if priority == 'Important' %}danger{% elif priority == 'Low effort' %}success{% else %}primary{% endif %}">
-            {{ priority }}
+    <div style="display:flex;flex-direction:column;gap:1rem;margin-bottom:2rem;">
+
+      {# ── LOWER INDICATION guidance ── #}
+      {% if band_color == 'asd_lower' %}
+
+      {% set asd_guidance = [
+        ('Understand','#d1fae5','#065f46',
+         'What a Lower Indication means',
+         'A lower number of traits were reported across the five areas. This does not rule out autism — some individuals present differently across environments or may mask traits. Continue to observe and seek professional input if concerns remain.',
+         'Important to know', 'Read'),
+        ('Observe','#ede9fe','#4f46e5',
+         'Keep observing over time',
+         'Behaviours and traits can vary with age, environment, and circumstance. Keep a brief diary of any recurring behaviours over the next 4–8 weeks, noting frequency, context, and any distress caused.',
+         '10 min/week', 'Low effort'),
+        ('Understand','#dbeafe','#1e40af',
+         'Learn about neurodevelopmental differences',
+         'Understanding the broad range of neurodevelopmental profiles — including autism, ADHD, dyslexia, and sensory processing differences — can help contextualise behaviours you observe.',
+         '1–2 hrs', 'Moderate'),
+        ('Act','#fef3c7','#92400e',
+         'Discuss with your GP if concerns remain',
+         'If you still have concerns after re-observing, raise them with your GP or health visitor. You can share this report as a starting point for that conversation.',
+         'As needed', 'Recommended'),
+        ('Support','#fee2e2','#991b1b',
+         'Support strategies do not require a diagnosis',
+         'Many strategies that help autistic individuals — such as clear routines, sensory-friendly environments, and explicit social coaching — also benefit neurotypical individuals. You do not need a diagnosis to begin exploring supportive approaches.',
+         'Ongoing', 'Optional'),
+      ] %}
+
+      {# ── REQUIRES ATTENTION guidance ── #}
+      {% elif band_color == 'asd_attention' %}
+
+      {% set asd_guidance = [
+        ('Act','#fff3cd','#92400e',
+         'Speak with your GP about next steps',
+         'A pattern across multiple ASD-related areas has been observed. The next recommended step is to discuss your observations with a GP, paediatrician, or relevant health professional. Bring this report to support your conversation.',
+         'As soon as possible', 'High priority'),
+        ('Act','#ede9fe','#4f46e5',
+         'Request a referral to an autism assessment team',
+         'If your GP agrees it is appropriate, ask for a referral to a specialist autism assessment team. Assessment pathways vary by region — your GP can advise on local options.',
+         'As needed', 'Recommended'),
+        ('Observe','#d1fae5','#065f46',
+         'Keep a structured behavioural diary',
+         'Document specific behaviours across settings (home, school, social situations). Note the frequency, duration, and level of distress or impairment caused. This information will be valuable during any professional assessment.',
+         '10–15 min/day', 'Moderate effort'),
+        ('Support','#dbeafe','#1e40af',
+         'Contact the school SENCO (if applicable)',
+         'If this relates to a school-age child, speak with the school\'s Special Educational Needs Co-ordinator (SENCO). They can arrange in-school observations and support, and help initiate a formal needs assessment if appropriate.',
+         'As needed', 'Recommended'),
+        ('Understand','#fef3c7','#92400e',
+         'Understand the formal autism assessment process',
+         'A formal autism assessment typically involves a multidisciplinary team including a psychologist, speech and language therapist, and paediatrician or psychiatrist. The process includes structured observation, interview, and developmental history.',
+         '30 min', 'Informational'),
+        ('Resources','#fee2e2','#991b1b',
+         'Connect with autism support organisations',
+         'Organisations such as the National Autistic Society (UK), Autism Speaks (US), and Autism Society of America offer guidance, helplines, and resources for individuals and families at every stage of the assessment journey.',
+         'Flexible', 'Support'),
+      ] %}
+
+      {# ── HIGHER INDICATION guidance ── #}
+      {% else %}
+
+      {% set asd_guidance = [
+        ('Act','#fee2e2','#991b1b',
+         'Seek a formal evaluation — this is the most important next step',
+         'A high number of traits have been reported across multiple areas. We strongly recommend seeking a formal autism assessment from a qualified multidisciplinary clinical team. Share this report with your GP to support the referral process.',
+         'Urgent — as soon as possible', 'High priority'),
+        ('Act','#fff3cd','#92400e',
+         'Speak with your GP immediately',
+         'Book an appointment with your GP and describe your observations. Ask specifically about referral to an autism assessment team. You are entitled to request this referral — if initially declined, ask for the reasons in writing and consider a second opinion.',
+         'This week', 'Essential'),
+        ('Support','#ede9fe','#4f46e5',
+         'Access interim support while awaiting assessment',
+         'Waiting lists for formal assessment can be long. In the meantime, contact autism charities and local support groups for interim guidance. Many strategies (routines, sensory adjustments, visual supports) can be implemented before a formal diagnosis.',
+         'Ongoing', 'Recommended'),
+        ('Act','#dbeafe','#1e40af',
+         'Request an Education, Health and Care (EHC) assessment if applicable',
+         'If this relates to a school-age child in England, you or the school can request an EHC needs assessment from your local authority, even before a formal autism diagnosis. This can help access appropriate educational support.',
+         'As needed', 'For school-age children'),
+        ('Observe','#d1fae5','#065f46',
+         'Document everything before the assessment',
+         'Compile a detailed developmental history: when milestones were reached, past medical history, school reports, behavioural observations across settings. This documentation will significantly support the clinical assessment process.',
+         '1–2 hrs to compile', 'Valuable'),
+        ('Resources','#fef3c7','#92400e',
+         'Reach out to autism support organisations now',
+         'Contact the National Autistic Society (UK: 0808 800 4104), Autism Society of America, or your local autism charity. They offer advice, helplines, and can signpost you to local assessment services and support groups.',
+         'Now', 'High priority'),
+      ] %}
+
+      {% endif %}
+
+      {% for filter, bg, color, title, desc, effort, priority in asd_guidance %}
+      <div class="rec-card" data-filter="{{ filter }}" role="article" aria-label="{{ title }}">
+        <div class="rec-icon" style="background:{{ bg }};color:{{ color }};" aria-hidden="true">
+          {% if filter == 'Act' %}📋
+          {% elif filter == 'Observe' %}👁
+          {% elif filter == 'Understand' %}📖
+          {% elif filter == 'Support' %}🤲
+          {% elif filter == 'Resources' %}🔗
+          {% else %}💡{% endif %}
+        </div>
+        <div class="rec-body" style="flex:1;">
+          <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem;flex-wrap:wrap;">
+            <h4>{{ title }}</h4>
+            <span class="badge badge-gray">{{ filter }}</span>
+            <span class="badge badge-{% if 'priority' in priority.lower() or 'urgent' in priority.lower() or 'essential' in priority.lower() %}danger{% elif 'recommended' in priority.lower() %}primary{% elif 'optional' in priority.lower() %}gray{% else %}warning{% endif %}">
+              {{ priority }}
+            </span>
+          </div>
+          <p style="font-size:.88rem;">{{ desc }}</p>
+          <div style="margin-top:.5rem;font-size:.8rem;color:var(--text-muted);">
+            ⏱ {{ effort }}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+
+    </div>
+
+    <!-- Domain-specific guidance -->
+    {% if extra and extra.domain_pct %}
+    <div class="card mb-4" role="region" aria-label="Domain-specific guidance">
+      <div class="card-header">
+        <span class="card-title">Domain-Specific Guidance</span>
+        <p class="card-text" style="margin-top:.2rem;">
+          Areas where higher traits were reported may benefit from targeted attention.
+        </p>
+      </div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:1.25rem;">
+        {% set domain_guidance = {
+          'social_comm': {
+            'label': 'Social Communication',
+            'tip': 'Consider speech and language therapy input. Visual supports (visual schedules, communication boards) can help. Use clear, literal language and avoid idioms or implied meaning where possible.',
+          },
+          'social_interact': {
+            'label': 'Social Interaction',
+            'tip': 'Social skills groups run by trained professionals can be beneficial. Structured social activities with clear rules and predictable outcomes are often more accessible than open-ended social situations.',
+          },
+          'repetitive': {
+            'label': 'Repetitive Patterns',
+            'tip': 'Predictable routines provide comfort and security. When changes are necessary, prepare in advance with clear explanations, visual cues, or social stories. Avoid sudden or unexplained changes.',
+          },
+          'focused': {
+            'label': 'Focused Interests',
+            'tip': 'Intense interests are often a strength. Where possible, channel them into learning and motivation. They can also be used as entry points for social connection with like-minded peers.',
+          },
+          'sensory': {
+            'label': 'Sensory Experiences',
+            'tip': 'An Occupational Therapist (OT) with sensory processing experience can conduct a sensory profile assessment. Adjustments to lighting, noise levels, clothing textures, and food variety can significantly reduce distress.',
+          },
+        } %}
+        {% for domain_key, domain_data in domain_guidance.items() %}
+        {% set dpct = extra.domain_pct.get(domain_key, 0) %}
+        {% if dpct >= 38 %}
+        <div style="border-left:4px solid
+                    {% if dpct >= 63 %}var(--danger){% else %}var(--warning){% endif %};
+                    padding-left:1rem;">
+          <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.3rem;">
+            <strong style="font-size:.92rem;">{{ domain_data.label }}</strong>
+            <span class="badge badge-{% if dpct >= 63 %}danger{% else %}warning{% endif %}">
+              {{ dpct }}%
+            </span>
+          </div>
+          <p style="font-size:.87rem;margin:0;">{{ domain_data.tip }}</p>
+        </div>
+        {% endif %}
+        {% endfor %}
+        {% set any_high = namespace(found=false) %}
+        {% for domain_key in ['social_comm','social_interact','repetitive','focused','sensory'] %}
+          {% if extra.domain_pct.get(domain_key, 0) >= 38 %}
+            {% set any_high.found = true %}
+          {% endif %}
+        {% endfor %}
+        {% if not any_high.found %}
+        <p style="color:var(--text-muted);font-size:.9rem;">
+          No individual domain scored above 38%. Domain-specific guidance will appear here
+          if any area shows a higher pattern in future assessments.
+        </p>
+        {% endif %}
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- ASD professional referral section -->
+    <div class="card mb-4" style="border-color:#7c3aed;" role="region">
+      <div class="card-header" style="background:#f5f3ff;border-color:#7c3aed;">
+        <span class="card-title" style="color:#5b21b6;">Where to Seek a Formal Assessment</span>
+      </div>
+      <div class="card-body" style="display:flex;flex-direction:column;gap:1rem;">
+        <div class="grid-2">
+          {% for org_name, org_desc, org_contact in [
+            ('Your GP / Family Doctor',
+             'First point of contact. Can refer to specialist assessment teams.',
+             'Book via your usual surgery'),
+            ('Paediatrician (for children)',
+             'Conducts or coordinates multidisciplinary autism assessments for children.',
+             'Referral via GP'),
+            ('National Autistic Society (UK)',
+             'Information, advice, and signposting to local services.',
+             '0808 800 4104 (helpline)'),
+            ('Autism Society of America',
+             'Resources, support groups, and local chapter directory.',
+             'autism-society.org'),
+            ('CAMHS (UK – children & adolescents)',
+             'Child and Adolescent Mental Health Services — assess and support complex needs.',
+             'Referral via GP or school'),
+            ('Local autism assessment teams',
+             'NHS or private multidisciplinary teams. Waiting times vary by region.',
+             'Ask your GP for local providers'),
+          ] %}
+          <div style="padding:.85rem;border:1px solid var(--border);border-radius:var(--radius);
+                      background:var(--surface-2);">
+            <div style="font-weight:700;font-size:.9rem;margin-bottom:.25rem;">{{ org_name }}</div>
+            <p style="font-size:.82rem;margin-bottom:.3rem;">{{ org_desc }}</p>
+            <span style="font-size:.78rem;color:var(--primary);font-weight:600;">{{ org_contact }}</span>
+          </div>
+          {% endfor %}
+        </div>
+        <div class="info-box mt-2" role="note">
+          <span aria-hidden="true" style="flex-shrink:0;">ℹ️</span>
+          <span style="font-size:.85rem;">
+            Assessment waiting times can be lengthy. Starting the referral process early is
+            recommended. Private assessment is also available if NHS waiting times are a concern.
           </span>
         </div>
-        <p style="font-size:.88rem;">{{ desc }}</p>
-        <div style="margin-top:.5rem;font-size:.8rem;color:var(--text-muted);">
-          ⏱ {{ effort }}
+      </div>
+    </div>
+
+  {# ═══════════════════════════════════════════════════════════════════════
+     STANDARD GUIDANCE PATH (all other assessments)
+  ═══════════════════════════════════════════════════════════════════════ #}
+  {% else %}
+
+    <!-- Standard disclaimer -->
+    <div class="disclaimer-box mb-4" role="note">
+      <span class="d-icon" aria-hidden="true">⚠️</span>
+      <div>
+        <strong>Screening tool, not a diagnosis.</strong>
+        This guidance reflects patterns in your responses at a single point in time.
+        It is not a clinical evaluation, psychological diagnosis, or professional opinion.
+        Language used here is intentionally neutral and descriptive.
+        <a href="{{ url_for('assessment.help_page') }}#limitations">Read more about limitations</a>
+      </div>
+    </div>
+
+    <!-- Filter tabs -->
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.75rem;"
+         role="group" aria-label="Filter guidance by category">
+      {% for tag in ['All','Reflect','Learn','Act','Support'] %}
+      <button class="btn rec-filter-btn {% if loop.first %}btn-primary{% else %}btn-secondary{% endif %} btn-sm"
+              data-filter="{{ tag }}"
+              aria-pressed="{{ 'true' if loop.first else 'false' }}">{{ tag }}</button>
+      {% endfor %}
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:1rem;margin-bottom:2rem;">
+      {% set guidance = [
+        ('Reflect','#ede9fe','#4f46e5',
+         'Take time to reflect on your responses',
+         'Look back at any questions you found difficult or surprising. Noticing a pattern — even without a score — can be a useful starting point for self-understanding.',
+         '5–10 min', 'Low effort'),
+        ('Learn','#dbeafe','#1e40af',
+         'Read about the area being assessed',
+         'Understanding what the assessed area involves can help you interpret your results more accurately and decide on meaningful next steps.',
+         '30 min', 'Moderate effort'),
+        ('Reflect','#d1fae5','#065f46',
+         'Keep a short reflection journal',
+         'Writing a few sentences each day about your thoughts, decisions, or feelings can build self-awareness over time. No special format is needed.',
+         '5 min/day', 'Low effort'),
+        ('Act','#fef3c7','#92400e',
+         'Take one small, concrete step',
+         'Rather than trying to change everything at once, identify one area from your results and choose one small action this week. Consistency matters more than scale.',
+         'Ongoing', 'Low effort'),
+        ('Support','#fee2e2','#991b1b',
+         'Consider speaking with a professional',
+         'If your results have raised concerns about your wellbeing, mental health, or personal development, a qualified counsellor or psychologist can offer personalised support.',
+         'As needed', 'Important'),
+        ('Learn','#f3e8ff','#6d28d9',
+         'Explore a structured learning resource',
+         'Many free and accessible resources exist on mindfulness, communication, goal-setting, and emotional regulation. Libraries, community centres, and online platforms are good starting points.',
+         'Flexible', 'Optional'),
+      ] %}
+      {% for filter, bg, color, title, desc, effort, priority in guidance %}
+      <div class="rec-card" data-filter="{{ filter }}" role="article" aria-label="{{ title }}">
+        <div class="rec-icon" style="background:{{ bg }};color:{{ color }};" aria-hidden="true">
+          {% if filter == 'Reflect' %}🪞{% elif filter == 'Learn' %}📚{% elif filter == 'Act' %}🚶{% else %}🩺{% endif %}
+        </div>
+        <div class="rec-body" style="flex:1;">
+          <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem;flex-wrap:wrap;">
+            <h4>{{ title }}</h4>
+            <span class="badge badge-gray">{{ filter }}</span>
+            <span class="badge badge-{% if priority == 'Important' %}danger{% elif priority == 'Low effort' %}success{% else %}primary{% endif %}">
+              {{ priority }}
+            </span>
+          </div>
+          <p style="font-size:.88rem;">{{ desc }}</p>
+          <div style="margin-top:.5rem;font-size:.8rem;color:var(--text-muted);">⏱ {{ effort }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Standard professional referral -->
+    <div class="card mb-4" style="border-color:var(--info);" role="region">
+      <div class="card-header" style="background:#dbeafe;border-color:var(--info);">
+        <span class="card-title" style="color:#1e40af;">When to Seek Professional Support</span>
+      </div>
+      <div class="card-body">
+        <p style="margin-bottom:1rem;">Consider speaking with a qualified professional if:</p>
+        <ul style="padding-left:1.25rem;color:var(--text-muted);font-size:.9rem;line-height:2;">
+          <li>You are experiencing persistent low mood, anxiety, or difficulty coping.</li>
+          <li>Your results surprised you or raised concerns you did not expect.</li>
+          <li>You want to understand your results in a personal context.</li>
+          <li>You are making an important life or career decision and want professional input.</li>
+          <li>You are supporting someone else who may need help.</li>
+        </ul>
+        <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1.25rem;">
+          <a href="{{ url_for('assessment.help_page') }}#support" class="btn btn-outline btn-sm">Find support resources</a>
+          <a href="{{ url_for('assessment.help_page') }}" class="btn btn-ghost btn-sm">About assessments</a>
         </div>
       </div>
     </div>
-    {% endfor %}
 
-  </div>
+  {% endif %}{# end non-ASD #}
 
-  <!-- Professional referral section -->
-  <div class="card mb-4" style="border-color:var(--info);" role="region"
-       aria-label="Professional support information">
-    <div class="card-header" style="background:#dbeafe;border-color:var(--info);">
-      <span class="card-title" style="color:#1e40af;">🩺 When to Seek Professional Support</span>
-    </div>
-    <div class="card-body">
-      <p style="margin-bottom:1rem;">
-        Automated assessments have significant limitations. Consider speaking with a qualified
-        professional if any of the following apply:
-      </p>
-      <ul style="padding-left:1.25rem;color:var(--text-muted);font-size:.9rem;line-height:2;">
-        <li>You are experiencing persistent low mood, anxiety, or difficulty coping.</li>
-        <li>Your results surprised you or raised concerns you did not expect.</li>
-        <li>You want to understand your results in a personal context.</li>
-        <li>You are making an important life or career decision and want professional input.</li>
-        <li>You are supporting someone else who may need help.</li>
-      </ul>
-      <div style="display:flex;gap:.75rem;flex-wrap:wrap;margin-top:1.25rem;">
-        <a href="{{ url_for('assessment.help_page') }}#support" class="btn btn-outline btn-sm">
-          Find support resources
-        </a>
-        <a href="{{ url_for('assessment.help_page') }}" class="btn btn-ghost btn-sm">
-          About assessments
-        </a>
-      </div>
-    </div>
-  </div>
-
-  <!-- Navigation -->
-  <div style="display:flex;justify-content:center;gap:1rem;flex-wrap:wrap;">
+  <!-- Navigation (all assessments) -->
+  <div style="display:flex;justify-content:center;gap:1rem;flex-wrap:wrap;margin-top:1rem;">
     <a href="{{ url_for('assessment.result') }}"  class="btn btn-secondary btn-lg">Back to Results</a>
-    <a href="{{ url_for('assessment.history') }}" class="btn btn-primary btn-lg">View History</a>
     <a href="{{ url_for('assessment.select') }}"  class="btn btn-outline btn-lg">New Assessment</a>
   </div>
 
