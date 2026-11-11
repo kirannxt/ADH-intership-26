@@ -374,15 +374,15 @@
              style="display:none;margin-top:.85rem;padding:.75rem 1rem;
                     border-radius:var(--radius);background:#d1fae5;
                     border:1px solid var(--success);
-                    display:flex;align-items:center;gap:.75rem;">
-          <span style="font-size:1.2rem;" aria-hidden="true">[OK]</span>
+                    align-items:center;gap:.75rem;">
+          <span style="font-size:1.2rem;color:var(--success);font-weight:700;" aria-hidden="true">+</span>
           <div style="flex:1;">
             <div id="file-name" style="font-weight:700;font-size:.88rem;"></div>
             <div id="file-size" style="font-size:.78rem;color:var(--text-muted);"></div>
           </div>
           <button type="button" onclick="clearFile()"
                   style="background:none;border:none;cursor:pointer;font-size:1.1rem;color:var(--text-muted);"
-                  aria-label="Remove selected file"></button>
+                  aria-label="Remove selected file">x</button>
         </div>
 
         <div style="margin-top:1.25rem;display:flex;gap:.75rem;flex-wrap:wrap;">
@@ -456,8 +456,7 @@ function showFile(file) {
 
   nameEl.textContent = file.name;
   sizeEl.textContent = formatBytes(file.size);
-  preview.style.display = 'flex';
-  btn.disabled = false;
+  preview.style.display = 'flex';  btn.disabled = false;
 
   dropZone.style.borderColor = 'var(--success)';
   dropZone.style.background  = '#f0fdf4';
