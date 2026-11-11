@@ -1,12 +1,12 @@
-/* ════════════════════════════════════════════
+/* --------------------------------------------
    AssessMe — Main JS
-   ════════════════════════════════════════════ */
+   ============================================ */
 
 document.addEventListener("DOMContentLoaded", () => {
 
-  /* ──────────────────────────────────────────
+  /* ------------------------------------------
      1. Auto-dismiss alerts after 5 s
-  ────────────────────────────────────────── */
+  ========================================== */
   document.querySelectorAll(".alert").forEach((el) => {
     setTimeout(() => {
       el.style.transition = "opacity .5s";
@@ -16,9 +16,9 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 
-  /* ──────────────────────────────────────────
+  /* ------------------------------------------
      2. Mobile hamburger nav
-  ────────────────────────────────────────── */
+  ========================================== */
   const hamburger = document.getElementById("hamburger");
   const mobileNav = document.getElementById("mobile-nav");
   if (hamburger && mobileNav) {
@@ -30,9 +30,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  /* ──────────────────────────────────────────
+  /* ------------------------------------------
      3. Modal helpers
-  ────────────────────────────────────────── */
+  ========================================== */
   function openModal(id) {
     const overlay = document.getElementById(id);
     if (!overlay) return;
@@ -77,10 +77,10 @@ document.addEventListener("DOMContentLoaded", () => {
   window.closeModal = closeModal;
 
 
-  /* ──────────────────────────────────────────
+  /* ------------------------------------------
      4. Auth — single-page tabs (login / register)
         Works when both panels exist on one page.
-  ────────────────────────────────────────── */
+  ========================================== */
   const authTabs   = document.querySelectorAll(".auth-tab[data-target]");
   const authPanels = document.querySelectorAll(".auth-panel");
   if (authTabs.length && authPanels.length) {
@@ -98,9 +98,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  /* ──────────────────────────────────────────
+  /* ------------------------------------------
      5. Password visibility toggle
-  ────────────────────────────────────────── */
+  ========================================== */
   document.querySelectorAll(".pwd-toggle").forEach((btn) => {
     btn.addEventListener("click", () => {
       const inp = document.getElementById(btn.dataset.target);
@@ -108,14 +108,14 @@ document.addEventListener("DOMContentLoaded", () => {
       const show = inp.type === "password";
       inp.type = show ? "text" : "password";
       btn.setAttribute("aria-label", show ? "Hide password" : "Show password");
-      btn.querySelector(".pwd-icon").textContent = show ? "🙈" : "👁";
+      btn.querySelector(".pwd-icon").textContent = show ? "" : "";
     });
   });
 
 
-  /* ──────────────────────────────────────────
+  /* ------------------------------------------
      6. Password strength meter
-  ────────────────────────────────────────── */
+  ========================================== */
   const pwdInput = document.getElementById("password");
   const strengthEl = document.getElementById("pwd-strength");
   if (pwdInput && strengthEl) {
@@ -135,9 +135,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  /* ──────────────────────────────────────────
+  /* ------------------------------------------
      7. Inline form validation
-  ────────────────────────────────────────── */
+  ========================================== */
   document.querySelectorAll("form.validated").forEach((form) => {
     form.addEventListener("submit", (e) => {
       let valid = true;
@@ -145,7 +145,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const err = field.parentElement.querySelector(".form-error");
         if (!field.value.trim()) {
           field.classList.add("is-invalid");
-          if (err) err.textContent = "⚠ This field is required.";
+          if (err) err.textContent = "[!] This field is required.";
           valid = false;
         } else {
           field.classList.remove("is-invalid");
@@ -159,7 +159,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (pwd && pwd2 && pwd.value !== pwd2.value) {
         pwd2.classList.add("is-invalid");
         const err2 = pwd2.parentElement.querySelector(".form-error");
-        if (err2) err2.textContent = "⚠ Passwords do not match.";
+        if (err2) err2.textContent = "[!] Passwords do not match.";
         valid = false;
       }
       if (!valid) e.preventDefault();
@@ -172,7 +172,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (field.required && !field.value.trim()) {
           field.classList.add("is-invalid");
           field.classList.remove("is-valid");
-          if (err) err.textContent = "⚠ This field is required.";
+          if (err) err.textContent = "[!] This field is required.";
         } else if (field.value.trim()) {
           field.classList.remove("is-invalid");
           field.classList.add("is-valid");
@@ -183,9 +183,9 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 
-  /* ──────────────────────────────────────────
+  /* ------------------------------------------
      8. Option-item selection (radio/checkbox visual)
-  ────────────────────────────────────────── */
+  ========================================== */
   document.querySelectorAll(".option-item").forEach((item) => {
     item.addEventListener("click", () => {
       const input = item.querySelector("input");
@@ -208,9 +208,9 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 
-  /* ──────────────────────────────────────────
+  /* ------------------------------------------
      9. Rating buttons (1-5 scale)
-  ────────────────────────────────────────── */
+  ========================================== */
   document.querySelectorAll(".rating-group").forEach((group) => {
     const hidden = group.querySelector("input[type='hidden']");
     group.querySelectorAll(".rating-btn").forEach((btn) => {
@@ -225,9 +225,9 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 
-  /* ──────────────────────────────────────────
+  /* ------------------------------------------
      10. Yes/No buttons
-  ────────────────────────────────────────── */
+  ========================================== */
   document.querySelectorAll(".yesno-group").forEach((group) => {
     const hidden = group.querySelector("input[type='hidden']");
     group.querySelectorAll(".yesno-btn").forEach((btn) => {
@@ -241,9 +241,9 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 
-  /* ──────────────────────────────────────────
+  /* ------------------------------------------
      11. Frequency buttons
-  ────────────────────────────────────────── */
+  ========================================== */
   document.querySelectorAll(".freq-group").forEach((group) => {
     const hidden = group.querySelector("input[type='hidden']");
     group.querySelectorAll(".freq-btn").forEach((btn) => {
@@ -257,9 +257,9 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 
-  /* ──────────────────────────────────────────
+  /* ------------------------------------------
      12. Assessment card single-select
-  ────────────────────────────────────────── */
+  ========================================== */
   document.querySelectorAll(".assessment-card").forEach((card) => {
     card.addEventListener("click", () => {
       document.querySelectorAll(".assessment-card").forEach(c => {
@@ -279,11 +279,11 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 
-  /* ──────────────────────────────────────────
+  /* ------------------------------------------
      13. Questionnaire navigation with answer
          persistence, keyboard nav, answer map,
          unsaved-changes warning
-  ────────────────────────────────────────── */
+  ========================================== */
   const questionCards = document.querySelectorAll(".question-card[data-qnum]");
   if (questionCards.length) {
     let current = 1;
@@ -465,9 +465,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  /* ──────────────────────────────────────────
+  /* ------------------------------------------
      14. Score ring animation (SVG donut)
-  ────────────────────────────────────────── */
+  ========================================== */
   document.querySelectorAll(".score-ring-fill").forEach((fill) => {
     const pct  = parseFloat(fill.dataset.pct || 0);
     const r    = 70;
@@ -480,18 +480,18 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 
-  /* ──────────────────────────────────────────
+  /* ------------------------------------------
      15. Score bar row animations
-  ────────────────────────────────────────── */
+  ========================================== */
   document.querySelectorAll(".score-row-fill").forEach((bar) => {
     bar.style.width = "0";
     setTimeout(() => { bar.style.width = (bar.dataset.pct || "0") + "%"; }, 400);
   });
 
 
-  /* ──────────────────────────────────────────
+  /* ------------------------------------------
      16. Processing step animation + redirect
-  ────────────────────────────────────────── */
+  ========================================== */
   const pSteps = document.querySelectorAll(".p-step");
   if (pSteps.length) {
     let i = 0;
@@ -520,9 +520,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
 
-  /* ──────────────────────────────────────────
+  /* ------------------------------------------
      17. History page: client-side filter
-  ────────────────────────────────────────── */
+  ========================================== */
   const historySearch = document.getElementById("history-search");
   const historyRows   = document.querySelectorAll(".history-item[data-name]");
   const historyType   = document.getElementById("filter-type");
@@ -554,9 +554,9 @@ document.addEventListener("DOMContentLoaded", () => {
   if (historyStatus) historyStatus.addEventListener("change", applyHistoryFilters);
 
 
-  /* ──────────────────────────────────────────
+  /* ------------------------------------------
      18. Recommendations filter tabs
-  ────────────────────────────────────────── */
+  ========================================== */
   document.querySelectorAll(".rec-filter-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
       document.querySelectorAll(".rec-filter-btn").forEach(b => b.classList.replace("btn-primary", "btn-secondary"));
@@ -570,9 +570,9 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 
-  /* ──────────────────────────────────────────
+  /* ------------------------------------------
      19. FAQ accordion
-  ────────────────────────────────────────── */
+  ========================================== */
   document.querySelectorAll(".faq-question").forEach((btn) => {
     btn.addEventListener("click", () => {
       const expanded = btn.getAttribute("aria-expanded") === "true";
@@ -592,9 +592,9 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 
-  /* ──────────────────────────────────────────
+  /* ------------------------------------------
      20. Step indicator: mark from data attribute
-  ────────────────────────────────────────── */
+  ========================================== */
   const stepIndicator = document.getElementById("step-indicator");
   if (stepIndicator) {
     const activeIdx = parseInt(stepIndicator.dataset.active || "0", 10);
@@ -602,7 +602,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (i < activeIdx) {
         s.classList.add("completed");
         const circle = s.querySelector(".step-circle");
-        if (circle) circle.textContent = "✓";
+        if (circle) circle.textContent = "";
       } else if (i === activeIdx) {
         s.classList.add("active");
       }

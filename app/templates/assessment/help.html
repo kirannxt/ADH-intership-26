@@ -5,7 +5,7 @@
 <div class="container">
   <nav class="breadcrumb" aria-label="Breadcrumb">
     <a href="{{ url_for('main.index') }}">Home</a>
-    <span class="breadcrumb-sep" aria-hidden="true">›</span>
+    <span class="breadcrumb-sep" aria-hidden="true">></span>
     <span class="current" aria-current="page">Help &amp; Information</span>
   </nav>
 </div>
@@ -38,7 +38,7 @@
 
   <!-- WHAT IS A NEUROBEHAVIOURAL ASSESSMENT -->
   <div class="card mb-4" id="what" tabindex="-1">
-    <div class="card-header"><span class="card-title">🧠 What is a Behavioural Self-Assessment?</span></div>
+    <div class="card-header"><span class="card-title"> What is a Behavioural Self-Assessment?</span></div>
     <div class="card-body" style="line-height:1.8;font-size:.95rem;color:var(--text);">
       <p style="margin-bottom:1rem;">
         A behavioural self-assessment is a structured set of questions designed to help you
@@ -56,7 +56,7 @@
 
   <!-- HOW IT WORKS -->
   <div class="card mb-4" id="how" tabindex="-1">
-    <div class="card-header"><span class="card-title">⚙️ How AssessMe Works</span></div>
+    <div class="card-header"><span class="card-title"> How AssessMe Works</span></div>
     <div class="card-body">
       <ol style="padding-left:1.25rem;font-size:.92rem;color:var(--text);line-height:2.2;">
         <li><strong>Choose an assessment</strong> — select the type that matches your goal.</li>
@@ -72,7 +72,7 @@
 
   <!-- INTERPRETING RESULTS -->
   <div class="card mb-4" id="interpret" tabindex="-1">
-    <div class="card-header"><span class="card-title">📊 Interpreting Your Results</span></div>
+    <div class="card-header"><span class="card-title"> Interpreting Your Results</span></div>
     <div class="card-body" style="font-size:.92rem;line-height:1.8;color:var(--text);">
       <p style="margin-bottom:1rem;">
         Results are presented as a percentage score and a descriptive band
@@ -93,7 +93,7 @@
         </div>
       </div>
       <div class="info-box" role="note">
-        <span aria-hidden="true">💡</span>
+        <span aria-hidden="true"></span>
         <span>Results can vary significantly based on mood, time of day, and how questions are interpreted. A single score does not define you.</span>
       </div>
     </div>
@@ -101,10 +101,10 @@
 
   <!-- LIMITATIONS -->
   <div class="card mb-4" id="limitations" tabindex="-1">
-    <div class="card-header"><span class="card-title">⚠️ Limitations of Automated Assessments</span></div>
+    <div class="card-header"><span class="card-title">[!] Limitations of Automated Assessments</span></div>
     <div class="card-body">
       <div class="disclaimer-box" style="margin-bottom:1rem;" role="note">
-        <span class="d-icon" aria-hidden="true">⚠️</span>
+        <span class="d-icon" aria-hidden="true">[!]</span>
         <span>Understanding these limitations is essential for responsible use of this tool.</span>
       </div>
       <ul style="padding-left:1.25rem;font-size:.92rem;color:var(--text);line-height:2.2;">
@@ -120,7 +120,7 @@
 
   <!-- PRIVACY -->
   <div class="card mb-4" id="privacy" tabindex="-1">
-    <div class="card-header"><span class="card-title">🔒 Privacy &amp; Data Use</span></div>
+    <div class="card-header"><span class="card-title"> Privacy &amp; Data Use</span></div>
     <div class="card-body" style="font-size:.92rem;line-height:1.8;color:var(--text);">
       <ul style="padding-left:1.25rem;line-height:2.2;">
         <li>We collect only the information needed to generate and contextualise your results.</li>
@@ -136,7 +136,7 @@
   <!-- PROFESSIONAL SUPPORT -->
   <div class="card mb-4" id="support" tabindex="-1" style="border-color:var(--info);">
     <div class="card-header" style="background:#dbeafe;">
-      <span class="card-title" style="color:#1e40af;">🩺 Where to Find Professional Support</span>
+      <span class="card-title" style="color:#1e40af;"> Where to Find Professional Support</span>
     </div>
     <div class="card-body" style="font-size:.92rem;line-height:1.8;color:var(--text);">
       <p style="margin-bottom:1rem;">
@@ -151,7 +151,7 @@
         <li><strong>School or university counselling services</strong> — free support for students.</li>
       </ul>
       <div class="info-box mt-3" role="note">
-        <span aria-hidden="true">📞</span>
+        <span aria-hidden="true"></span>
         <span>
           <strong>In a crisis?</strong> Contact your local emergency services (e.g. 999, 911)
           or a crisis helpline. In the UK: Samaritans 116 123 (free, 24/7).
@@ -163,7 +163,7 @@
 
   <!-- FAQ -->
   <div class="card mb-4" id="faq" tabindex="-1">
-    <div class="card-header"><span class="card-title">❓ Frequently Asked Questions</span></div>
+    <div class="card-header"><span class="card-title"> Frequently Asked Questions</span></div>
     <div class="card-body" style="padding:0;">
       {% set faqs = [
         ('faq1','Is this a real psychological test?',
@@ -188,7 +188,7 @@
                 data-answer="{{ id }}-answer"
                 id="{{ id }}-btn">
           {{ question }}
-          <span class="faq-chevron" aria-hidden="true">▾</span>
+          <span class="faq-chevron" aria-hidden="true"></span>
         </button>
         <div class="faq-answer" id="{{ id }}-answer" role="region" aria-labelledby="{{ id }}-btn">
           {{ answer }}
@@ -200,7 +200,7 @@
 
   <!-- CONTACT -->
   <div class="card" id="contact" tabindex="-1">
-    <div class="card-header"><span class="card-title">📬 Contact &amp; Support</span></div>
+    <div class="card-header"><span class="card-title"> Contact &amp; Support</span></div>
     <div class="card-body" style="font-size:.92rem;color:var(--text);">
       <p style="margin-bottom:1rem;">
         If you have questions, technical issues, or concerns about your data,
@@ -208,11 +208,11 @@
       </p>
       <div style="display:flex;flex-direction:column;gap:.75rem;">
         <div style="display:flex;align-items:center;gap:.75rem;">
-          <span aria-hidden="true">📧</span>
+          <span aria-hidden="true"></span>
           <span>Email: <a href="mailto:support@assessme.example">support@assessme.example</a></span>
         </div>
         <div style="display:flex;align-items:center;gap:.75rem;">
-          <span aria-hidden="true">⏱</span>
+          <span aria-hidden="true"></span>
           <span>Response time: within 2 business days.</span>
         </div>
       </div>

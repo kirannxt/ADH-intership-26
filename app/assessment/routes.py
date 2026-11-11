@@ -1,9 +1,14 @@
-from flask import render_template, redirect, url_for, request, session, flash
+import json
+from datetime import datetime
+
+from flask import render_template, redirect, url_for, request, session, flash, current_app
 from flask_login import login_required, current_user
 
+from app import db
+from app.models import AssessmentRecord
 from app.assessment import assessment
 
-# ══════════════════════════════════════════════════════════════════════════
+# --------------------------------------------------------------------------
 #  REAL ASSESSMENT CATEGORIES
 #  Each entry defines:
 #    label       – display name
@@ -20,14 +25,14 @@ from app.assessment import assessment
 #                    key    – short machine name (e.g. "inattention")
 #                    options– list of (label, score) tuples
 #    scoring     – dict with bands: list of (min_score, max_score, band, colour, interpretation)
-# ══════════════════════════════════════════════════════════════════════════
+# --------------------------------------------------------------------------
 
 ASSESSMENT_TYPES = {
 
-    # ── 1. ADHD Screening ─────────────────────────────────────────────────
+    # -- 1. ADHD Screening -------------------------------------------------
     "adhd": {
         "label":       "ADHD Screening",
-        "icon":        "🎯",
+        "icon":        "",
         "color":       "#ede9fe",
         "time":        "~8 min",
         "sections":    ["Inattention", "Hyperactivity", "Impulsivity"],
@@ -176,10 +181,10 @@ ASSESSMENT_TYPES = {
         }
     },
 
-    # ── 2. Anxiety Screening (GAD-7 structure) ────────────────────────────
+    # -- 2. Anxiety Screening (GAD-7 structure) ----------------------------
     "anxiety": {
         "label":       "Anxiety Screening",
-        "icon":        "😰",
+        "icon":        "",
         "color":       "#dbeafe",
         "time":        "~5 min",
         "sections":    ["Worry", "Nervousness", "Avoidance"],
@@ -318,10 +323,10 @@ ASSESSMENT_TYPES = {
         }
     },
 
-    # ── 3. Depression Screening (PHQ-9 structure) ─────────────────────────
+    # -- 3. Depression Screening (PHQ-9 structure) -------------------------
     "depression": {
         "label":       "Depression Screening",
-        "icon":        "🌧",
+        "icon":        "",
         "color":       "#e0e7ff",
         "time":        "~5 min",
         "sections":    ["Mood", "Energy", "Cognition"],
@@ -459,10 +464,10 @@ ASSESSMENT_TYPES = {
         }
     },
 
-    # ── 4. Perceived Stress Scale (PSS-10 structure) ──────────────────────
+    # -- 4. Perceived Stress Scale (PSS-10 structure) ----------------------
     "stress": {
         "label":       "Perceived Stress",
-        "icon":        "🧘",
+        "icon":        "",
         "color":       "#d1fae5",
         "time":        "~5 min",
         "sections":    ["Control", "Overload", "Coping"],
@@ -610,10 +615,10 @@ ASSESSMENT_TYPES = {
         }
     },
 
-    # ── 5. Learning Style Inventory (VARK-inspired) ───────────────────────
+    # -- 5. Learning Style Inventory (VARK-inspired) -----------------------
     "learning": {
         "label":       "Learning Style",
-        "icon":        "📚",
+        "icon":        "",
         "color":       "#fef3c7",
         "time":        "~6 min",
         "sections":    ["Visual", "Auditory", "Reading/Writing", "Kinaesthetic"],
@@ -754,10 +759,10 @@ ASSESSMENT_TYPES = {
         }
     },
 
-    # ── 6. Emotional Intelligence (EQ) ────────────────────────────────────
+    # -- 6. Emotional Intelligence (EQ) ------------------------------------
     "eq": {
         "label":       "Emotional Intelligence",
-        "icon":        "❤️",
+        "icon":        "",
         "color":       "#fee2e2",
         "time":        "~7 min",
         "sections":    ["Self-Awareness", "Empathy", "Regulation", "Social Skills"],
@@ -903,6 +908,311 @@ ASSESSMENT_TYPES = {
             ]
         }
     },
+
+    # -- 7. ASD Assessment-Support System ---------------------------------
+    "asd": {
+        "label":       "ASD Assessment-Support",
+        "icon":        "",
+        "color":       "#ecfdf5",
+        "time":        "~15 min",
+        "sections":    ["Social Communication", "Social Interaction",
+                        "Repetitive Patterns", "Focused Interests", "Sensory Experiences"],
+        "description": (
+            "A structured observation-based support screen across five core "
+            "ASD-related behavioural areas. Suitable for parents, caregivers, "
+            "teachers, or self-reporting adults."
+        ),
+        "instructions": (
+            "The following questions ask about behaviours and traits observed "
+            "over the past year. For each item, choose the option that most "
+            "accurately reflects typical behaviour — not an occasional or "
+            "unusual occurrence. Answer as honestly as possible. "
+            "This is a support screen only and cannot diagnose autism."
+        ),
+        "purpose": (
+            "Inspired by established ASD behavioural screening frameworks "
+            "(including elements of the Social Communication Questionnaire, "
+            "SRS-2 and the DSM-5 criteria). A positive screen indicates it "
+            "may be worth seeking a professional evaluation — it is not a "
+            "diagnosis and does not confirm the presence of autism."
+        ),
+        "questions": [
+
+            # -- DOMAIN 1: Social Communication (Q1–Q4) -------------------
+            {
+                "text": "How often does this person have difficulty starting or maintaining a two-way conversation?",
+                "type": "freq5",
+                "key":  "social_comm",
+                "options": [
+                    ("Never",       0),
+                    ("Rarely",      1),
+                    ("Sometimes",   2),
+                    ("Often",       3),
+                    ("Very often",  4),
+                ]
+            },
+            {
+                "text": "How often does this person take things said to them too literally, missing sarcasm, jokes, or implied meaning?",
+                "type": "freq5",
+                "key":  "social_comm",
+                "options": [
+                    ("Never",       0),
+                    ("Rarely",      1),
+                    ("Sometimes",   2),
+                    ("Often",       3),
+                    ("Very often",  4),
+                ]
+            },
+            {
+                "text": "How often does this person have difficulty adjusting their communication style depending on the listener (e.g. speaking to a child vs. an adult)?",
+                "type": "freq5",
+                "key":  "social_comm",
+                "options": [
+                    ("Never",       0),
+                    ("Rarely",      1),
+                    ("Sometimes",   2),
+                    ("Often",       3),
+                    ("Very often",  4),
+                ]
+            },
+            {
+                "text": "How often does this person use unusual or overly formal language that seems out of place for the social situation?",
+                "type": "freq5",
+                "key":  "social_comm",
+                "options": [
+                    ("Never",       0),
+                    ("Rarely",      1),
+                    ("Sometimes",   2),
+                    ("Often",       3),
+                    ("Very often",  4),
+                ]
+            },
+
+            # -- DOMAIN 2: Social Interaction (Q5–Q8) ---------------------
+            {
+                "text": "How often does this person seem unaware of, or uninterested in, what others are thinking or feeling?",
+                "type": "freq5",
+                "key":  "social_interact",
+                "options": [
+                    ("Never",       0),
+                    ("Rarely",      1),
+                    ("Sometimes",   2),
+                    ("Often",       3),
+                    ("Very often",  4),
+                ]
+            },
+            {
+                "text": "How often does this person have difficulty making or keeping friends of a similar age?",
+                "type": "freq5",
+                "key":  "social_interact",
+                "options": [
+                    ("Never",       0),
+                    ("Rarely",      1),
+                    ("Sometimes",   2),
+                    ("Often",       3),
+                    ("Very often",  4),
+                ]
+            },
+            {
+                "text": "How often does this person avoid or show discomfort with eye contact?",
+                "type": "freq5",
+                "key":  "social_interact",
+                "options": [
+                    ("Never",       0),
+                    ("Rarely",      1),
+                    ("Sometimes",   2),
+                    ("Often",       3),
+                    ("Very often",  4),
+                ]
+            },
+            {
+                "text": "How often does this person appear to prefer being alone rather than spending time with peers or family?",
+                "type": "freq5",
+                "key":  "social_interact",
+                "options": [
+                    ("Never",       0),
+                    ("Rarely",      1),
+                    ("Sometimes",   2),
+                    ("Often",       3),
+                    ("Very often",  4),
+                ]
+            },
+
+            # -- DOMAIN 3: Repetitive Patterns / Behaviours (Q9–Q12) ------
+            {
+                "text": "How often does this person insist on following the same routine or become very upset when routines change unexpectedly?",
+                "type": "freq5",
+                "key":  "repetitive",
+                "options": [
+                    ("Never",       0),
+                    ("Rarely",      1),
+                    ("Sometimes",   2),
+                    ("Often",       3),
+                    ("Very often",  4),
+                ]
+            },
+            {
+                "text": "How often does this person repeat the same movements, words, or phrases (e.g. rocking, hand-flapping, echoing words)?",
+                "type": "freq5",
+                "key":  "repetitive",
+                "options": [
+                    ("Never",       0),
+                    ("Rarely",      1),
+                    ("Sometimes",   2),
+                    ("Often",       3),
+                    ("Very often",  4),
+                ]
+            },
+            {
+                "text": "How often does this person become highly distressed by small changes to their environment (e.g. furniture moved, different route taken)?",
+                "type": "freq5",
+                "key":  "repetitive",
+                "options": [
+                    ("Never",       0),
+                    ("Rarely",      1),
+                    ("Sometimes",   2),
+                    ("Often",       3),
+                    ("Very often",  4),
+                ]
+            },
+            {
+                "text": "How often does this person arrange objects in lines or patterns, or become upset when these are disturbed?",
+                "type": "freq5",
+                "key":  "repetitive",
+                "options": [
+                    ("Never",       0),
+                    ("Rarely",      1),
+                    ("Sometimes",   2),
+                    ("Often",       3),
+                    ("Very often",  4),
+                ]
+            },
+
+            # -- DOMAIN 4: Focused Interests (Q13–Q16) --------------------
+            {
+                "text": "How often does this person talk about or focus on one or two topics to the exclusion of most others?",
+                "type": "freq5",
+                "key":  "focused",
+                "options": [
+                    ("Never",       0),
+                    ("Rarely",      1),
+                    ("Sometimes",   2),
+                    ("Often",       3),
+                    ("Very often",  4),
+                ]
+            },
+            {
+                "text": "How often does this person demonstrate an unusually deep level of knowledge about a very specific topic?",
+                "type": "freq5",
+                "key":  "focused",
+                "options": [
+                    ("Never",       0),
+                    ("Rarely",      1),
+                    ("Sometimes",   2),
+                    ("Often",       3),
+                    ("Very often",  4),
+                ]
+            },
+            {
+                "text": "How often does this person have difficulty shifting attention away from a preferred activity when asked?",
+                "type": "freq5",
+                "key":  "focused",
+                "options": [
+                    ("Never",       0),
+                    ("Rarely",      1),
+                    ("Sometimes",   2),
+                    ("Often",       3),
+                    ("Very often",  4),
+                ]
+            },
+            {
+                "text": "How often does this person use objects in repetitive or unusual ways (e.g. spinning wheels, lining up toys)?",
+                "type": "freq5",
+                "key":  "focused",
+                "options": [
+                    ("Never",       0),
+                    ("Rarely",      1),
+                    ("Sometimes",   2),
+                    ("Often",       3),
+                    ("Very often",  4),
+                ]
+            },
+
+            # -- DOMAIN 5: Sensory Experiences (Q17–Q20) ------------------
+            {
+                "text": "How often does this person show an unusually strong reaction to sounds (e.g. covering ears, becoming very distressed by everyday noises)?",
+                "type": "freq5",
+                "key":  "sensory",
+                "options": [
+                    ("Never",       0),
+                    ("Rarely",      1),
+                    ("Sometimes",   2),
+                    ("Often",       3),
+                    ("Very often",  4),
+                ]
+            },
+            {
+                "text": "How often does this person appear unusually sensitive or insensitive to textures, tastes, smells, or physical touch?",
+                "type": "freq5",
+                "key":  "sensory",
+                "options": [
+                    ("Never",       0),
+                    ("Rarely",      1),
+                    ("Sometimes",   2),
+                    ("Often",       3),
+                    ("Very often",  4),
+                ]
+            },
+            {
+                "text": "How often does this person seem to seek out strong sensory experiences (e.g. spinning, pressing against surfaces, sniffing objects)?",
+                "type": "freq5",
+                "key":  "sensory",
+                "options": [
+                    ("Never",       0),
+                    ("Rarely",      1),
+                    ("Sometimes",   2),
+                    ("Often",       3),
+                    ("Very often",  4),
+                ]
+            },
+            {
+                "text": "How often does this person show an unusually strong reaction to visual stimuli (e.g. bright lights, certain colours, or moving objects)?",
+                "type": "freq5",
+                "key":  "sensory",
+                "options": [
+                    ("Never",       0),
+                    ("Rarely",      1),
+                    ("Sometimes",   2),
+                    ("Often",       3),
+                    ("Very often",  4),
+                ]
+            },
+        ],
+        "scoring": {
+            "method": "asd",
+            "max": 80,       # 20 questions × max 4 points each
+            "bands": [
+                # Lower Indication — few traits reported
+                (0,  26, "Lower Indication",     "asd_lower",
+                 "Responses across the five areas suggest few traits associated with autism "
+                 "at this time. This does not rule out autism — many individuals present "
+                 "differently across environments. Continue awareness and seek professional "
+                 "guidance if concerns remain."),
+                # Requires Attention — moderate pattern
+                (27, 53, "Requires Attention",   "asd_attention",
+                 "Responses suggest a moderate number of traits across one or more ASD-related "
+                 "areas. This does not confirm autism, but the overall pattern warrants "
+                 "consideration. We recommend discussing these observations with a qualified "
+                 "professional — such as a paediatrician, psychologist, or autism specialist."),
+                # Higher Indication — strong pattern across multiple domains
+                (54, 80, "Higher Indication",    "asd_higher",
+                 "Responses suggest a higher number of traits across multiple ASD-related "
+                 "areas. This is a screening tool only and cannot diagnose autism. However, "
+                 "this result indicates that a professional evaluation would be strongly "
+                 "advisable. Please seek a formal assessment from a qualified clinician."),
+            ]
+        }
+    },
 }
 
 
@@ -910,7 +1220,7 @@ def compute_score(a_type, answers):
     """
     Compute a numeric score and band from session answers.
     Returns (raw_score, pct_score, band_label, band_colour, interpretation, extra).
-    extra is used for VARK dominant style.
+    extra carries VARK tally or ASD domain breakdown.
     """
     cfg = ASSESSMENT_TYPES.get(a_type)
     if not cfg:
@@ -924,7 +1234,44 @@ def compute_score(a_type, answers):
     raw = 0
     extra = {}
 
-    if method == "vark":
+    # -- ASD: domain-by-domain tally ---------------------------------------
+    if method == "asd":
+        DOMAIN_LABELS = {
+            "social_comm":    "Social Communication",
+            "social_interact":"Social Interaction",
+            "repetitive":     "Repetitive Patterns",
+            "focused":        "Focused Interests",
+            "sensory":        "Sensory Experiences",
+        }
+        domain_scores = {d: 0 for d in DOMAIN_LABELS}
+        domain_max    = {d: 0 for d in DOMAIN_LABELS}
+
+        for i, q in enumerate(questions, start=1):
+            ans   = answers.get(f"q{i}", "")
+            domain = q["key"]
+            for label, score_val in q["options"]:
+                if label == ans:
+                    domain_scores[domain] = domain_scores.get(domain, 0) + score_val
+                    break
+            # max possible per question = highest option score
+            domain_max[domain] = domain_max.get(domain, 0) + max(v for _, v in q["options"])
+
+        raw = sum(domain_scores.values())
+
+        # Domain percentages (0–100 each)
+        domain_pct = {
+            d: round((domain_scores[d] / domain_max[d]) * 100) if domain_max[d] else 0
+            for d in DOMAIN_LABELS
+        }
+        extra = {
+            "domain_scores": domain_scores,
+            "domain_max":    domain_max,
+            "domain_pct":    domain_pct,
+            "domain_labels": DOMAIN_LABELS,
+        }
+
+    # -- VARK: category tally ---------------------------------------------
+    elif method == "vark":
         tally = {"visual": 0, "auditory": 0, "read_write": 0, "kinaesthetic": 0}
         for i, q in enumerate(questions, start=1):
             ans = answers.get(f"q{i}", "")
@@ -936,7 +1283,8 @@ def compute_score(a_type, answers):
         raw = tally[dominant]
         extra = {"tally": tally, "dominant": dominant}
 
-    else:  # "sum"
+    # -- Standard sum -----------------------------------------------------
+    else:
         for i, q in enumerate(questions, start=1):
             ans = answers.get(f"q{i}", "")
             for label, score_val in q["options"]:
@@ -947,8 +1295,8 @@ def compute_score(a_type, answers):
     pct = round((raw / max_score) * 100) if max_score else 0
     pct = max(0, min(100, pct))
 
-    band_label   = "N/A"
-    band_colour  = "primary"
+    band_label     = "N/A"
+    band_colour    = "primary"
     interpretation = ""
     for lo, hi, bl, bc, interp in scoring["bands"]:
         if lo <= raw <= hi:
@@ -960,7 +1308,7 @@ def compute_score(a_type, answers):
     return raw, pct, band_label, band_colour, interpretation, extra
 
 
-# ── Assessment Selection ──────────────────────────────────────────────────
+# -- Assessment Selection --------------------------------------------------
 @assessment.route("/select", methods=["GET", "POST"])
 @login_required
 def select():
@@ -992,7 +1340,7 @@ def select():
                            })
 
 
-# ── Personal Information ──────────────────────────────────────────────────
+# -- Personal Information --------------------------------------------------
 @assessment.route("/personal-info", methods=["GET", "POST"])
 @login_required
 def personal_info():
@@ -1000,26 +1348,49 @@ def personal_info():
         flash("Please select an assessment first.", "warning")
         return redirect(url_for("assessment.select"))
 
+    a_type  = session.get("assessment_type", "")
+    is_asd  = (a_type == "asd")
+
     if request.method == "POST":
-        session["personal_info"] = {
+        info = {
             "first_name": request.form.get("first_name",  "").strip(),
             "last_name":  request.form.get("last_name",   "").strip(),
-            "age_group":  request.form.get("age_group",   ""),
-            "gender":     request.form.get("gender",      ""),
-            "education":  request.form.get("education",   ""),
-            "occupation": request.form.get("occupation",  "").strip(),
             "goal":       request.form.get("goal",        ""),
             "notes":      request.form.get("notes",       "").strip(),
         }
+
+        if is_asd:
+            # ASD-specific fields
+            info["responder_role"]       = request.form.get("responder_role",       "").strip()
+            info["subject_name"]         = request.form.get("subject_name",         "").strip()
+            info["subject_age_group"]    = request.form.get("subject_age_group",    "")
+            info["subject_gender"]       = request.form.get("subject_gender",       "")
+            info["previous_assessment"]  = request.form.get("previous_assessment",  "")
+            info["developmental_notes"]  = request.form.get("developmental_notes",  "").strip()
+
+            if not info["responder_role"]:
+                flash("Please select who is completing this screen.", "warning")
+                return redirect(url_for("assessment.personal_info"))
+            if not info["subject_age_group"]:
+                flash("Please select the age group of the person being assessed.", "warning")
+                return redirect(url_for("assessment.personal_info"))
+        else:
+            # Standard fields
+            info["age_group"]  = request.form.get("age_group",  "")
+            info["gender"]     = request.form.get("gender",     "")
+            info["education"]  = request.form.get("education",  "")
+            info["occupation"] = request.form.get("occupation", "").strip()
+
+        session["personal_info"] = info
         return redirect(url_for("assessment.questionnaire"))
 
-    a_type = session.get("assessment_type", "")
     return render_template("assessment/personal_info.html",
                            title="Personal Information",
-                           assessment_label=ASSESSMENT_TYPES.get(a_type, {}).get("label", "Assessment"))
+                           assessment_label=ASSESSMENT_TYPES.get(a_type, {}).get("label", "Assessment"),
+                           is_asd=is_asd)
 
 
-# ── Questionnaire ─────────────────────────────────────────────────────────
+# -- Questionnaire ---------------------------------------------------------
 @assessment.route("/questionnaire", methods=["GET", "POST"])
 @login_required
 def questionnaire():
@@ -1054,14 +1425,465 @@ def questionnaire():
                            saved_answers=saved)
 
 
-# ── Progress Tracking ─────────────────────────────────────────────────────
+# -- Progress Tracking -----------------------------------------------------
 @assessment.route("/progress")
 @login_required
 def progress():
-    return render_template("assessment/progress.html", title="Progress Tracking")
+    from app.ml import run_ml_insights
+    from datetime import datetime
+
+    records = (
+        AssessmentRecord.query
+        .filter_by(user_id=current_user.id)
+        .order_by(AssessmentRecord.completed_at.desc())
+        .all()
+    )
+
+    total       = len(records)
+    completed   = sum(1 for r in records if r.status == "completed")
+    in_progress = sum(1 for r in records if r.status == "in_progress")
+    avg_score   = (
+        round(sum(r.pct_score for r in records if r.status == "completed") / completed)
+        if completed else None
+    )
+
+    # Score by category: latest pct per type
+    type_scores = {}
+    for r in reversed(records):           # oldest first so latest overwrites
+        if r.status == "completed":
+            type_scores[r.assessment_type] = {
+                "label": r.assessment_label,
+                "pct":   r.pct_score,
+                "band":  r.band,
+                "color": r.color_bg,
+                "icon":  r.icon,
+            }
+
+    # Milestones
+    used_types = {r.assessment_type for r in records if r.status == "completed"}
+    all_types  = set(ASSESSMENT_TYPES.keys())
+    milestones = [
+        ("First Assessment",   "Complete your first assessment",           completed >= 1),
+        ("Honest Responder",   "Complete any assessment without skipping", completed >= 1),
+        ("Consistent Learner", "Complete 3 assessments",                   completed >= 3),
+        ("Explorer",           "Try 3 different assessment types",         len(used_types) >= 3),
+        ("Well-Rounded",       "Complete all assessment types",            used_types >= all_types),
+    ]
+
+    # -- Read active ML filter from session --------------------------------
+    ml_filter = session.get("ml_filter", {})
+    date_from_str    = ml_filter.get("date_from")
+    date_to_str      = ml_filter.get("date_to")
+    types_include    = ml_filter.get("types_include") or None
+    mode             = ml_filter.get("mode", "all")
+
+    date_from = datetime.strptime(date_from_str, "%Y-%m-%d") if date_from_str else None
+    date_to   = datetime.strptime(date_to_str,   "%Y-%m-%d") if date_to_str   else None
+
+    # ML insights — re-runs fresh with current filter every page visit
+    ml = run_ml_insights(
+        records,
+        date_from=date_from,
+        date_to=date_to,
+        types_include=types_include,
+        mode=mode,
+    )
+
+    # -- Load trained model predictions if models exist --------------------
+    from app.ml import load_and_predict
+    trained_preds = load_and_predict(
+        records,
+        user_id=current_user.id,
+        instance_path=current_app.instance_path,
+        assessment_types_meta=ASSESSMENT_TYPES,
+    )
+    ml["trained_predictions"] = trained_preds
+
+    return render_template(
+        "assessment/progress.html",
+        title="Progress Tracking",
+        total=total,
+        completed=completed,
+        in_progress=in_progress,
+        avg_score=avg_score,
+        type_scores=type_scores,
+        milestones=milestones,
+        has_data=(total > 0),
+        ml=ml,
+        all_assessment_types=ASSESSMENT_TYPES,
+    )
 
 
-# ── Review Answers ────────────────────────────────────────────────────────
+# -- Retrain Insights page -------------------------------------------------
+@assessment.route("/retrain", methods=["GET", "POST"])
+@login_required
+def retrain_insights():
+    """
+    GET  — render the standalone Retrain Insights settings page.
+    POST — validate inputs, store filter in session, redirect back to this page
+           (or to progress on reset).
+    """
+    from datetime import datetime
+
+    if request.method == "POST":
+        action = request.form.get("action", "apply")
+
+        if action == "reset":
+            session.pop("ml_filter", None)
+            flash("Insights reset to all data.", "success")
+            return redirect(url_for("assessment.retrain_insights"))
+
+        # -- Parse & validate inputs --------------------------------------
+        date_from_str = request.form.get("date_from", "").strip()
+        date_to_str   = request.form.get("date_to",   "").strip()
+        mode          = request.form.get("mode", "all").strip()
+        types_raw     = request.form.getlist("types_include")
+
+        date_from = date_to = None
+        try:
+            if date_from_str:
+                date_from = datetime.strptime(date_from_str, "%Y-%m-%d")
+            if date_to_str:
+                date_to = datetime.strptime(date_to_str, "%Y-%m-%d")
+        except ValueError:
+            flash("Invalid date format. Please use the date picker.", "danger")
+            return redirect(url_for("assessment.retrain_insights"))
+
+        if date_from and date_to and date_from > date_to:
+            flash("'From' date must be before 'To' date.", "danger")
+            return redirect(url_for("assessment.retrain_insights"))
+
+        valid_modes     = {"all", "recent", "trend"}
+        valid_type_keys = {"adhd", "anxiety", "depression", "stress", "learning", "eq", "asd"}
+
+        if mode not in valid_modes:
+            mode = "all"
+
+        types_include = [t for t in types_raw if t in valid_type_keys] or None
+
+        session["ml_filter"] = {
+            "date_from":     date_from_str if date_from else None,
+            "date_to":       date_to_str   if date_to   else None,
+            "types_include": types_include,
+            "mode":          mode,
+        }
+
+        flash("Insights retrained with your selected settings.", "success")
+        return redirect(url_for("assessment.retrain_insights"))
+
+    # -- GET: build current_filter summary to pre-fill the form -----------
+    ml_filter_raw = session.get("ml_filter", {})
+
+    # Count how many completed records the user has (for the status banner)
+    all_records = (
+        AssessmentRecord.query
+        .filter_by(user_id=current_user.id)
+        .filter(AssessmentRecord.status == "completed")
+        .count()
+    )
+
+    current_filter = None
+    if ml_filter_raw:
+        current_filter = dict(ml_filter_raw)
+        current_filter["is_active"] = bool(
+            current_filter.get("date_from")
+            or current_filter.get("date_to")
+            or current_filter.get("types_include")
+            or current_filter.get("mode", "all") != "all"
+        )
+        current_filter["n_records"] = all_records
+
+    # -- Model status (which types have trained models on disk) ------------
+    from app.ml import get_model_status
+    from app.models import MLModel
+    model_status = get_model_status(current_user.id, current_app.instance_path)
+
+    # Enrich with DB metadata (accuracy, trained_at)
+    db_rows = {
+        row.assessment_type: row
+        for row in MLModel.query.filter_by(user_id=current_user.id).all()
+    }
+    for a_type, info in model_status.items():
+        if a_type in db_rows:
+            row = db_rows[a_type]
+            info["accuracy_pct"] = row.accuracy_pct
+            info["trained_at"]   = row.trained_at.strftime("%Y-%m-%d %H:%M") \
+                                   if row.trained_at else None
+            info["trained_ago"]  = row.trained_ago
+
+    # Record counts per type for the training status panel
+    type_counts: dict[str, int] = {}
+    for r in AssessmentRecord.query.filter_by(
+        user_id=current_user.id, status="completed"
+    ).all():
+        type_counts[r.assessment_type] = type_counts.get(r.assessment_type, 0) + 1
+
+    return render_template(
+        "assessment/retrain.html",
+        title="Retrain AI Insights",
+        current_filter=current_filter,
+        all_assessment_types=ASSESSMENT_TYPES,
+        model_status=model_status,
+        type_counts=type_counts,
+    )
+
+
+# -- Train ML Models -------------------------------------------------------
+@assessment.route("/retrain/train", methods=["POST"])
+@login_required
+def train_ml_models():
+    """
+    Trigger supervised model training for all assessment types.
+    Trains one sklearn Pipeline per type, persists to disk with joblib,
+    and upserts metadata into the MLModel table.
+    """
+    from app.ml import train_models, get_model_status
+    from app.models import MLModel
+    from datetime import datetime
+
+    records = (
+        AssessmentRecord.query
+        .filter_by(user_id=current_user.id)
+        .order_by(AssessmentRecord.completed_at.asc())
+        .all()
+    )
+
+    results = train_models(
+        records,
+        user_id=current_user.id,
+        instance_path=current_app.instance_path,
+        assessment_types_meta=ASSESSMENT_TYPES,
+    )
+
+    # -- Upsert MLModel metadata rows --------------------------------------
+    trained_count = 0
+    for a_type, info in results.items():
+        if not info.get("trained"):
+            continue
+        row = MLModel.query.filter_by(
+            user_id=current_user.id,
+            assessment_type=a_type,
+        ).first()
+        if row is None:
+            row = MLModel(user_id=current_user.id, assessment_type=a_type)
+            db.session.add(row)
+        row.algorithm   = info["algorithm"]
+        row.n_samples   = info["n_samples"]
+        row.n_features  = info["n_features"]
+        row.accuracy    = info.get("accuracy")
+        row.model_path  = info["model_path"]
+        row.trained_at  = datetime.utcnow()
+        trained_count  += 1
+
+    db.session.commit()
+
+    skipped = [t for t, i in results.items() if not i.get("trained")]
+
+    if trained_count == 0:
+        flash(
+            "No models were trained — you need at least 4 completed records "
+            "per assessment type. Upload a CSV or complete more assessments first.",
+            "warning",
+        )
+    else:
+        msg = f"[OK] Trained {trained_count} model(s) successfully."
+        if skipped:
+            msg += f" {len(skipped)} type(s) skipped (not enough data)."
+        flash(msg, "success")
+
+    return redirect(url_for("assessment.retrain_insights"))
+
+
+# -- CSV Template download -------------------------------------------------
+@assessment.route("/retrain/csv-template")
+@login_required
+def csv_template():
+    """Return a ready-to-fill CSV template the user can populate and re-upload."""
+    import io
+    from flask import Response
+
+    lines = [
+        "date,assessment_type,pct_score,band",
+        "# date        : YYYY-MM-DD format",
+        "# assessment_type : adhd | anxiety | depression | stress | learning | eq | asd",
+        "# pct_score   : integer 0-100",
+        "# band        : your result label, e.g. Mild / Moderate / High (optional)",
+        "# Delete these comment lines before uploading.",
+        "2026-01-15,anxiety,42,Mild",
+        "2026-02-10,anxiety,38,Mild",
+        "2026-03-05,eq,74,High",
+    ]
+    content = "\n".join(lines) + "\n"
+    return Response(
+        content,
+        mimetype="text/csv",
+        headers={"Content-Disposition": "attachment; filename=assessme_import_template.csv"},
+    )
+
+
+# -- CSV Upload ------------------------------------------------------------
+@assessment.route("/retrain/upload-csv", methods=["POST"])
+@login_required
+def upload_csv():
+    """
+    Parse an uploaded CSV file and import rows as AssessmentRecord entries.
+
+    Expected columns (order-independent, case-insensitive header):
+        date            YYYY-MM-DD
+        assessment_type adhd | anxiety | depression | stress | learning | eq | asd
+        pct_score       integer 0–100
+        band            (optional) text label
+
+    Rows with errors are skipped; a summary flash message reports
+    how many were imported and how many were rejected.
+    """
+    import csv
+    import io
+    from datetime import datetime
+
+    _VALID_TYPES = {
+        "adhd", "anxiety", "depression", "stress", "learning", "eq", "asd"
+    }
+    _TYPE_LABELS = {
+        "adhd":       "ADHD Screening",
+        "anxiety":    "Anxiety Screening",
+        "depression": "Depression Screening",
+        "stress":     "Perceived Stress",
+        "learning":   "Learning Style",
+        "eq":         "Emotional Intelligence",
+        "asd":        "ASD Support Screen",
+    }
+    _BAND_COLORS = {
+        "low": "success", "mild": "success",
+        "moderate": "warning", "medium": "warning",
+        "high": "danger", "severe": "danger",
+        "very high": "danger",
+    }
+
+    uploaded = request.files.get("csv_file")
+    if not uploaded or uploaded.filename == "":
+        flash("No file selected. Please choose a CSV file.", "warning")
+        return redirect(url_for("assessment.retrain_insights"))
+
+    if not uploaded.filename.lower().endswith(".csv"):
+        flash("Only .csv files are accepted.", "danger")
+        return redirect(url_for("assessment.retrain_insights"))
+
+    # Read file content — limit to 1 MB
+    raw_bytes = uploaded.read(1_048_577)
+    if len(raw_bytes) > 1_048_576:
+        flash("File too large. Maximum size is 1 MB.", "danger")
+        return redirect(url_for("assessment.retrain_insights"))
+
+    try:
+        content = raw_bytes.decode("utf-8-sig")   # strip BOM if present
+    except UnicodeDecodeError:
+        flash("Could not read file. Make sure it is saved as UTF-8.", "danger")
+        return redirect(url_for("assessment.retrain_insights"))
+
+    imported = 0
+    skipped  = 0
+    errors   = []
+
+    reader = csv.DictReader(io.StringIO(content))
+
+    # Normalise header names (strip whitespace, lowercase)
+    if reader.fieldnames is None:
+        flash("CSV file appears to be empty.", "warning")
+        return redirect(url_for("assessment.retrain_insights"))
+
+    fieldnames_norm = [f.strip().lower() for f in reader.fieldnames]
+
+    required = {"date", "assessment_type", "pct_score"}
+    if not required.issubset(set(fieldnames_norm)):
+        missing = required - set(fieldnames_norm)
+        flash(f"CSV is missing required column(s): {', '.join(sorted(missing))}. "
+              f"Download the template to see the correct format.", "danger")
+        return redirect(url_for("assessment.retrain_insights"))
+
+    for line_num, raw_row in enumerate(reader, start=2):
+        # Skip comment lines (cell starts with #)
+        first_val = next(iter(raw_row.values()), "").strip()
+        if first_val.startswith("#"):
+            continue
+
+        # Normalise keys
+        row = {k.strip().lower(): v.strip() for k, v in raw_row.items() if k}
+
+        # -- Validate date ------------------------------------------------
+        try:
+            completed_at = datetime.strptime(row.get("date", ""), "%Y-%m-%d")
+        except ValueError:
+            skipped += 1
+            errors.append(f"Row {line_num}: invalid date '{row.get('date')}' (use YYYY-MM-DD)")
+            continue
+
+        if completed_at > datetime.utcnow():
+            skipped += 1
+            errors.append(f"Row {line_num}: date {row['date']} is in the future")
+            continue
+
+        # -- Validate assessment_type -------------------------------------
+        a_type = row.get("assessment_type", "").lower().strip()
+        if a_type not in _VALID_TYPES:
+            skipped += 1
+            errors.append(f"Row {line_num}: unknown type '{a_type}'")
+            continue
+
+        # -- Validate pct_score -------------------------------------------
+        try:
+            pct = int(row.get("pct_score", ""))
+            if not 0 <= pct <= 100:
+                raise ValueError
+        except ValueError:
+            skipped += 1
+            errors.append(f"Row {line_num}: pct_score must be an integer 0–100")
+            continue
+
+        # -- Optional band ------------------------------------------------
+        band       = row.get("band", "").strip() or "Imported"
+        band_color = _BAND_COLORS.get(band.lower(), "primary")
+
+        # -- Insert record ------------------------------------------------
+        record = AssessmentRecord(
+            user_id           = current_user.id,
+            assessment_type   = a_type,
+            assessment_label  = _TYPE_LABELS[a_type],
+            raw_score         = pct,          # raw stored as pct for CSV imports
+            pct_score         = pct,
+            band              = band,
+            band_color        = band_color,
+            status            = "completed",
+            answers_json      = "{}",
+            personal_info_json= "{}",
+            completed_at      = completed_at,
+        )
+        db.session.add(record)
+        imported += 1
+
+    if imported:
+        db.session.commit()
+
+    # -- Build summary flash ----------------------------------------------
+    if imported == 0 and skipped == 0:
+        flash("The CSV had no data rows to import.", "warning")
+    elif imported > 0 and skipped == 0:
+        flash(f"[OK] Successfully imported {imported} record(s). "
+              f"Visit Progress to see your updated insights.", "success")
+    elif imported > 0 and skipped > 0:
+        err_preview = "; ".join(errors[:3])
+        if len(errors) > 3:
+            err_preview += f" … and {len(errors) - 3} more"
+        flash(f"[!] Imported {imported} record(s), skipped {skipped} row(s): {err_preview}",
+              "warning")
+    else:
+        err_preview = "; ".join(errors[:3])
+        flash(f"[X] No records imported. Errors: {err_preview}", "danger")
+
+    return redirect(url_for("assessment.retrain_insights"))
+
+
+# -- Review Answers --------------------------------------------------------
 @assessment.route("/review", methods=["GET", "POST"])
 @login_required
 def review():
@@ -1071,9 +1893,35 @@ def review():
         return redirect(url_for("assessment.questionnaire"))
 
     if request.method == "POST":
-        # Final report submission is temporarily disabled.
-        flash("Final submission is temporarily disabled. Please check back later.", "info")
-        return redirect(url_for("assessment.review"))
+        answers  = session.get("answers", {})
+        p_info   = session.get("personal_info", {})
+
+        raw, pct, band, band_color, interpretation, extra = compute_score(a_type, answers)
+
+        # Duration: stored in session by the questionnaire JS as seconds
+        duration = session.get("duration_seconds")
+
+        record = AssessmentRecord(
+            user_id           = current_user.id,
+            assessment_type   = a_type,
+            assessment_label  = session.get("assessment_label", "Assessment"),
+            raw_score         = raw,
+            pct_score         = pct,
+            band              = band,
+            band_color        = band_color,
+            status            = "completed",
+            duration_seconds  = int(duration) if duration else None,
+            answers_json      = json.dumps(answers),
+            personal_info_json = json.dumps(p_info),
+            completed_at      = datetime.utcnow(),
+        )
+        db.session.add(record)
+        db.session.commit()
+
+        # Store the record id in session so result/recommendations pages can load it
+        session["last_record_id"] = record.id
+
+        return redirect(url_for("assessment.processing"))
 
     cfg           = ASSESSMENT_TYPES.get(a_type, {})
     questions     = cfg.get("questions", [])
@@ -1096,7 +1944,7 @@ def review():
     )
 
 
-# ── Processing ────────────────────────────────────────────────────────────
+# -- Processing ------------------------------------------------------------
 @assessment.route("/processing")
 @login_required
 def processing():
@@ -1105,7 +1953,7 @@ def processing():
     return render_template("assessment/processing.html", title="Processing")
 
 
-# ── Result ────────────────────────────────────────────────────────────────
+# -- Result ----------------------------------------------------------------
 @assessment.route("/result")
 @login_required
 def result():
@@ -1129,39 +1977,67 @@ def result():
         assessment_info=cfg,
         answers=answers,
         extra=extra,
+        personal_info=session.get("personal_info", {}),
     )
 
 
-# ── Guidance / Recommendations ────────────────────────────────────────────
+# -- Guidance / Recommendations --------------------------------------------
 @assessment.route("/recommendations")
 @login_required
 def recommendations():
     a_type  = session.get("assessment_type", "")
     a_label = session.get("assessment_label", "Assessment")
+    answers = session.get("answers", {})
+    cfg     = ASSESSMENT_TYPES.get(a_type, {})
+
+    # Re-use compute_score so the guidance page has full band context
+    raw, pct, band, band_color, interpretation, extra = compute_score(a_type, answers)
+
     return render_template(
         "assessment/recommendations.html",
         title="Guidance & Interpretation",
         assessment_type=a_type,
         assessment_label=a_label,
+        band=band,
+        band_color=band_color,
+        interpretation=interpretation,
+        extra=extra,
+        personal_info=session.get("personal_info", {}),
     )
 
 
-# ── History ───────────────────────────────────────────────────────────────
+# -- History ---------------------------------------------------------------
 @assessment.route("/history")
 @login_required
 def history():
-    return render_template("assessment/history.html", title="Assessment History")
+    records = (
+        AssessmentRecord.query
+        .filter_by(user_id=current_user.id)
+        .order_by(AssessmentRecord.completed_at.desc())
+        .all()
+    )
+    return render_template("assessment/history.html",
+                           title="Assessment History",
+                           records=records)
 
 
-# ── Help / Information ────────────────────────────────────────────────────
+# -- Help / Information ----------------------------------------------------
 @assessment.route("/help")
 def help_page():
     return render_template("assessment/help.html", title="Help & Information")
 
 
-# ── Delete stub ───────────────────────────────────────────────────────────
+# -- Delete ----------------------------------------------------------------
 @assessment.route("/delete/<int:assessment_id>", methods=["POST"])
 @login_required
 def delete_assessment(assessment_id):
-    flash("Assessment record deleted.", "success")
+    record = AssessmentRecord.query.filter_by(
+        id=assessment_id, user_id=current_user.id
+    ).first()
+    if record:
+        db.session.delete(record)
+        db.session.commit()
+        flash("Assessment record deleted.", "success")
+    else:
+        flash("Record not found or you do not have permission to delete it.", "warning")
     return redirect(url_for("assessment.history"))

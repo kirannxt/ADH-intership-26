@@ -5,7 +5,7 @@
 <div class="container">
   <nav class="breadcrumb" aria-label="Breadcrumb">
     <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
-    <span class="breadcrumb-sep" aria-hidden="true">›</span>
+    <span class="breadcrumb-sep" aria-hidden="true">></span>
     <span class="current" aria-current="page">Result</span>
   </nav>
 </div>
@@ -14,316 +14,491 @@
 {% block content %}
 <div class="container section">
 
-  <!-- ── Result header ──────────────────────────────────────────────── -->
-  <div class="result-header" role="region" aria-label="Assessment result summary">
-    <div style="font-size:.85rem;font-weight:700;letter-spacing:.08em;
-                text-transform:uppercase;opacity:.85;margin-bottom:.4rem;">
-      {{ assessment_info.icon }}  {{ assessment_label }}
-    </div>
-    <h1 style="color:#fff;font-size:1.75rem;margin-bottom:.4rem;">
-      Your Screening is Complete
-    </h1>
-    <p style="color:rgba(255,255,255,.85);font-size:.95rem;">
-      Based on your self-reported responses today. Read the interpretation carefully.
-    </p>
-  </div>
+  {# -----------------------------------------------------------------------
+     ASD RESULT PATH
+  ---- #}
+  {% if assessment_type == 'asd' %}
 
-  <!-- ── IMPORTANT disclaimer — shown before any score ─────────────── -->
-  <div class="disclaimer-box mb-4" role="alert" aria-label="Important notice">
-    <span class="d-icon" aria-hidden="true">⚠️</span>
-    <div>
-      <strong>Please read before interpreting your result.</strong>
-      This is a <em>self-report screening tool</em>, not a clinical assessment or diagnosis.
-      Your score reflects how you responded <em>today</em> and may be influenced by your current
-      mood, stress level, and how you interpreted each question.
-      <strong>Do not use this result to self-diagnose</strong> or make important decisions without
-      speaking to a qualified professional.
-      <a href="{{ url_for('assessment.help_page') }}#limitations">Learn about limitations →</a>
-    </div>
-  </div>
+    {# Pull personal_info from session for personalised report #}
+    {% set pinfo = personal_info %}
+    {% set subject = pinfo.get('subject_name', '') %}
+    {% set role    = pinfo.get('responder_role', 'individual') %}
+    {% set role_label = {
+        'parent':    'Parent',
+        'caregiver': 'Caregiver',
+        'teacher':   'Teacher / Professional',
+        'individual':'Individual (Self)'
+    }.get(role, 'Respondent') %}
 
-  <!-- ── Special: Depression Q9 safety notice ───────────────────────── -->
-  {% if assessment_type == 'depression' and answers.get('q9', 'Not at all') != 'Not at all' %}
-  <div class="alert alert-danger mb-4" role="alert" aria-live="assertive">
-    <span aria-hidden="true">🆘</span>
-    <div>
-      <strong>You indicated thoughts of self-harm or feeling better off dead.</strong>
-      Please reach out for support immediately.
-      In the UK call <strong>Samaritans: 116 123</strong> (free, 24/7).
-      In the US call/text <strong>988</strong> (Suicide &amp; Crisis Lifeline).
-      Or go to your nearest emergency department.
-    </div>
-  </div>
-  {% endif %}
-
-  <div class="grid-2 mb-4">
-
-    <!-- ── Score display ──────────────────────────────────────────── -->
-    <div class="card" role="region" aria-label="Your score">
-      <div class="card-header"><span class="card-title">Your Result</span></div>
-      <div class="card-body" style="display:flex;flex-direction:column;align-items:center;gap:1.25rem;">
-
-        {# VARK: show style tally instead of a ring #}
-        {% if assessment_type == 'learning' and extra.tally %}
-
-          <div style="text-align:center;">
-            <div style="font-size:3rem;margin-bottom:.5rem;" aria-hidden="true">
-              {% if extra.dominant == 'visual' %}👁
-              {% elif extra.dominant == 'auditory' %}🎧
-              {% elif extra.dominant == 'read_write' %}📖
-              {% else %}🖐{% endif %}
-            </div>
-            <h2 style="margin-bottom:.25rem;">
-              {% if extra.dominant == 'visual' %}Visual Learner
-              {% elif extra.dominant == 'auditory' %}Auditory Learner
-              {% elif extra.dominant == 'read_write' %}Read/Write Learner
-              {% else %}Kinaesthetic Learner{% endif %}
-            </h2>
-            <p style="font-size:.9rem;color:var(--text-muted);">Dominant learning preference</p>
-          </div>
-
-          <!-- VARK tally bars -->
-          <div class="score-breakdown" style="width:100%;">
-            {% set vark_labels = [
-              ('visual',       '👁 Visual',       extra.tally.get('visual',0)),
-              ('auditory',     '🎧 Auditory',      extra.tally.get('auditory',0)),
-              ('read_write',   '📖 Read / Write',  extra.tally.get('read_write',0)),
-              ('kinaesthetic', '🖐 Kinaesthetic',  extra.tally.get('kinaesthetic',0)),
-            ] %}
-            {% for key, label, count in vark_labels %}
-            <div class="score-row">
-              <span class="score-row-label">{{ label }}</span>
-              <div class="score-row-bar">
-                <div class="score-row-fill"
-                     data-pct="{{ (count / 10 * 100)|round|int }}"
-                     style="background:{% if key == extra.dominant %}var(--primary){% else %}var(--secondary){% endif %};">
-                </div>
-              </div>
-              <span class="score-row-val">{{ count }}/10</span>
-            </div>
-            {% endfor %}
-          </div>
-
-        {# Standard assessments: donut ring #}
-        {% else %}
-
-          <div class="score-ring-wrap">
-            <div class="score-ring" aria-label="Score: {{ raw_score }} — {{ band }}">
-              <svg viewBox="0 0 160 160" aria-hidden="true">
-                <circle class="score-ring-track" cx="80" cy="80" r="70"/>
-                <circle class="score-ring-fill" cx="80" cy="80" r="70"
-                        data-pct="{{ score }}"
-                        stroke="{% if band_color == 'success' %}#10b981
-                               {% elif band_color == 'warning' %}#f59e0b
-                               {% elif band_color == 'danger'  %}#ef4444
-                               {% else %}#4f46e5{% endif %}"/>
-              </svg>
-              <div class="score-ring-text">
-                <span class="score-ring-value" aria-hidden="true">{{ raw_score }}</span>
-                <span class="score-ring-label" aria-hidden="true">/ {{ assessment_info.scoring.max }}</span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Band label -->
-          <span class="result-band result-band-{% if band_color == 'success' %}high{% elif band_color == 'warning' %}moderate{% else %}low{% endif %}"
-                role="status" aria-label="Result band: {{ band }}">
-            {% if band_color == 'success' %}✅
-            {% elif band_color == 'warning' %}📊
-            {% else %}⚠️{% endif %}
-            {{ band }}
-          </span>
-
-          <!-- Score context bar -->
-          <div style="width:100%;">
-            <div style="display:flex;justify-content:space-between;
-                        font-size:.78rem;color:var(--text-muted);margin-bottom:.4rem;">
-              <span>Score: <strong>{{ raw_score }}</strong> out of {{ assessment_info.scoring.max }}</span>
-              <span>{{ score }}%</span>
-            </div>
-            <div class="progress-bar-bg" style="height:12px;">
-              <div class="progress-bar-fill"
-                   id="q-progress"
-                   style="width:0%;background:
-                     {% if band_color == 'success' %}var(--success)
-                     {% elif band_color == 'warning' %}var(--warning)
-                     {% else %}var(--danger){% endif %};">
-              </div>
-            </div>
-            <!-- Band threshold markers -->
-            {% set bands = assessment_info.scoring.bands %}
-            <div style="display:flex;justify-content:space-between;
-                        font-size:.72rem;color:var(--text-light);margin-top:.3rem;">
-              {% for lo, hi, bl, bc, _ in bands %}
-              <span>{{ bl }} ({{ lo }}–{{ hi }})</span>
-              {% endfor %}
-            </div>
-          </div>
-
-        {% endif %}
-
+    <!-- ASD header banner -->
+    <div class="asd-result-header" role="region" aria-label="ASD assessment result">
+      <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem;flex-wrap:wrap;">
+        <span style="font-size:2rem;" aria-hidden="true"></span>
+        <div>
+          <div style="font-size:.8rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+                      opacity:.85;margin-bottom:.2rem;">ASD Assessment-Support Screen</div>
+          <h1 style="color:#fff;font-size:1.6rem;margin:0;">
+            {% if subject %}Report for {{ subject }}{% else %}Your Assessment Report{% endif %}
+          </h1>
+        </div>
+        <div style="margin-left:auto;font-size:.85rem;opacity:.85;text-align:right;">
+          Completed by: {{ role_label }}
+        </div>
       </div>
-    </div>
-
-    <!-- ── Interpretation ─────────────────────────────────────────── -->
-    <div class="card" role="region" aria-label="Result interpretation">
-      <div class="card-header"><span class="card-title">What This Means</span></div>
-      <div class="card-body" style="display:flex;flex-direction:column;gap:1rem;">
-
-        <!-- Plain-language interpretation from scoring band -->
-        <div class="{% if band_color == 'danger' %}alert alert-danger{% elif band_color == 'warning' %}alert alert-warning{% else %}alert alert-success{% endif %}"
-             role="status" style="margin:0;">
-          <span aria-hidden="true">
-            {% if band_color == 'success' %}✅
-            {% elif band_color == 'warning' %}📊
-            {% else %}⚠️{% endif %}
-          </span>
-          <span>{{ interpretation }}</span>
-        </div>
-
-        <!-- Per-assessment context -->
-        {% if assessment_type == 'adhd' %}
-        <div>
-          <h4 style="margin-bottom:.4rem;">About ADHD Screening</h4>
-          <p style="font-size:.88rem;">
-            This screen is inspired by the ASRS (Adult ADHD Self-Report Scale) developed
-            by the WHO. A high score indicates traits that may warrant professional evaluation —
-            it does not confirm ADHD. Many conditions share these traits, and only a clinician
-            can make a diagnosis through a full assessment.
-          </p>
-        </div>
-
-        {% elif assessment_type == 'anxiety' %}
-        <div>
-          <h4 style="margin-bottom:.4rem;">About Anxiety Screening</h4>
-          <p style="font-size:.88rem;">
-            This screen is inspired by the GAD-7 (Generalised Anxiety Disorder 7-item scale).
-            Scores of 8–15 suggest moderate anxiety; scores ≥16 suggest severe anxiety.
-            Anxiety symptoms are common and treatable — speaking with a GP is a good first step.
-          </p>
-        </div>
-
-        {% elif assessment_type == 'depression' %}
-        <div>
-          <h4 style="margin-bottom:.4rem;">About Depression Screening</h4>
-          <p style="font-size:.88rem;">
-            This screen is inspired by the PHQ-9 (Patient Health Questionnaire-9).
-            Depression is a medical condition — not a personal failing.
-            If your score is 7 or above, please consider speaking with your GP.
-            Effective treatments are available.
-          </p>
-        </div>
-
-        {% elif assessment_type == 'stress' %}
-        <div>
-          <h4 style="margin-bottom:.4rem;">About Perceived Stress</h4>
-          <p style="font-size:.88rem;">
-            Based on Cohen's PSS-10, this measures how stressed you feel — not an
-            objective measure of stressors in your life. High perceived stress is
-            associated with health impacts over time. Stress management strategies and
-            professional support can both help.
-          </p>
-        </div>
-
-        {% elif assessment_type == 'learning' %}
-        <div>
-          <h4 style="margin-bottom:.4rem;">About Learning Styles</h4>
-          <p style="font-size:.88rem;">
-            Based on the VARK model (Fleming, 1992). Learning style preferences are
-            tendencies, not rigid categories — most people use multiple styles.
-            This result can help you choose study strategies that feel more natural.
-            It is not a measure of intelligence or ability.
-          </p>
-        </div>
-
-        {% elif assessment_type == 'eq' %}
-        <div>
-          <h4 style="margin-bottom:.4rem;">About Emotional Intelligence</h4>
-          <p style="font-size:.88rem;">
-            Based on established EI frameworks (Mayer–Salovey–Caruso, Goleman).
-            Emotional intelligence is a set of learnable skills — not a fixed trait.
-            Lower scores indicate areas with potential for development, not personal
-            deficiencies.
-          </p>
-        </div>
-        {% endif %}
-
-        <!-- What this does NOT mean -->
-        <details style="border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;">
-          <summary style="padding:.75rem 1rem;cursor:pointer;font-weight:600;
-                          font-size:.9rem;background:var(--surface-2);
-                          list-style:none;display:flex;justify-content:space-between;">
-            What this result does <em>not</em> mean
-            <span aria-hidden="true">▾</span>
-          </summary>
-          <ul style="padding:.85rem 1rem .85rem 1.75rem;font-size:.88rem;
-                     color:var(--text-muted);line-height:2;margin:0;">
-            <li>It is not a clinical diagnosis of any condition.</li>
-            <li>It does not define your character, intelligence, or worth.</li>
-            <li>It is not a permanent measure — it reflects today's responses.</li>
-            <li>It should not be used to make medical or major life decisions.</li>
-            <li>It is not a substitute for professional evaluation.</li>
-          </ul>
-        </details>
-
-      </div>
-    </div>
-
-  </div><!-- /grid-2 -->
-
-  <!-- ── Suggested next steps ────────────────────────────────────── -->
-  <div class="card mb-4" role="region" aria-label="Suggested next steps">
-    <div class="card-header"><span class="card-title">📋 Suggested Next Steps</span></div>
-    <div class="card-body">
-      <ol style="padding-left:1.25rem;font-size:.92rem;color:var(--text);line-height:2.2;">
-        <li>
-          Read the
-          <a href="{{ url_for('assessment.recommendations') }}">Guidance &amp; Interpretation</a>
-          page for reflection suggestions specific to this assessment.
-        </li>
-        <li>
-          {% if assessment_type in ['adhd','anxiety','depression','stress'] %}
-          If your score is in the Moderate or High range, consider speaking with your
-          GP or a mental health professional. A screening result is a conversation-starter,
-          not a conclusion.
-          {% elif assessment_type == 'learning' %}
-          Try applying your dominant learning style to an upcoming task or study session
-          and notice whether it makes a difference.
-          {% elif assessment_type == 'eq' %}
-          Pick one EQ domain (self-awareness, empathy, regulation, or social skills)
-          and focus on it for the next two weeks.
-          {% endif %}
-        </li>
-        <li>
-          Retake this assessment in 4–6 weeks to see if anything has changed.
-          Scores often shift with time, context, and deliberate effort.
-        </li>
-        <li>
-          Visit the <a href="{{ url_for('assessment.help_page') }}">Help page</a>
-          to learn more about what this assessment measures and its limitations.
-        </li>
-      </ol>
-    </div>
-  </div>
-
-  <!-- ── Professional support callout (for clinical screens) ───────── -->
-  {% if assessment_type in ['adhd','anxiety','depression','stress'] %}
-  <div class="info-box mb-4" role="note" style="background:#dbeafe;border-color:var(--info);">
-    <span style="font-size:1.2rem;flex-shrink:0;" aria-hidden="true">🩺</span>
-    <div>
-      <strong>When to seek professional support:</strong>
-      <p style="color:#1e40af;margin-top:.3rem;font-size:.9rem;">
-        If your result is Moderate or High, or if you are experiencing persistent difficulty
-        in your daily life, please speak with a qualified professional. Your GP is a good
-        starting point. Effective support is available.
-        <a href="{{ url_for('assessment.help_page') }}#support"
-           style="font-weight:700;">Find support resources →</a>
+      <p style="color:rgba(255,255,255,.85);font-size:.92rem;margin:0;">
+        Based on responses across 5 behavioural domains. Read all sections before drawing any conclusions.
       </p>
     </div>
-  </div>
-  {% endif %}
 
-  <!-- ── Action buttons ─────────────────────────────────────────── -->
+    <!-- CRITICAL disclaimer — must be prominent for ASD -->
+    <div class="asd-disclaimer" role="alert">
+      <div style="display:flex;gap:.75rem;align-items:flex-start;">
+        <span style="font-size:1.4rem;flex-shrink:0;" aria-hidden="true">[!]</span>
+        <div>
+          <strong style="font-size:1rem;">This is a screening support tool — not a diagnosis.</strong>
+          <p style="margin-top:.4rem;margin-bottom:0;font-size:.9rem;color:#92400e;">
+            This report cannot diagnose autism spectrum disorder (ASD) or any other condition.
+            Autism can only be diagnosed by a qualified clinician following a full assessment.
+            Results reflect the observations reported on a single occasion and may be influenced
+            by context, the respondent's perspective, and the limitations of self-report tools.
+            Do not use this result to label, treat, or make major decisions about any individual.
+            <a href="{{ url_for('assessment.help_page') }}#limitations"
+               style="color:#92400e;font-weight:700;">Learn about limitations</a>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- -- Assessment Outcome (the 3-branch diamond from flowchart) --- -->
+    <div class="asd-outcome-section mb-4">
+      <h2 style="margin-bottom:1.25rem;font-size:1.3rem;">Assessment Outcome</h2>
+
+      <div class="asd-outcome-card asd-outcome-{{ band_color }}"
+           role="status" aria-label="Assessment outcome: {{ band }}">
+        <div class="asd-outcome-indicator">
+          {% if band_color == 'asd_lower' %}
+            <span class="asd-outcome-dot asd-dot-lower" aria-hidden="true"></span>
+          {% elif band_color == 'asd_attention' %}
+            <span class="asd-outcome-dot asd-dot-attention" aria-hidden="true"></span>
+          {% else %}
+            <span class="asd-outcome-dot asd-dot-higher" aria-hidden="true"></span>
+          {% endif %}
+          <h3 class="asd-outcome-title">{{ band }}</h3>
+        </div>
+        <p class="asd-outcome-text">{{ interpretation }}</p>
+
+        <!-- Visual band scale -->
+        <div class="asd-band-scale" aria-label="Score scale">
+          <div class="asd-band-scale-bar">
+            <div class="asd-band-zone asd-zone-lower"  title="Lower Indication (0–26)">Lower</div>
+            <div class="asd-band-zone asd-zone-attention" title="Requires Attention (27–53)">Requires Attention</div>
+            <div class="asd-band-zone asd-zone-higher" title="Higher Indication (54–80)">Higher</div>
+          </div>
+          <div class="asd-band-marker" style="left:{{ [(raw_score / 80 * 100)|round|int, 97]|min }}%;"
+               aria-label="Your score position"></div>
+          <div style="display:flex;justify-content:space-between;font-size:.72rem;
+                      color:var(--text-muted);margin-top:.25rem;padding:0 2px;">
+            <span>Score: <strong>{{ raw_score }}</strong> / 80</span>
+            <span>{{ score }}%</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- -- Domain Breakdown (the 5 ASD-related areas) ---- -->
+    <div class="card mb-4" role="region" aria-label="Domain breakdown">
+      <div class="card-header flex-between">
+        <span class="card-title">Responses by Domain</span>
+        <span style="font-size:.82rem;color:var(--text-muted);">
+          Higher bar = more traits reported in that area
+        </span>
+      </div>
+      <div class="card-body">
+        <div class="asd-domain-grid">
+          {% set domain_colors = {
+            'social_comm':    '#4f46e5',
+            'social_interact':'#06b6d4',
+            'repetitive':     '#f59e0b',
+            'focused':        '#10b981',
+            'sensory':        '#8b5cf6',
+          } %}
+          {% for domain_key, domain_label in extra.domain_labels.items() %}
+          {% set dpct = extra.domain_pct.get(domain_key, 0) %}
+          {% set dscore = extra.domain_scores.get(domain_key, 0) %}
+          {% set dmax   = extra.domain_max.get(domain_key, 16) %}
+          {% set dcolor = domain_colors.get(domain_key, '#4f46e5') %}
+          <div class="asd-domain-card" aria-label="{{ domain_label }}: {{ dpct }}%">
+            <div class="asd-domain-name">{{ domain_label }}</div>
+            <div class="asd-domain-bar-wrap">
+              <div class="asd-domain-bar-bg">
+                <div class="asd-domain-bar-fill score-row-fill"
+                     data-pct="{{ dpct }}"
+                     style="background:{{ dcolor }};width:0%;">
+                </div>
+              </div>
+              <span class="asd-domain-pct">{{ dpct }}%</span>
+            </div>
+            <div style="font-size:.76rem;color:var(--text-light);">
+              {{ dscore }} / {{ dmax }} points
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <div class="info-box mt-3" role="note">
+          <span aria-hidden="true" style="flex-shrink:0;">[i]</span>
+          <span style="font-size:.85rem;">
+            Each domain has a maximum of 16 points (4 questions × 4 points each).
+            A higher percentage means more traits associated with that area were reported.
+            No single domain is sufficient to draw conclusions — the overall pattern matters.
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- -- Pattern observations (plain language) ---- -->
+    <div class="grid-2 mb-4">
+
+      <!-- What the pattern suggests -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Pattern Observations</span>
+        </div>
+        <div class="card-body" style="display:flex;flex-direction:column;gap:.85rem;">
+          <p style="font-size:.9rem;color:var(--text-muted);margin-bottom:.25rem;">
+            The following observations describe the pattern of responses only.
+            They are descriptive — not diagnostic.
+          </p>
+          {% for domain_key, domain_label in extra.domain_labels.items() %}
+          {% set dpct = extra.domain_pct.get(domain_key, 0) %}
+          <div style="display:flex;gap:.6rem;align-items:flex-start;font-size:.88rem;">
+            <span style="flex-shrink:0;margin-top:2px;">
+              {% if dpct >= 63 %}{% elif dpct >= 38 %}{% else %}{% endif %}
+            </span>
+            <span>
+              <strong>{{ domain_label }}:</strong>
+              {% if dpct >= 63 %}
+                A higher number of traits were reported in this area.
+              {% elif dpct >= 38 %}
+                A moderate number of traits were reported in this area.
+              {% else %}
+                Few traits were reported in this area.
+              {% endif %}
+            </span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- What this means / does NOT mean -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Interpreting This Result</span>
+        </div>
+        <div class="card-body" style="display:flex;flex-direction:column;gap:1rem;">
+          <div>
+            <h4 style="margin-bottom:.5rem;">What this result means:</h4>
+            <ul style="padding-left:1.1rem;font-size:.88rem;color:var(--text-muted);line-height:2;">
+              <li>It reflects the traits reported by <strong>{{ role_label }}</strong> on this occasion.</li>
+              <li>It can be a helpful starting point for a conversation with a professional.</li>
+              <li>It indicates the <em>level of observed traits</em> — not the presence of a condition.</li>
+            </ul>
+          </div>
+          <div>
+            <h4 style="margin-bottom:.5rem;">What this result does <em>not</em> mean:</h4>
+            <ul style="padding-left:1.1rem;font-size:.88rem;color:var(--text-muted);line-height:2;">
+              <li>It is <strong>not a diagnosis</strong> of autism or any other condition.</li>
+              <li>A Lower Indication does not rule out autism.</li>
+              <li>A Higher Indication does not confirm autism.</li>
+              <li>It should not replace a full professional assessment.</li>
+              <li>It should not be used to label or limit any individual.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- -- Suggested next steps (outcome-specific) ---- -->
+    <div class="card mb-4" role="region" aria-label="Suggested next steps">
+      <div class="card-header"><span class="card-title">Suggested Next Steps</span></div>
+      <div class="card-body">
+        <ol style="padding-left:1.25rem;font-size:.92rem;color:var(--text);line-height:2.4;">
+          {% if band_color == 'asd_lower' %}
+          <li>Continue to monitor behaviours and note any changes over time.</li>
+          <li>Share these observations with your GP or health visitor if you have ongoing concerns.</li>
+          <li>Read the <a href="{{ url_for('assessment.recommendations') }}">Guidance page</a> for awareness resources.</li>
+          <li>Retake this screen in 3–6 months if concerns remain or behaviours change.</li>
+          {% elif band_color == 'asd_attention' %}
+          <li><strong>Speak with your GP or a paediatrician</strong> about your observations. Bring this report as a starting point.</li>
+          <li>Request a referral to a specialist autism assessment team if your GP agrees it is appropriate.</li>
+          <li>Read the <a href="{{ url_for('assessment.recommendations') }}">Guidance page</a> for information on the assessment process.</li>
+          <li>Keep a behavioural diary over the next few weeks noting frequency and context of observed traits.</li>
+          <li>Contact your school's SENCO (Special Educational Needs Co-ordinator) if this relates to a school-age child.</li>
+          {% else %}
+          <li><strong>Seek a professional evaluation as soon as possible.</strong> Share this report with your GP or relevant specialist.</li>
+          <li>Request a formal autism assessment from a qualified multidisciplinary team.</li>
+          <li>While awaiting assessment, contact support organisations for guidance on interim support strategies.</li>
+          <li>Read the <a href="{{ url_for('assessment.recommendations') }}">Guidance page</a> for a list of support organisations and next steps.</li>
+          <li>For school-age children, speak with the school's SENCO and request an Education, Health and Care (EHC) needs assessment if appropriate.</li>
+          {% endif %}
+          <li>Visit the <a href="{{ url_for('assessment.help_page') }}">Help page</a> to learn more about this tool and its limitations.</li>
+        </ol>
+      </div>
+    </div>
+
+    <!-- Professional support callout -->
+    <div class="info-box mb-4" style="background:#dbeafe;border-color:var(--info);" role="note">
+      <span style="font-size:1.2rem;flex-shrink:0;" aria-hidden="true"></span>
+      <div>
+        <strong>Remember: only a qualified professional can diagnose autism.</strong>
+        <p style="color:#1e40af;margin-top:.3rem;font-size:.88rem;">
+          A GP, paediatrician, psychologist, or autism specialist can arrange or conduct
+          a comprehensive assessment. This screening tool is a support resource only —
+          not a substitute for professional clinical evaluation.
+          <a href="{{ url_for('assessment.help_page') }}#support" style="font-weight:700;">
+            Find support resources
+          </a>
+        </p>
+      </div>
+    </div>
+
+  {# -----------------------------------------------------------------------
+     ALL OTHER ASSESSMENTS
+  ---- #}
+  {% else %}
+
+    <!-- Result header -->
+    <div class="result-header" role="region" aria-label="Assessment result summary">
+      <div style="font-size:.85rem;font-weight:700;letter-spacing:.08em;
+                  text-transform:uppercase;opacity:.85;margin-bottom:.4rem;">
+        {{ assessment_info.icon }}  {{ assessment_label }}
+      </div>
+      <h1 style="color:#fff;font-size:1.75rem;margin-bottom:.4rem;">
+        Your Screening is Complete
+      </h1>
+      <p style="color:rgba(255,255,255,.85);font-size:.95rem;">
+        Based on your self-reported responses today. Read the interpretation carefully.
+      </p>
+    </div>
+
+    <!-- Standard disclaimer -->
+    <div class="disclaimer-box mb-4" role="alert">
+      <span class="d-icon" aria-hidden="true">[!]</span>
+      <div>
+        <strong>Please read before interpreting your result.</strong>
+        This is a <em>self-report screening tool</em>, not a clinical assessment or diagnosis.
+        Your score reflects how you responded <em>today</em> and may be influenced by your
+        current mood, stress level, and how you interpreted each question.
+        <strong>Do not use this result to self-diagnose</strong> or make important decisions
+        without speaking to a qualified professional.
+        <a href="{{ url_for('assessment.help_page') }}#limitations">Learn about limitations</a>
+      </div>
+    </div>
+
+    <!-- Depression Q9 safety notice -->
+    {% if assessment_type == 'depression' and answers.get('q9', 'Not at all') != 'Not at all' %}
+    <div class="alert alert-danger mb-4" role="alert" aria-live="assertive">
+      <span aria-hidden="true">[SOS]</span>
+      <div>
+        <strong>You indicated thoughts of self-harm or feeling better off dead.</strong>
+        Please reach out for support immediately.
+        In the UK call <strong>Samaritans: 116 123</strong> (free, 24/7).
+        In the US call/text <strong>988</strong> (Suicide &amp; Crisis Lifeline).
+        Or go to your nearest emergency department.
+      </div>
+    </div>
+    {% endif %}
+
+    <div class="grid-2 mb-4">
+
+      <!-- Score display -->
+      <div class="card" role="region" aria-label="Your score">
+        <div class="card-header"><span class="card-title">Your Result</span></div>
+        <div class="card-body" style="display:flex;flex-direction:column;align-items:center;gap:1.25rem;">
+
+          {% if assessment_type == 'learning' and extra.tally %}
+            <div style="text-align:center;">
+              <div style="font-size:3rem;margin-bottom:.5rem;" aria-hidden="true">
+                {% if extra.dominant == 'visual' %}
+                {% elif extra.dominant == 'auditory' %}
+                {% elif extra.dominant == 'read_write' %}
+                {% else %}{% endif %}
+              </div>
+              <h2 style="margin-bottom:.25rem;">
+                {% if extra.dominant == 'visual' %}Visual Learner
+                {% elif extra.dominant == 'auditory' %}Auditory Learner
+                {% elif extra.dominant == 'read_write' %}Read/Write Learner
+                {% else %}Kinaesthetic Learner{% endif %}
+              </h2>
+              <p style="font-size:.9rem;color:var(--text-muted);">Dominant learning preference</p>
+            </div>
+            <div class="score-breakdown" style="width:100%;">
+              {% set vark_labels = [
+                ('visual',       'Visual',       extra.tally.get('visual',0)),
+                ('auditory',     'Auditory',     extra.tally.get('auditory',0)),
+                ('read_write',   'Read / Write', extra.tally.get('read_write',0)),
+                ('kinaesthetic', 'Kinaesthetic', extra.tally.get('kinaesthetic',0)),
+              ] %}
+              {% for key, label, count in vark_labels %}
+              <div class="score-row">
+                <span class="score-row-label">{{ label }}</span>
+                <div class="score-row-bar">
+                  <div class="score-row-fill"
+                       data-pct="{{ (count / 10 * 100)|round|int }}"
+                       style="background:{% if key == extra.dominant %}var(--primary){% else %}var(--secondary){% endif %};">
+                  </div>
+                </div>
+                <span class="score-row-val">{{ count }}/10</span>
+              </div>
+              {% endfor %}
+            </div>
+
+          {% else %}
+            <div class="score-ring-wrap">
+              <div class="score-ring" aria-label="Score: {{ raw_score }} — {{ band }}">
+                <svg viewBox="0 0 160 160" aria-hidden="true">
+                  <circle class="score-ring-track" cx="80" cy="80" r="70"/>
+                  <circle class="score-ring-fill" cx="80" cy="80" r="70"
+                          data-pct="{{ score }}"
+                          stroke="{% if band_color == 'success' %}#10b981
+                                 {% elif band_color == 'warning' %}#f59e0b
+                                 {% elif band_color == 'danger'  %}#ef4444
+                                 {% else %}#4f46e5{% endif %}"/>
+                </svg>
+                <div class="score-ring-text">
+                  <span class="score-ring-value" aria-hidden="true">{{ raw_score }}</span>
+                  <span class="score-ring-label" aria-hidden="true">/ {{ assessment_info.scoring.max }}</span>
+                </div>
+              </div>
+            </div>
+
+            <span class="result-band result-band-{% if band_color == 'success' %}high{% elif band_color == 'warning' %}moderate{% else %}low{% endif %}"
+                  role="status" aria-label="Result band: {{ band }}">
+              {% if band_color == 'success' %}[OK]{% elif band_color == 'warning' %}{% else %}[!]{% endif %}
+              {{ band }}
+            </span>
+
+            <div style="width:100%;">
+              <div style="display:flex;justify-content:space-between;font-size:.78rem;
+                          color:var(--text-muted);margin-bottom:.4rem;">
+                <span>Score: <strong>{{ raw_score }}</strong> out of {{ assessment_info.scoring.max }}</span>
+                <span>{{ score }}%</span>
+              </div>
+              <div class="progress-bar-bg" style="height:12px;">
+                <div class="progress-bar-fill" id="q-progress" style="width:0%;background:
+                  {% if band_color == 'success' %}var(--success)
+                  {% elif band_color == 'warning' %}var(--warning)
+                  {% else %}var(--danger){% endif %};">
+                </div>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:.72rem;
+                          color:var(--text-light);margin-top:.3rem;">
+                {% for lo, hi, bl, bc, _ in assessment_info.scoring.bands %}
+                <span>{{ bl }} ({{ lo }}–{{ hi }})</span>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+
+        </div>
+      </div>
+
+      <!-- Interpretation -->
+      <div class="card" role="region" aria-label="Result interpretation">
+        <div class="card-header"><span class="card-title">What This Means</span></div>
+        <div class="card-body" style="display:flex;flex-direction:column;gap:1rem;">
+
+          <div class="{% if band_color == 'danger' %}alert alert-danger{% elif band_color == 'warning' %}alert alert-warning{% else %}alert alert-success{% endif %}"
+               role="status" style="margin:0;">
+            <span aria-hidden="true">
+              {% if band_color == 'success' %}[OK]{% elif band_color == 'warning' %}{% else %}[!]{% endif %}
+            </span>
+            <span>{{ interpretation }}</span>
+          </div>
+
+          {% if assessment_type == 'adhd' %}
+          <div><h4 style="margin-bottom:.4rem;">About ADHD Screening</h4>
+            <p style="font-size:.88rem;">Based on the ASRS structure. A high score indicates traits that may warrant professional evaluation — it does not confirm ADHD. Only a clinician can diagnose through a full assessment.</p>
+          </div>
+          {% elif assessment_type == 'anxiety' %}
+          <div><h4 style="margin-bottom:.4rem;">About Anxiety Screening</h4>
+            <p style="font-size:.88rem;">Based on the GAD-7. Anxiety symptoms are common and treatable — speaking with a GP is a good first step.</p>
+          </div>
+          {% elif assessment_type == 'depression' %}
+          <div><h4 style="margin-bottom:.4rem;">About Depression Screening</h4>
+            <p style="font-size:.88rem;">Based on the PHQ-9. Depression is a medical condition — not a personal failing. Effective treatments are available.</p>
+          </div>
+          {% elif assessment_type == 'stress' %}
+          <div><h4 style="margin-bottom:.4rem;">About Perceived Stress</h4>
+            <p style="font-size:.88rem;">Based on Cohen's PSS-10. High perceived stress is associated with health impacts over time. Stress management and professional support can help.</p>
+          </div>
+          {% elif assessment_type == 'learning' %}
+          <div><h4 style="margin-bottom:.4rem;">About Learning Styles</h4>
+            <p style="font-size:.88rem;">Based on the VARK model. Learning style preferences are tendencies, not rigid categories. This is not a measure of intelligence.</p>
+          </div>
+          {% elif assessment_type == 'eq' %}
+          <div><h4 style="margin-bottom:.4rem;">About Emotional Intelligence</h4>
+            <p style="font-size:.88rem;">Based on Mayer–Salovey–Caruso and Goleman frameworks. EI is a set of learnable skills — not a fixed trait.</p>
+          </div>
+          {% endif %}
+
+          <details style="border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;">
+            <summary style="padding:.75rem 1rem;cursor:pointer;font-weight:600;font-size:.9rem;
+                            background:var(--surface-2);list-style:none;display:flex;justify-content:space-between;">
+              What this result does <em>not</em> mean
+              <span aria-hidden="true"></span>
+            </summary>
+            <ul style="padding:.85rem 1rem .85rem 1.75rem;font-size:.88rem;color:var(--text-muted);line-height:2;margin:0;">
+              <li>It is not a clinical diagnosis of any condition.</li>
+              <li>It does not define your character, intelligence, or worth.</li>
+              <li>It is not a permanent measure — it reflects today's responses.</li>
+              <li>It should not be used to make medical or major life decisions.</li>
+              <li>It is not a substitute for professional evaluation.</li>
+            </ul>
+          </details>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Suggested next steps -->
+    <div class="card mb-4" role="region" aria-label="Suggested next steps">
+      <div class="card-header"><span class="card-title">Suggested Next Steps</span></div>
+      <div class="card-body">
+        <ol style="padding-left:1.25rem;font-size:.92rem;color:var(--text);line-height:2.2;">
+          <li>Read the <a href="{{ url_for('assessment.recommendations') }}">Guidance &amp; Interpretation</a> page for reflection suggestions.</li>
+          <li>
+            {% if assessment_type in ['adhd','anxiety','depression','stress'] %}
+            If your score is in the Moderate or High range, consider speaking with your GP or a mental health professional.
+            {% elif assessment_type == 'learning' %}
+            Try applying your dominant learning style to an upcoming task or study session.
+            {% elif assessment_type == 'eq' %}
+            Pick one EQ domain and focus on it for the next two weeks.
+            {% endif %}
+          </li>
+          <li>Retake this assessment in 4–6 weeks to see if anything has changed.</li>
+          <li>Visit the <a href="{{ url_for('assessment.help_page') }}">Help page</a> to learn more about limitations.</li>
+        </ol>
+      </div>
+    </div>
+
+    {% if assessment_type in ['adhd','anxiety','depression','stress'] %}
+    <div class="info-box mb-4" style="background:#dbeafe;border-color:var(--info);" role="note">
+      <span style="font-size:1.2rem;flex-shrink:0;" aria-hidden="true"></span>
+      <div>
+        <strong>When to seek professional support:</strong>
+        <p style="color:#1e40af;margin-top:.3rem;font-size:.9rem;">
+          If your result is Moderate or High, or if you are experiencing persistent difficulty,
+          please speak with a qualified professional. Your GP is a good starting point.
+          <a href="{{ url_for('assessment.help_page') }}#support" style="font-weight:700;">Find support resources</a>
+        </p>
+      </div>
+    </div>
+    {% endif %}
+
+  {% endif %}{# end else (non-ASD) #}
+
+  <!-- -- Action buttons (all assessments) ---- -->
   <div style="display:flex;justify-content:center;gap:1rem;flex-wrap:wrap;">
     <a href="{{ url_for('assessment.recommendations') }}" class="btn btn-primary btn-lg">
       View Guidance
@@ -341,12 +516,10 @@
 
 {% block extra_js %}
 <script>
-  // Animate the score progress bar after page load
   document.addEventListener("DOMContentLoaded", () => {
+    // Animate standard score progress bar
     const bar = document.getElementById("q-progress");
-    if (bar) {
-      setTimeout(() => { bar.style.width = "{{ score }}%"; }, 400);
-    }
+    if (bar) setTimeout(() => { bar.style.width = "{{ score }}%"; }, 400);
   });
 </script>
 {% endblock %}

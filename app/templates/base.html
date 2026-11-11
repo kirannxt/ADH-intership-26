@@ -12,11 +12,11 @@
 </head>
 <body>
 
-  <!-- ── Navbar ─────────────────────────────── -->
+  <!-- -- Navbar ------------------------------- -->
   {% block navbar %}
   <nav class="navbar" role="navigation" aria-label="Main navigation">
     <a href="{{ url_for('main.index') }}" class="navbar-brand" aria-label="AssessMe home">
-      <span class="brand-icon" aria-hidden="true">🧠</span>
+      <span class="brand-icon" aria-hidden="true"></span>
       AssessMe
     </a>
 
@@ -29,6 +29,15 @@
         <li><a href="{{ url_for('assessment.select') }}"
                class="nav-link {% if request.endpoint == 'assessment.select' %}active{% endif %}"
                aria-current="{% if request.endpoint == 'assessment.select' %}page{% endif %}">New Assessment</a></li>
+        <li><a href="{{ url_for('assessment.history') }}"
+               class="nav-link {% if request.endpoint == 'assessment.history' %}active{% endif %}"
+               aria-current="{% if request.endpoint == 'assessment.history' %}page{% endif %}">History</a></li>
+        <li><a href="{{ url_for('assessment.progress') }}"
+               class="nav-link {% if request.endpoint == 'assessment.progress' %}active{% endif %}"
+               aria-current="{% if request.endpoint == 'assessment.progress' %}page{% endif %}">Progress</a></li>
+        <li><a href="{{ url_for('assessment.retrain_insights') }}"
+               class="nav-link {% if request.endpoint == 'assessment.retrain_insights' %}active{% endif %}"
+               aria-current="{% if request.endpoint == 'assessment.retrain_insights' %}page{% endif %}"> Retrain</a></li>
       {% endif %}
       <li><a href="{{ url_for('assessment.help_page') }}"
              class="nav-link {% if request.endpoint == 'assessment.help_page' %}active{% endif %}"
@@ -62,6 +71,9 @@
     {% if current_user.is_authenticated %}
       <a href="{{ url_for('main.dashboard') }}"     class="nav-link">Dashboard</a>
       <a href="{{ url_for('assessment.select') }}"  class="nav-link">New Assessment</a>
+      <a href="{{ url_for('assessment.history') }}" class="nav-link">History</a>
+      <a href="{{ url_for('assessment.progress') }}" class="nav-link">Progress</a>
+      <a href="{{ url_for('assessment.retrain_insights') }}" class="nav-link"> Retrain</a>
     {% endif %}
     <a href="{{ url_for('assessment.help_page') }}" class="nav-link">Help</a>
     {% if current_user.is_authenticated %}
@@ -73,8 +85,8 @@
   </div>
   {% endblock %}
 
-  <!-- ── Skip link (accessibility) ──────────── -->
-  <a href="#main-content" class="hidden" style="position:absolute;top:4px;left:4px;z-index:999;background:var(--primary);color:#fff;padding:.4rem .8rem;border-radius:var(--radius-sm);font-size:.85rem;">
+  <!-- -- Skip link (accessibility) ------------ -->
+  <a href="#main-content" class="visually-hidden" style="position:absolute;top:4px;left:4px;z-index:999;background:var(--primary);color:#fff;padding:.4rem .8rem;border-radius:var(--radius-sm);font-size:.85rem;">
     Skip to content
   </a>
 
@@ -89,7 +101,7 @@
         <div class="container" style="padding-top:.75rem;">
           {% for cat, msg in messages %}
             <div class="alert alert-{{ cat }}" role="alert">
-              <span aria-hidden="true">{% if cat == 'success' %}✅{% elif cat == 'danger' %}❌{% elif cat == 'warning' %}⚠️{% else %}ℹ️{% endif %}</span>
+              <span aria-hidden="true">{% if cat == 'success' %}[OK]{% elif cat == 'danger' %}[X]{% elif cat == 'warning' %}[!]{% else %}[i]{% endif %}</span>
               {{ msg }}
             </div>
           {% endfor %}
@@ -101,7 +113,7 @@
     {% block content %}{% endblock %}
   </main>
 
-  <!-- ── Footer ─────────────────────────────── -->
+  <!-- -- Footer ------------------------------- -->
   {% block footer %}
   <footer class="footer" role="contentinfo">
     <p>© 2026 AssessMe &nbsp;·&nbsp; Empowering you with insight</p>

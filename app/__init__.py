@@ -14,6 +14,11 @@ login_manager.login_message = "Please log in to access this page."
 login_manager.login_message_category = "info"
 
 
+def _format_date(dt):
+    """Cross-platform date formatter: 'Nov 8, 2026' (no leading zero on day)."""
+    return dt.strftime("%b {d}, %Y").replace("{d}", str(dt.day))
+
+
 def create_app(config_name="default"):
     app = Flask(__name__)
     app.config.from_object(config[config_name])
@@ -22,6 +27,9 @@ def create_app(config_name="default"):
     db.init_app(app)
     login_manager.init_app(app)
     migrate.init_app(app, db)
+
+    # Custom Jinja filter for cross-platform date formatting
+    app.jinja_env.filters["fmtdate"] = _format_date
 
     # Blueprints
     from app.main import main as main_blueprint

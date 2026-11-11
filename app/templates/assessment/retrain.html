@@ -1,0 +1,504 @@
+{% extends "base.html" %}
+{% block title %}Retrain AI Insights — AssessMe{% endblock %}
+
+{% block breadcrumb %}
+<div class="container">
+  <nav class="breadcrumb" aria-label="Breadcrumb">
+    <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
+    <span class="breadcrumb-sep" aria-hidden="true">></span>
+    <a href="{{ url_for('assessment.progress') }}">Progress</a>
+    <span class="breadcrumb-sep" aria-hidden="true">></span>
+    <span class="current" aria-current="page">Retrain Insights</span>
+  </nav>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="container section">
+
+  <div class="flex-between mb-4" style="flex-wrap:wrap;gap:1rem;">
+    <div>
+      <h1 class="page-title"> Retrain AI Insights</h1>
+      <p class="page-sub">
+        Choose which records the ML analysis learns from — filter by date, assessment type, or training mode.
+      </p>
+    </div>
+    <a href="{{ url_for('assessment.progress') }}" class="btn btn-secondary">← Back to Progress</a>
+  </div>
+
+  <!-- How it works note -->
+  <div class="info-box mb-4" role="note">
+    <span aria-hidden="true"></span>
+    <div>
+      <strong>How retraining works</strong>
+      <p style="margin-top:.25rem;font-size:.87rem;">
+        The AI analyses your own assessment history every time you visit the Progress page.
+        There are no saved model files — your filter settings control which records are included
+        in the next run. Changes take effect immediately when you click <strong>Retrain Insights</strong>.
+      </p>
+    </div>
+  </div>
+
+  <!-- ----
+       SECTION 0 — TRAINING STATUS + TRAIN NOW BUTTON
+  ---- -->
+  <div class="card mb-4" role="region" aria-labelledby="train-section-title">
+    <div class="card-header"
+         style="background:linear-gradient(135deg,#fdf4ff,#ede9fe);border-color:#c4b5fd;">
+      <div style="display:flex;align-items:center;justify-content:space-between;
+                  flex-wrap:wrap;gap:.85rem;">
+        <div>
+          <span class="card-title" id="train-section-title" style="color:#5b21b6;">
+             Trained Model Status
+          </span>
+          <p class="card-text" style="margin-top:.2rem;color:#6d28d9;">
+            Supervised ML models (GradientBoosting / RandomForest / LogisticRegression)
+            trained on your answer history. Models persist on disk and are used for
+            next-band predictions on the Progress page.
+          </p>
+        </div>
+        <form method="POST" action="{{ url_for('assessment.train_ml_models') }}">
+          <button type="submit" class="btn btn-primary"
+                  style="background:#7c3aed;border-color:#7c3aed;"
+                  aria-label="Train or retrain all models now">
+             Train Models Now
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card-body" style="padding:1.25rem 1.75rem;">
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+                  gap:.85rem;">
+        {% for a_type, info in model_status.items() %}
+        {% set count = type_counts.get(a_type, 0) %}
+        <div style="padding:.9rem 1.1rem;border-radius:var(--radius);
+                    border:2px solid {% if info.has_model %}#c4b5fd{% else %}var(--border){% endif %};
+                    background:{% if info.has_model %}#fdf4ff{% else %}var(--surface-2){% endif %};">
+          <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem;">
+            <span style="font-size:1.1rem;" aria-hidden="true">
+              {{ all_assessment_types[a_type].icon }}
+            </span>
+            <span style="font-weight:700;font-size:.88rem;color:var(--text);">
+              {{ info.label }}
+            </span>
+            <span class="badge {% if info.has_model %}badge-primary{% else %}badge-gray{% endif %}"
+                  style="margin-left:auto;font-size:.7rem;">
+              {% if info.has_model %} Trained{% else %}Not trained{% endif %}
+            </span>
+          </div>
+
+          {% if info.has_model %}
+          <div style="font-size:.78rem;color:var(--text-muted);
+                      display:flex;flex-direction:column;gap:.2rem;">
+            <div> <strong>{{ info.algorithm }}</strong></div>
+            <div> {{ info.n_samples }} sample(s)</div>
+            {% if info.accuracy_pct != '—' %}
+            <div> CV accuracy: <strong style="color:#5b21b6;">{{ info.accuracy_pct }}</strong></div>
+            {% endif %}
+            {% if info.trained_ago %}
+            <div> {{ info.trained_ago }}</div>
+            {% endif %}
+          </div>
+          {% else %}
+          <div style="font-size:.78rem;color:var(--text-muted);">
+            {% if count >= 4 %}
+            <span style="color:var(--success);">[OK] {{ count }} record(s) — ready to train</span>
+            {% else %}
+            <span>{{ count }}/4 records — need {{ [0, 4 - count] | max }} more</span>
+            {% endif %}
+          </div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+
+      <p style="font-size:.77rem;color:var(--text-muted);margin-top:1rem;">
+         Each model is trained on your personal answer history only — no other users' data
+        is ever used. Training takes under a second for typical data sizes.
+      </p>
+    </div>
+  </div>
+
+  <!-- -- Active filter status banner ---- -->
+  {% if current_filter and current_filter.is_active %}
+  <div class="alert alert-info mb-4" role="status" aria-label="Active ML filter">
+    <span aria-hidden="true"></span>
+    <div style="flex:1;">
+      <strong>Filter currently active</strong> — insights on the Progress page use filtered data.
+      <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.45rem;">
+        {% if current_filter.date_from or current_filter.date_to %}
+        <span class="badge badge-primary">
+          
+          {% if current_filter.date_from %}from {{ current_filter.date_from }}{% endif %}
+          {% if current_filter.date_to %}to {{ current_filter.date_to }}{% endif %}
+        </span>
+        {% endif %}
+        {% if current_filter.types_include %}
+          {% for t in current_filter.types_include %}
+          <span class="badge badge-primary">
+            {{ all_assessment_types[t].icon }} {{ all_assessment_types[t].label }}
+          </span>
+          {% endfor %}
+        {% endif %}
+        <span class="badge badge-primary">
+           Mode:
+          {% if current_filter.mode == 'recent' %}Recent Focus
+          {% elif current_filter.mode == 'trend' %}Trend Focus
+          {% else %}All Data{% endif %}
+        </span>
+        <span class="badge badge-gray">{{ current_filter.n_records }} record(s) available</span>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- -- Main retrain form ---- -->
+  <form method="POST" action="{{ url_for('assessment.retrain_insights') }}"
+        aria-label="Retrain AI insights settings">
+
+    <!-- Section 1: Date Range -->
+    <div class="card mb-4" role="region" aria-labelledby="date-section-title">
+      <div class="card-header">
+        <span class="card-title" id="date-section-title"> Date Range</span>
+        <p class="card-text" style="margin-top:.2rem;">
+          Restrict the analysis to records completed within a specific window.
+          Leave both fields empty to include all records.
+        </p>
+      </div>
+      <div class="card-body">
+        <div class="form-row">
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label" for="date_from">From</label>
+            <input type="date" id="date_from" name="date_from" class="form-control"
+                   value="{{ current_filter.date_from if current_filter else '' }}"
+                   aria-label="Include records from this date">
+            <p class="form-hint">Include records on or after this date.</p>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label" for="date_to">To</label>
+            <input type="date" id="date_to" name="date_to" class="form-control"
+                   value="{{ current_filter.date_to if current_filter else '' }}"
+                   aria-label="Include records up to this date">
+            <p class="form-hint">Include records on or before this date.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2: Assessment Types -->
+    <div class="card mb-4" role="region" aria-labelledby="types-section-title">
+      <div class="card-header">
+        <span class="card-title" id="types-section-title"> Assessment Types</span>
+        <p class="card-text" style="margin-top:.2rem;">
+          Select specific types to focus the analysis on. Leave all unchecked to include every type.
+        </p>
+      </div>
+      <div class="card-body">
+        {% set active_types = current_filter.types_include if (current_filter and current_filter.types_include) else [] %}
+        <div style="display:flex;flex-wrap:wrap;gap:.65rem;" role="group" aria-label="Assessment type selection">
+          {% for key, cfg in all_assessment_types.items() %}
+          <label id="pill-{{ key }}"
+                 style="display:flex;align-items:center;gap:.5rem;padding:.5rem 1rem;
+                        border-radius:999px;cursor:pointer;font-size:.88rem;font-weight:600;
+                        border:2px solid {% if key in active_types %}var(--primary){% else %}var(--border){% endif %};
+                        background:{% if key in active_types %}var(--primary-light){% else %}var(--surface-2){% endif %};
+                        color:{% if key in active_types %}var(--primary){% else %}var(--text-muted){% endif %};
+                        transition:all .15s ease;">
+            <input type="checkbox" name="types_include" value="{{ key }}"
+                   {% if key in active_types %}checked{% endif %}
+                   style="display:none;">
+            <span style="font-size:1.1rem;" aria-hidden="true">{{ cfg.icon }}</span>
+            <span>{{ cfg.label }}</span>
+          </label>
+          {% endfor %}
+        </div>
+        <p class="form-hint" style="margin-top:.75rem;">
+          Click a pill to toggle it. Selected types are highlighted in purple.
+        </p>
+      </div>
+    </div>
+
+    <!-- Section 3: Training Mode -->
+    <div class="card mb-4" role="region" aria-labelledby="mode-section-title">
+      <div class="card-header">
+        <span class="card-title" id="mode-section-title"> Training Mode</span>
+        <p class="card-text" style="margin-top:.2rem;">
+          Controls which records within the selected window are passed to the ML pipeline.
+        </p>
+      </div>
+      <div class="card-body">
+        {% set cur_mode = current_filter.mode if current_filter else 'all' %}
+        <div style="display:flex;flex-direction:column;gap:.75rem;"
+             role="radiogroup" aria-label="Training mode">
+          {% for val, icon, title, desc, tip in [
+            ('all',    '', 'All Data',
+             'Use every completed record within the date and type filters.',
+             'Best when you have many assessments and want the full picture.'),
+            ('recent', '', 'Recent Focus',
+             'Keep only the 5 most-recent records per assessment type.',
+             'Use this if your life has changed recently and older data feels outdated.'),
+            ('trend',  '', 'Trend Focus',
+             'Include only assessment types you have taken 2 or more times.',
+             'Sharpens trend predictions by filtering out single-session types.'),
+          ] %}
+          <label style="display:flex;align-items:flex-start;gap:1rem;
+                        padding:1rem 1.25rem;border-radius:var(--radius);cursor:pointer;
+                        border:2px solid {% if cur_mode == val %}var(--primary){% else %}var(--border){% endif %};
+                        background:{% if cur_mode == val %}var(--primary-light){% else %}var(--surface-2){% endif %};
+                        transition:all .15s ease;"
+                id="mode-card-{{ val }}">
+            <input type="radio" name="mode" value="{{ val }}"
+                   {% if cur_mode == val %}checked{% endif %}
+                   style="margin-top:.25rem;accent-color:var(--primary);flex-shrink:0;">
+            <div>
+              <div style="font-weight:700;font-size:.95rem;
+                           color:{% if cur_mode == val %}var(--primary){% else %}var(--text){% endif %};">
+                {{ icon }} {{ title }}
+              </div>
+              <p style="font-size:.85rem;color:var(--text-muted);margin:.2rem 0 .3rem;">{{ desc }}</p>
+              <p style="font-size:.78rem;color:var(--text-light);margin:0;"> {{ tip }}</p>
+            </div>
+          </label>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Action buttons -->
+    <div style="display:flex;gap:.85rem;flex-wrap:wrap;align-items:center;">
+      <button type="submit" name="action" value="apply" class="btn btn-primary btn-lg">
+         Retrain Insights
+      </button>
+      <button type="submit" name="action" value="reset" class="btn btn-secondary">
+         Reset to All Data
+      </button>
+      <a href="{{ url_for('assessment.progress') }}" class="btn btn-ghost">
+        Cancel
+      </a>
+    </div>
+
+  </form>
+
+  <!-- ----
+       SECTION 4 — CSV IMPORT
+  ---- -->
+  <div class="card mt-4" role="region" aria-labelledby="csv-section-title">
+    <div class="card-header">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.75rem;">
+        <div>
+          <span class="card-title" id="csv-section-title"> Import from CSV</span>
+          <p class="card-text" style="margin-top:.2rem;">
+            Upload a CSV file of past assessment scores to add them to your history
+            and include them in the ML analysis.
+          </p>
+        </div>
+        <a href="{{ url_for('assessment.csv_template') }}"
+           class="btn btn-sm btn-secondary"
+           download="assessme_import_template.csv"
+           aria-label="Download CSV template">
+           Download Template
+        </a>
+      </div>
+    </div>
+
+    <div class="card-body">
+
+      {# -- Format reference --------------------------------------------- #}
+      <div style="background:var(--surface-2);border:1px solid var(--border);
+                  border-radius:var(--radius);padding:1rem 1.25rem;margin-bottom:1.5rem;
+                  font-size:.82rem;">
+        <div style="font-weight:700;margin-bottom:.5rem;color:var(--text);">
+          Required CSV format
+        </div>
+        <code style="display:block;line-height:1.9;color:var(--primary-dark);">
+          date, assessment_type, pct_score, band<br>
+          2026-01-15, anxiety, 42, Mild<br>
+          2026-02-10, eq, 74, High
+        </code>
+        <div style="margin-top:.75rem;display:flex;flex-wrap:wrap;gap:.5rem;">
+          {% for col, hint in [
+            ('date',            'YYYY-MM-DD — required'),
+            ('assessment_type', 'adhd | anxiety | depression | stress | learning | eq | asd — required'),
+            ('pct_score',       'integer 0–100 — required'),
+            ('band',            'text label e.g. Mild, Moderate, High — optional'),
+          ] %}
+          <div style="font-size:.78rem;padding:.2rem .6rem;border-radius:999px;
+                      background:var(--primary-light);color:var(--primary-dark);">
+            <strong>{{ col }}</strong>
+            <span style="color:var(--text-muted);margin-left:.3rem;">{{ hint }}</span>
+          </div>
+          {% endfor %}
+        </div>
+        <p style="margin-top:.65rem;font-size:.77rem;color:var(--text-muted);">
+          Lines starting with <code>#</code> are treated as comments and skipped.
+          Maximum file size: 1 MB.
+        </p>
+      </div>
+
+      {# -- Upload form -------------------------------------------------- #}
+      <form method="POST"
+            action="{{ url_for('assessment.upload_csv') }}"
+            enctype="multipart/form-data"
+            id="csv-upload-form"
+            aria-label="CSV file upload">
+
+        {# Drag-and-drop zone #}
+        <div id="drop-zone"
+             style="border:2px dashed var(--border);border-radius:var(--radius-lg);
+                    padding:2.5rem 1.5rem;text-align:center;cursor:pointer;
+                    transition:all .2s ease;background:var(--surface-2);"
+             onclick="document.getElementById('csv-file-input').click()"
+             ondragover="event.preventDefault();this.style.borderColor='var(--primary)';this.style.background='var(--primary-light)';"
+             ondragleave="this.style.borderColor='var(--border)';this.style.background='var(--surface-2)';"
+             ondrop="handleDrop(event)"
+             role="button"
+             tabindex="0"
+             aria-label="Drop CSV file here or click to browse"
+             onkeydown="if(event.key==='Enter'||event.key===' ')document.getElementById('csv-file-input').click()">
+          <div id="drop-icon" style="font-size:2.5rem;margin-bottom:.65rem;" aria-hidden="true"></div>
+          <div id="drop-label" style="font-weight:700;color:var(--text);margin-bottom:.3rem;">
+            Drop your CSV here or <span style="color:var(--primary);text-decoration:underline;">browse</span>
+          </div>
+          <div id="drop-hint" style="font-size:.8rem;color:var(--text-muted);">
+            .csv files only · max 1 MB
+          </div>
+          <input type="file" id="csv-file-input" name="csv_file"
+                 accept=".csv,text/csv"
+                 style="display:none;"
+                 onchange="onFileSelected(this)">
+        </div>
+
+        {# Selected file preview #}
+        <div id="file-preview"
+             style="display:none;margin-top:.85rem;padding:.75rem 1rem;
+                    border-radius:var(--radius);background:#d1fae5;
+                    border:1px solid var(--success);
+                    display:flex;align-items:center;gap:.75rem;">
+          <span style="font-size:1.2rem;" aria-hidden="true">[OK]</span>
+          <div style="flex:1;">
+            <div id="file-name" style="font-weight:700;font-size:.88rem;"></div>
+            <div id="file-size" style="font-size:.78rem;color:var(--text-muted);"></div>
+          </div>
+          <button type="button" onclick="clearFile()"
+                  style="background:none;border:none;cursor:pointer;font-size:1.1rem;color:var(--text-muted);"
+                  aria-label="Remove selected file"></button>
+        </div>
+
+        <div style="margin-top:1.25rem;display:flex;gap:.75rem;flex-wrap:wrap;">
+          <button type="submit" id="upload-btn" class="btn btn-primary" disabled
+                  aria-label="Upload and import CSV">
+             Import Records
+          </button>
+          <span style="font-size:.8rem;color:var(--text-muted);align-self:center;">
+            Imported records are added to your history and used in the next ML analysis.
+          </span>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+/* -- Pill checkboxes -- */
+document.querySelectorAll('input[name="types_include"]').forEach(function(cb) {
+  cb.addEventListener('change', function() {
+    var lbl = this.closest('label');
+    if (this.checked) {
+      lbl.style.borderColor = 'var(--primary)';
+      lbl.style.background  = 'var(--primary-light)';
+      lbl.style.color       = 'var(--primary)';
+    } else {
+      lbl.style.borderColor = 'var(--border)';
+      lbl.style.background  = 'var(--surface-2)';
+      lbl.style.color       = 'var(--text-muted)';
+    }
+  });
+});
+
+/* -- Training mode radio cards -- */
+document.querySelectorAll('input[name="mode"]').forEach(function(r) {
+  r.addEventListener('change', function() {
+    document.querySelectorAll('input[name="mode"]').forEach(function(other) {
+      var lbl     = other.closest('label');
+      var titleEl = lbl.querySelector('div > div');
+      if (other.checked) {
+        lbl.style.borderColor = 'var(--primary)';
+        lbl.style.background  = 'var(--primary-light)';
+        if (titleEl) titleEl.style.color = 'var(--primary)';
+      } else {
+        lbl.style.borderColor = 'var(--border)';
+        lbl.style.background  = 'var(--surface-2)';
+        if (titleEl) titleEl.style.color = 'var(--text)';
+      }
+    });
+  });
+});
+
+/* -- CSV drag-and-drop / file picker -- */
+function formatBytes(bytes) {
+  if (bytes < 1024)       return bytes + ' B';
+  if (bytes < 1048576)    return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / 1048576).toFixed(2) + ' MB';
+}
+
+function showFile(file) {
+  if (!file) return;
+  var preview  = document.getElementById('file-preview');
+  var nameEl   = document.getElementById('file-name');
+  var sizeEl   = document.getElementById('file-size');
+  var btn      = document.getElementById('upload-btn');
+  var dropZone = document.getElementById('drop-zone');
+
+  nameEl.textContent = file.name;
+  sizeEl.textContent = formatBytes(file.size);
+  preview.style.display = 'flex';
+  btn.disabled = false;
+
+  dropZone.style.borderColor = 'var(--success)';
+  dropZone.style.background  = '#f0fdf4';
+  document.getElementById('drop-icon').textContent  = '[OK]';
+  document.getElementById('drop-label').textContent = file.name;
+  document.getElementById('drop-hint').textContent  = formatBytes(file.size);
+}
+
+function onFileSelected(input) {
+  if (input.files && input.files[0]) showFile(input.files[0]);
+}
+
+function handleDrop(event) {
+  event.preventDefault();
+  var zone = document.getElementById('drop-zone');
+  zone.style.borderColor = 'var(--border)';
+  zone.style.background  = 'var(--surface-2)';
+  var file = event.dataTransfer.files[0];
+  if (!file) return;
+  if (!file.name.toLowerCase().endsWith('.csv')) {
+    zone.style.borderColor = 'var(--danger)';
+    document.getElementById('drop-label').textContent = 'Only .csv files are accepted';
+    return;
+  }
+  // Assign to the real input so the form submits it
+  var dt = new DataTransfer();
+  dt.items.add(file);
+  document.getElementById('csv-file-input').files = dt.files;
+  showFile(file);
+}
+
+function clearFile() {
+  document.getElementById('csv-file-input').value = '';
+  document.getElementById('file-preview').style.display = 'none';
+  document.getElementById('upload-btn').disabled = true;
+  var zone = document.getElementById('drop-zone');
+  zone.style.borderColor = 'var(--border)';
+  zone.style.background  = 'var(--surface-2)';
+  document.getElementById('drop-icon').textContent  = '';
+  document.getElementById('drop-label').innerHTML   = 'Drop your CSV here or <span style="color:var(--primary);text-decoration:underline;">browse</span>';
+  document.getElementById('drop-hint').textContent  = '.csv files only · max 1 MB';
+}
+</script>
+{% endblock %}

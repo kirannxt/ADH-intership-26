@@ -7,7 +7,7 @@
 
     <!-- Logo -->
     <div class="auth-logo">
-      <div class="logo-icon" aria-hidden="true">🧠</div>
+      <div class="logo-icon" aria-hidden="true"></div>
       <h1 style="font-size:1.75rem;margin-bottom:.25rem;">Welcome to AssessMe</h1>
       <p>Sign in or create a free account to get started.</p>
     </div>
@@ -27,7 +27,7 @@
                   data-target="panel-register">Create Account</button>
         </div>
 
-        <!-- ── LOGIN PANEL ── -->
+        <!-- -- LOGIN PANEL -- -->
         <div id="panel-login" class="auth-panel" role="tabpanel" aria-labelledby="tab-login">
           <form method="POST" action="{{ url_for('auth.login') }}"
                 class="validated" novalidate autocomplete="on">
@@ -60,7 +60,7 @@
                         data-target="login-password"
                         aria-label="Show password"
                         style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1rem;padding:.2rem;">
-                  <span class="pwd-icon" aria-hidden="true">👁</span>
+                  <span class="pwd-icon" aria-hidden="true"></span>
                 </button>
               </div>
               <p class="form-error" aria-live="polite"></p>
@@ -84,7 +84,7 @@
           </div>
         </div><!-- /panel-login -->
 
-        <!-- ── REGISTER PANEL ── -->
+        <!-- -- REGISTER PANEL -- -->
         <div id="panel-register" class="auth-panel hidden" role="tabpanel" aria-labelledby="tab-register">
           <form method="POST" action="{{ url_for('auth.register') }}"
                 class="validated" novalidate autocomplete="on">
@@ -148,7 +148,7 @@
                         data-target="password"
                         aria-label="Show password"
                         style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1rem;padding:.2rem;">
-                  <span class="pwd-icon" aria-hidden="true">👁</span>
+                  <span class="pwd-icon" aria-hidden="true"></span>
                 </button>
               </div>
               <!-- Password strength -->
@@ -172,7 +172,7 @@
                         data-target="confirm_password"
                         aria-label="Show confirm password"
                         style="position:absolute;right:.75rem;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1rem;padding:.2rem;">
-                  <span class="pwd-icon" aria-hidden="true">👁</span>
+                  <span class="pwd-icon" aria-hidden="true"></span>
                 </button>
               </div>
               <p class="form-error" aria-live="polite"></p>
@@ -190,7 +190,7 @@
 
             <!-- Privacy note -->
             <div class="privacy-note" role="note">
-              <span class="p-icon" aria-hidden="true">🔒</span>
+              <span class="p-icon" aria-hidden="true"></span>
               <span>Your information is used only to personalise your assessment results.
               We do not sell or share your data with third parties.
               See our <a href="{{ url_for('assessment.help_page') }}#privacy">Privacy Policy</a> for details.</span>

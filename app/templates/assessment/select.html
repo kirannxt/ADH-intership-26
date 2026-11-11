@@ -5,7 +5,7 @@
 <div class="container">
   <nav class="breadcrumb" aria-label="Breadcrumb">
     <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
-    <span class="breadcrumb-sep" aria-hidden="true">›</span>
+    <span class="breadcrumb-sep" aria-hidden="true">></span>
     <span class="current" aria-current="page">Choose Assessment</span>
   </nav>
 </div>
@@ -31,7 +31,7 @@
 
   <!-- Important notice -->
   <div class="disclaimer-box mb-4" role="note">
-    <span class="d-icon" aria-hidden="true">⚠️</span>
+    <span class="d-icon" aria-hidden="true">[!]</span>
     <div>
       <strong>These are screening tools only.</strong>
       They are not substitutes for professional evaluation. If you are experiencing
@@ -53,7 +53,7 @@
            aria-checked="false"
            tabindex="0"
            aria-label="{{ cfg.label }}">
-        <div class="check-mark" aria-hidden="true">✓</div>
+        <div class="check-mark" aria-hidden="true"></div>
 
         <!-- Icon + colour from real config -->
         <div class="a-icon" style="background:{{ cfg.color }};" aria-hidden="true">{{ cfg.icon }}</div>
@@ -63,8 +63,8 @@
 
         <!-- Section tags -->
         <div class="assessment-meta" style="margin-bottom:.6rem;">
-          <span class="badge badge-gray">⏱ {{ cfg.time }}</span>
-          <span class="badge badge-gray">❓ {{ cfg.question_count }} questions</span>
+          <span class="badge badge-gray"> {{ cfg.time }}</span>
+          <span class="badge badge-gray"> {{ cfg.question_count }} questions</span>
         </div>
         <div style="display:flex;gap:.4rem;flex-wrap:wrap;">
           {% for section in cfg.sections %}
@@ -98,8 +98,8 @@
           <div class="modal-body" style="display:flex;flex-direction:column;gap:1rem;">
 
             <div style="display:flex;gap:.6rem;flex-wrap:wrap;">
-              <span class="badge badge-gray">⏱ {{ cfg.time }}</span>
-              <span class="badge badge-gray">❓ {{ cfg.question_count }} questions</span>
+              <span class="badge badge-gray"> {{ cfg.time }}</span>
+              <span class="badge badge-gray"> {{ cfg.question_count }} questions</span>
               {% for section in cfg.sections %}
               <span class="badge badge-primary">{{ section }}</span>
               {% endfor %}
@@ -108,7 +108,7 @@
             <p style="color:var(--text);">{{ cfg.description }}</p>
 
             <div class="info-box">
-              <span aria-hidden="true" style="flex-shrink:0;">📋</span>
+              <span aria-hidden="true" style="flex-shrink:0;"></span>
               <div>
                 <strong>Instructions:</strong>
                 <p style="color:var(--primary-dark);margin-top:.25rem;">{{ cfg.instructions }}</p>
@@ -116,7 +116,7 @@
             </div>
 
             <div class="info-box" style="background:#f0fdf4;border-color:#10b981;">
-              <span aria-hidden="true" style="flex-shrink:0;">🔬</span>
+              <span aria-hidden="true" style="flex-shrink:0;"></span>
               <div>
                 <strong>About this tool:</strong>
                 <p style="color:#065f46;margin-top:.25rem;">{{ cfg.purpose }}</p>
@@ -124,7 +124,7 @@
             </div>
 
             <div class="disclaimer-box">
-              <span class="d-icon" aria-hidden="true">⚠️</span>
+              <span class="d-icon" aria-hidden="true">[!]</span>
               <span>
                 This is a self-report screening tool. It cannot diagnose any condition.
                 Results are for personal reflection only.
@@ -147,7 +147,7 @@
 
     <!-- Validation error -->
     <div id="select-error" class="alert alert-warning" style="display:none;" role="alert">
-      ⚠️ Please select an assessment before continuing.
+      [!] Please select an assessment before continuing.
     </div>
 
     <div class="text-center">

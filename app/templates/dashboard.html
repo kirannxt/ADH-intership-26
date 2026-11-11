@@ -16,7 +16,7 @@
   <div class="flex-between mb-4" style="flex-wrap:wrap;gap:1rem;">
     <div>
       <h1 class="page-title" id="greeting-heading">
-        👋 Hello, {{ current_user.username }}!
+         Hello, {{ current_user.username }}!
       </h1>
       <p class="page-sub" id="greeting-sub">Here's a snapshot of your activity.</p>
     </div>
@@ -28,24 +28,29 @@
   <!-- Stat cards -->
   <div class="grid-4 mb-4">
     <div class="stat-card" role="region" aria-label="Total assessments">
-      <div class="stat-icon" style="background:#ede9fe;" aria-hidden="true">📋</div>
-      <div class="stat-value">—</div>
+      <div class="stat-icon" style="background:#ede9fe;" aria-hidden="true"></div>
+      <div class="stat-value">{{ total }}</div>
       <div class="stat-label">Total Assessments</div>
     </div>
     <div class="stat-card" role="region" aria-label="Completed assessments">
-      <div class="stat-icon" style="background:#d1fae5;" aria-hidden="true">✅</div>
-      <div class="stat-value">—</div>
+      <div class="stat-icon" style="background:#d1fae5;" aria-hidden="true">[OK]</div>
+      <div class="stat-value">{{ completed }}</div>
       <div class="stat-label">Completed</div>
     </div>
     <div class="stat-card" role="region" aria-label="In-progress assessments">
-      <div class="stat-icon" style="background:#fef3c7;" aria-hidden="true">⏳</div>
-      <div class="stat-value">—</div>
+      <div class="stat-icon" style="background:#fef3c7;" aria-hidden="true"></div>
+      <div class="stat-value">{{ in_progress }}</div>
       <div class="stat-label">In Progress</div>
     </div>
     <div class="stat-card" role="region" aria-label="View progress tracking">
-      <div class="stat-icon" style="background:#dbeafe;" aria-hidden="true">📈</div>
-      <div class="stat-value">—</div>
-      <div class="stat-label">Coming Soon</div>
+      <div class="stat-icon" style="background:#dbeafe;" aria-hidden="true"></div>
+      <div class="stat-value">
+        <a href="{{ url_for('assessment.progress') }}"
+           style="font-size:.85rem;font-weight:700;color:var(--primary);text-decoration:none;">
+          View →
+        </a>
+      </div>
+      <div class="stat-label">Progress</div>
     </div>
   </div>
 
@@ -58,13 +63,32 @@
         <a href="{{ url_for('assessment.history') }}" class="btn btn-ghost btn-sm">View all</a>
       </div>
 
+      {% if recent %}
+        {% for r in recent %}
+        <div class="history-item" role="listitem"
+             aria-label="{{ r.assessment_label }}, {{ r.status }}, {{ r.score_display }}">
+          <div class="h-icon" style="background:{{ r.color_bg }};" aria-hidden="true">{{ r.icon }}</div>
+          <div class="h-info">
+            <h4>{{ r.assessment_label }}</h4>
+            <p>{{ r.completed_at | fmtdate }} &nbsp;·&nbsp; {{ r.duration_display }}</p>
+          </div>
+          <div style="display:flex;align-items:center;gap:.75rem;">
+            <span class="badge badge-{{ r.badge_class }}">
+              {{ r.status | replace('_', ' ') | title }}
+            </span>
+            <span style="font-weight:700;font-size:.95rem;">{{ r.score_display }}</span>
+          </div>
+        </div>
+        {% endfor %}
+      {% else %}
       <!-- Empty state (shown when no history exists) -->
       <div class="empty-state" id="dashboard-empty" aria-label="No assessments yet">
-        <div class="empty-icon" aria-hidden="true">📝</div>
+        <div class="empty-icon" aria-hidden="true"></div>
         <h3>No assessments yet</h3>
         <p>Start your first assessment to see your results and history here.</p>
         <a href="{{ url_for('assessment.select') }}" class="btn btn-primary">Start an Assessment</a>
       </div>
+      {% endif %}
     </div>
 
     <!-- Right column -->
@@ -99,7 +123,7 @@
 
       <!-- Help nudge -->
       <div class="info-box" role="note">
-        <span style="font-size:1.1rem;flex-shrink:0;" aria-hidden="true">💡</span>
+        <span style="font-size:1.1rem;flex-shrink:0;" aria-hidden="true"></span>
         <div>
           <strong>New to AssessMe?</strong>
           <p style="margin-top:.2rem;color:var(--primary-dark);">
@@ -119,7 +143,7 @@
   const h = new Date().getHours();
   const greet = h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening";
   const el = document.getElementById("greeting-heading");
-  if (el) el.textContent = `${greet}, {{ current_user.username }}! 👋`;
+  if (el) el.textContent = `${greet}, {{ current_user.username }}! `;
   const sub = document.getElementById("greeting-sub");
   if (sub) {
     const day = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][new Date().getDay()];

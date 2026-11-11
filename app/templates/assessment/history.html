@@ -5,7 +5,7 @@
 <div class="container">
   <nav class="breadcrumb" aria-label="Breadcrumb">
     <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
-    <span class="breadcrumb-sep" aria-hidden="true">›</span>
+    <span class="breadcrumb-sep" aria-hidden="true">></span>
     <span class="current" aria-current="page">Assessment History</span>
   </nav>
 </div>
@@ -16,7 +16,7 @@
 
   <div class="flex-between mb-4" style="flex-wrap:wrap;gap:1rem;">
     <div>
-      <h1 class="page-title">📋 Assessment History</h1>
+      <h1 class="page-title"> Assessment History</h1>
       <p class="page-sub">A record of your completed and in-progress assessments.</p>
     </div>
     <a href="{{ url_for('assessment.select') }}" class="btn btn-primary">New Assessment</a>
@@ -24,7 +24,7 @@
 
   <!-- Privacy note -->
   <div class="privacy-note mb-4" role="note">
-    <span class="p-icon" aria-hidden="true">🔒</span>
+    <span class="p-icon" aria-hidden="true"></span>
     <span>
       Your assessment records are private and visible only to you.
       You may delete individual records at any time using the delete button on each entry.
@@ -39,7 +39,7 @@
     <div style="flex:1;min-width:200px;">
       <label for="history-search" class="visually-hidden">Search assessments</label>
       <input type="text" id="history-search" class="form-control"
-             placeholder="🔍  Search by assessment name…"
+             placeholder="  Search by assessment name…"
              style="max-width:320px;"
              aria-label="Search assessments by name" />
     </div>
@@ -64,9 +64,11 @@
   <!-- History list card -->
   <div class="card" role="region" aria-label="Assessment history list">
 
-    <!-- Empty state — always shown when no real DB data -->
-    <div class="empty-state" id="history-empty" role="status" aria-live="polite">
-      <div class="empty-icon" aria-hidden="true">📂</div>
+    <!-- Empty state — shown when user has no records -->
+    <div class="empty-state" id="history-empty"
+         role="status" aria-live="polite"
+         {% if records %}style="display:none;"{% endif %}>
+      <div class="empty-icon" aria-hidden="true"></div>
       <h3>No assessments found</h3>
       <p>
         You haven't completed any assessments yet, or none match your current filters.
@@ -75,70 +77,54 @@
       <a href="{{ url_for('assessment.select') }}" class="btn btn-primary">Start an Assessment</a>
     </div>
 
-    {# ── Demo rows — each has data-* for JS filtering and delete form ── #}
-    {% set demo_history = [
-      ('🧠','#ede9fe','Cognitive Skills',   'cognitive',  'Oct 3, 2026', '4m 32s', '84%', '#4f46e5', 'Completed',   'success', 1),
-      ('🌟','#fef3c7','Personality Profile','personality','Sep 28, 2026','7m 15s', '72%', '#f59e0b', 'Completed',   'success', 2),
-      ('❤️','#fee2e2','Emotional IQ',       'emotional',  'Sep 20, 2026','11m 4s', '78%', '#ef4444', 'Completed',   'success', 3),
-      ('🧑‍💼','#d1fae5','Leadership',         'leadership', 'Oct 5, 2026', '—',     '35%', '#10b981', 'In Progress', 'warning', 4),
-      ('🧘','#e0f2fe','Stress & Wellbeing',  'stress',     'Sep 12, 2026','5m 50s', '61%', '#06b6d4', 'Completed',   'danger',  5),
-    ] %}
-
-    {# Show demo rows only as illustration — hide empty state if rows present #}
-    <script>
-      // Hide the empty state if there are demo rows
-      document.addEventListener("DOMContentLoaded", () => {
-        const emptyEl = document.getElementById("history-empty");
-        const rows = document.querySelectorAll(".history-item[data-name]");
-        if (rows.length > 0 && emptyEl) emptyEl.classList.add("hidden");
-      });
-    </script>
-
-    {% for icon, bg, name, type_key, date, dur, score, color, status, badge, rid in demo_history %}
+    {% for r in records %}
     <div class="history-item"
-         data-name="{{ name | lower }}"
-         data-type="{{ type_key }}"
-         data-status="{{ status | lower }}"
+         data-name="{{ r.assessment_label | lower }}"
+         data-type="{{ r.assessment_type }}"
+         data-status="{{ r.status | replace('_', ' ') }}"
          role="listitem"
-         aria-label="{{ name }}, {{ status }}, {{ score }}">
+         aria-label="{{ r.assessment_label }}, {{ r.status }}, {{ r.score_display }}">
 
-      <div class="h-icon" style="background:{{ bg }};" aria-hidden="true">{{ icon }}</div>
+      <div class="h-icon" style="background:{{ r.color_bg }};" aria-hidden="true">{{ r.icon }}</div>
 
       <div class="h-info">
-        <h4>{{ name }}</h4>
-        <p>{{ date }} &nbsp;·&nbsp; {{ dur }}</p>
+        <h4>{{ r.assessment_label }}</h4>
+        <p>{{ r.completed_at | fmtdate }} &nbsp;·&nbsp; {{ r.duration_display }}</p>
       </div>
 
       <div style="display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap;">
-        <span class="badge badge-{{ badge }}" aria-label="Status: {{ status }}">{{ status }}</span>
+        <span class="badge badge-{{ r.badge_class }}"
+              aria-label="Status: {{ r.status }}">
+          {{ r.status | replace('_', ' ') | title }}
+        </span>
 
-        <div class="h-score" aria-label="Score: {{ score }}">
-          <div class="score-val" style="color:{{ color }};">{{ score }}</div>
+        <div class="h-score" aria-label="Score: {{ r.score_display }}">
+          <div class="score-val">{{ r.score_display }}</div>
         </div>
 
-        <div style="display:flex;gap:.4rem;" role="group" aria-label="Actions for {{ name }}">
+        <div style="display:flex;gap:.4rem;" role="group" aria-label="Actions for {{ r.assessment_label }}">
           <a href="{{ url_for('assessment.result') }}"
              class="btn btn-ghost btn-sm" title="View result"
-             aria-label="View result for {{ name }}">Result</a>
+             aria-label="View result for {{ r.assessment_label }}">Result</a>
           <a href="{{ url_for('assessment.recommendations') }}"
              class="btn btn-ghost btn-sm" title="View guidance"
-             aria-label="View guidance for {{ name }}">Guidance</a>
-          {% if status == 'In Progress' %}
+             aria-label="View guidance for {{ r.assessment_label }}">Guidance</a>
+          {% if r.status == 'in_progress' %}
           <a href="{{ url_for('assessment.questionnaire') }}"
              class="btn btn-primary btn-sm"
-             aria-label="Resume {{ name }}">Resume</a>
+             aria-label="Resume {{ r.assessment_label }}">Resume</a>
           {% endif %}
 
           <!-- Delete button — POST form for CSRF safety -->
           <form method="POST"
-                action="{{ url_for('assessment.delete_assessment', assessment_id=rid) }}"
+                action="{{ url_for('assessment.delete_assessment', assessment_id=r.id) }}"
                 style="margin:0;"
                 onsubmit="return confirm('Delete this assessment record? This cannot be undone.');">
             <button type="submit"
                     class="btn btn-ghost btn-sm"
                     style="color:var(--danger);"
                     title="Delete record"
-                    aria-label="Delete {{ name }} record">Delete</button>
+                    aria-label="Delete {{ r.assessment_label }} record">Delete</button>
           </form>
         </div>
       </div>
@@ -149,7 +135,7 @@
 
   <!-- Responsible note at bottom -->
   <div class="disclaimer-box mt-4" role="note">
-    <span class="d-icon" aria-hidden="true">⚠️</span>
+    <span class="d-icon" aria-hidden="true">[!]</span>
     <span style="font-size:.82rem;">
       Scores shown are based on your self-reported responses. They are indicators for
       personal reflection and may vary between sessions. Do not use historical scores
