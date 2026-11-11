@@ -108,7 +108,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const show = inp.type === "password";
       inp.type = show ? "text" : "password";
       btn.setAttribute("aria-label", show ? "Hide password" : "Show password");
-      btn.querySelector(".pwd-icon").textContent = show ? "" : "";
+      btn.querySelector(".pwd-icon").textContent = show ? "Hide" : "Show";
     });
   });
 
@@ -498,7 +498,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const advance = () => {
       if (i < pSteps.length) {
         if (i > 0) pSteps[i-1].classList.replace("active", "done");
-        pSteps[i].classList.add("active");
+        pSteps<svg style="display:inline;vertical-align:-.125em;width:1em;height:1em;" viewBox="0 0 16 16" fill="none" stroke="#3b82f6" stroke-width="2" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><line x1="8" y1="7" x2="8" y2="11"/><circle cx="8" cy="4.5" r=".75" fill="#3b82f6" stroke="none"/></svg>.classList.add("active");
         i++;
         setTimeout(advance, 1100);
       } else {

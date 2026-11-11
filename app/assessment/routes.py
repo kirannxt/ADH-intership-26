@@ -32,7 +32,7 @@ ASSESSMENT_TYPES = {
     # -- 1. ADHD Screening -------------------------------------------------
     "adhd": {
         "label":       "ADHD Screening",
-        "icon":        "",
+        "icon":        "AD",
         "color":       "#ede9fe",
         "time":        "~8 min",
         "sections":    ["Inattention", "Hyperactivity", "Impulsivity"],
@@ -184,7 +184,7 @@ ASSESSMENT_TYPES = {
     # -- 2. Anxiety Screening (GAD-7 structure) ----------------------------
     "anxiety": {
         "label":       "Anxiety Screening",
-        "icon":        "",
+        "icon":        "AX",
         "color":       "#dbeafe",
         "time":        "~5 min",
         "sections":    ["Worry", "Nervousness", "Avoidance"],
@@ -326,7 +326,7 @@ ASSESSMENT_TYPES = {
     # -- 3. Depression Screening (PHQ-9 structure) -------------------------
     "depression": {
         "label":       "Depression Screening",
-        "icon":        "",
+        "icon":        "DP",
         "color":       "#e0e7ff",
         "time":        "~5 min",
         "sections":    ["Mood", "Energy", "Cognition"],
@@ -467,7 +467,7 @@ ASSESSMENT_TYPES = {
     # -- 4. Perceived Stress Scale (PSS-10 structure) ----------------------
     "stress": {
         "label":       "Perceived Stress",
-        "icon":        "",
+        "icon":        "ST",
         "color":       "#d1fae5",
         "time":        "~5 min",
         "sections":    ["Control", "Overload", "Coping"],
@@ -618,7 +618,7 @@ ASSESSMENT_TYPES = {
     # -- 5. Learning Style Inventory (VARK-inspired) -----------------------
     "learning": {
         "label":       "Learning Style",
-        "icon":        "",
+        "icon":        "LS",
         "color":       "#fef3c7",
         "time":        "~6 min",
         "sections":    ["Visual", "Auditory", "Reading/Writing", "Kinaesthetic"],
@@ -762,7 +762,7 @@ ASSESSMENT_TYPES = {
     # -- 6. Emotional Intelligence (EQ) ------------------------------------
     "eq": {
         "label":       "Emotional Intelligence",
-        "icon":        "",
+        "icon":        "EQ",
         "color":       "#fee2e2",
         "time":        "~7 min",
         "sections":    ["Self-Awareness", "Empathy", "Regulation", "Social Skills"],
@@ -912,7 +912,7 @@ ASSESSMENT_TYPES = {
     # -- 7. ASD Assessment-Support System ---------------------------------
     "asd": {
         "label":       "ASD Assessment-Support",
-        "icon":        "",
+        "icon":        "AS",
         "color":       "#ecfdf5",
         "time":        "~15 min",
         "sections":    ["Social Communication", "Social Interaction",

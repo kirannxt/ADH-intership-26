@@ -48,9 +48,9 @@
       <div>
         <span style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--primary);">Status</span><br>
         {% if answered_count == total_q %}
-          <span class="badge badge-success">[OK] All answered</span>
+          <span class="badge badge-success"><svg style="display:inline;vertical-align:-.125em;width:1em;height:1em;" viewBox="0 0 16 16" fill="none" stroke="#10b981" stroke-width="2.5" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><polyline points="5,8 7,10.5 11,5.5"/></svg> All answered</span>
         {% else %}
-          <span class="badge badge-warning">[!] {{ total_q - answered_count }} unanswered</span>
+          <span class="badge badge-warning"><svg style="display:inline;vertical-align:-.125em;width:1em;height:1em;" viewBox="0 0 16 16" fill="none" stroke="#f59e0b" stroke-width="2" aria-hidden="true"><path d="M8 2 L14.5 13.5 H1.5 Z"/><line x1="8" y1="6" x2="8" y2="9.5"/><circle cx="8" cy="11.5" r=".75" fill="#f59e0b" stroke="none"/></svg> {{ total_q - answered_count }} unanswered</span>
         {% endif %}
       </div>
       <a href="{{ url_for('assessment.questionnaire') }}" class="btn btn-outline btn-sm"
@@ -63,7 +63,7 @@
   <!-- Unanswered warning -->
   {% if answered_count < total_q %}
   <div class="alert alert-warning" role="alert" aria-live="assertive">
-    [!] You have <strong>{{ total_q - answered_count }} unanswered question(s)</strong>.
+    <svg style="display:inline;vertical-align:-.125em;width:1em;height:1em;" viewBox="0 0 16 16" fill="none" stroke="#f59e0b" stroke-width="2" aria-hidden="true"><path d="M8 2 L14.5 13.5 H1.5 Z"/><line x1="8" y1="6" x2="8" y2="9.5"/><circle cx="8" cy="11.5" r=".75" fill="#f59e0b" stroke="none"/></svg> You have <strong>{{ total_q - answered_count }} unanswered question(s)</strong>.
     Please go back and answer all questions before submitting.
   </div>
   {% endif %}
@@ -94,12 +94,12 @@
             </div>
             {% if answer %}
             <div style="display:flex;align-items:center;gap:.5rem;">
-              <span style="color:var(--success);" aria-hidden="true">[OK]</span>
+              <span style="color:var(--success);" aria-hidden="true"><svg style="display:inline;vertical-align:-.125em;width:1em;height:1em;" viewBox="0 0 16 16" fill="none" stroke="#10b981" stroke-width="2.5" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><polyline points="5,8 7,10.5 11,5.5"/></svg></span>
               <span style="font-size:.9rem;color:var(--text-muted);">{{ answer }}</span>
             </div>
             {% else %}
             <div style="display:flex;align-items:center;gap:.5rem;">
-              <span style="color:var(--warning);" aria-hidden="true">[!]</span>
+              <span style="color:var(--warning);" aria-hidden="true"><svg style="display:inline;vertical-align:-.125em;width:1em;height:1em;" viewBox="0 0 16 16" fill="none" stroke="#f59e0b" stroke-width="2" aria-hidden="true"><path d="M8 2 L14.5 13.5 H1.5 Z"/><line x1="8" y1="6" x2="8" y2="9.5"/><circle cx="8" cy="11.5" r=".75" fill="#f59e0b" stroke="none"/></svg></span>
               <span style="font-size:.9rem;color:var(--warning);font-weight:600;">
                 Not answered —
                 <a href="{{ url_for('assessment.questionnaire') }}"
@@ -157,7 +157,7 @@
         This action cannot be undone.
       </p>
       <div class="disclaimer-box" role="note">
-        <span class="d-icon" aria-hidden="true">[!]</span>
+        <span class="d-icon" aria-hidden="true"><svg style="display:inline;vertical-align:-.125em;width:1em;height:1em;" viewBox="0 0 16 16" fill="none" stroke="#f59e0b" stroke-width="2" aria-hidden="true"><path d="M8 2 L14.5 13.5 H1.5 Z"/><line x1="8" y1="6" x2="8" y2="9.5"/><circle cx="8" cy="11.5" r=".75" fill="#f59e0b" stroke="none"/></svg></span>
         <span>
           Your results are for <strong>personal insight only</strong> and do not
           constitute a clinical, medical, or professional assessment.
