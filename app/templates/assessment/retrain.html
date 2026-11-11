@@ -103,7 +103,7 @@
           {% else %}
           <div style="font-size:.78rem;color:var(--text-muted);">
             {% if count >= 4 %}
-            <span style="color:var(--success);">[OK] {{ count }} record(s) — ready to train</span>
+            <span style="color:var(--success);"><svg style="display:inline;vertical-align:-.125em;width:1em;height:1em;" viewBox="0 0 16 16" fill="none" stroke="#10b981" stroke-width="2.5" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><polyline points="5,8 7,10.5 11,5.5"/></svg> {{ count }} record(s) — ready to train</span>
             {% else %}
             <span>{{ count }}/4 records — need {{ [0, 4 - count] | max }} more</span>
             {% endif %}
@@ -460,7 +460,7 @@ function showFile(file) {
 
   dropZone.style.borderColor = 'var(--success)';
   dropZone.style.background  = '#f0fdf4';
-  document.getElementById('drop-icon').textContent  = '[OK]';
+  document.getElementById('drop-icon').textContent  = '<svg style="display:inline;vertical-align:-.125em;width:1em;height:1em;" viewBox="0 0 16 16" fill="none" stroke="#10b981" stroke-width="2.5" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><polyline points="5,8 7,10.5 11,5.5"/></svg>';
   document.getElementById('drop-label').textContent = file.name;
   document.getElementById('drop-hint').textContent  = formatBytes(file.size);
 }

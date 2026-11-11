@@ -24,7 +24,7 @@
 
   <!-- Responsible note -->
   <div class="disclaimer-box mb-4" role="note">
-    <span class="d-icon" aria-hidden="true">[!]</span>
+    <span class="d-icon" aria-hidden="true"><svg style="display:inline;vertical-align:-.125em;width:1em;height:1em;" viewBox="0 0 16 16" fill="none" stroke="#f59e0b" stroke-width="2" aria-hidden="true"><path d="M8 2 L14.5 13.5 H1.5 Z"/><line x1="8" y1="6" x2="8" y2="9.5"/><circle cx="8" cy="11.5" r=".75" fill="#f59e0b" stroke="none"/></svg></span>
     <span>
       Scores shown here reflect your self-reported responses at the time of each assessment.
       They are indicators for personal reflection — not clinical measurements.
@@ -75,7 +75,7 @@
   <div class="grid-4 mb-4">
     {% for val, label, icon, bg in [
       (total,                              'Assessments Taken', '', '#ede9fe'),
-      (completed,                          'Completed',         '[OK]', '#d1fae5'),
+      (completed,                          'Completed',         '<svg style="display:inline;vertical-align:-.125em;width:1em;height:1em;" viewBox="0 0 16 16" fill="none" stroke="#10b981" stroke-width="2.5" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><polyline points="5,8 7,10.5 11,5.5"/></svg>', '#d1fae5'),
       (in_progress,                        'In Progress',       '', '#fef3c7'),
       ((avg_score ~ '%') if avg_score else '—', 'Avg. Score',  '', '#dbeafe'),
     ] %}
@@ -144,7 +144,7 @@
                     background:{% if done %}#d1fae5{% else %}var(--surface-2){% endif %};
                     border:1px solid {% if done %}var(--success){% else %}var(--border){% endif %};"
              role="listitem" aria-label="{{ title }}: {{ 'achieved' if done else 'not yet achieved' }}">
-          <span style="font-size:1.2rem;" aria-hidden="true">{% if done %}[OK]{% else %}{% endif %}</span>
+          <span style="font-size:1.2rem;" aria-hidden="true">{% if done %}<svg style="display:inline;vertical-align:-.125em;width:1em;height:1em;" viewBox="0 0 16 16" fill="none" stroke="#10b981" stroke-width="2.5" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><polyline points="5,8 7,10.5 11,5.5"/></svg>{% else %}{% endif %}</span>
           <div>
             <div style="font-weight:700;font-size:.9rem;color:{% if done %}#065f46{% else %}var(--text){% endif %};">
               {{ title }}
@@ -217,7 +217,7 @@
         {% endfor %}
       </div>
       <p style="font-size:.76rem;color:var(--text-muted);margin-top:.85rem;">
-        [!] Predictions are based solely on your personal history and are statistical
+        <svg style="display:inline;vertical-align:-.125em;width:1em;height:1em;" viewBox="0 0 16 16" fill="none" stroke="#f59e0b" stroke-width="2" aria-hidden="true"><path d="M8 2 L14.5 13.5 H1.5 Z"/><line x1="8" y1="6" x2="8" y2="9.5"/><circle cx="8" cy="11.5" r=".75" fill="#f59e0b" stroke="none"/></svg> Predictions are based solely on your personal history and are statistical
         estimates — not clinical forecasts.
       </p>
     </div>
@@ -402,7 +402,7 @@
         </div>
 
         <p style="font-size:.76rem;color:var(--text-muted);margin-top:.75rem;">
-          [!] Predictions are based on your personal history and are statistical estimates only —
+          <svg style="display:inline;vertical-align:-.125em;width:1em;height:1em;" viewBox="0 0 16 16" fill="none" stroke="#f59e0b" stroke-width="2" aria-hidden="true"><path d="M8 2 L14.5 13.5 H1.5 Z"/><line x1="8" y1="6" x2="8" y2="9.5"/><circle cx="8" cy="11.5" r=".75" fill="#f59e0b" stroke="none"/></svg> Predictions are based on your personal history and are statistical estimates only —
           they are not clinical forecasts. Complete more assessments to improve accuracy.
         </p>
       </div>
