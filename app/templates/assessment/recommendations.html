@@ -5,9 +5,9 @@
 <div class="container">
   <nav class="breadcrumb" aria-label="Breadcrumb">
     <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
-    <span class="breadcrumb-sep" aria-hidden="true">›</span>
+    <span class="breadcrumb-sep" aria-hidden="true">></span>
     <a href="{{ url_for('assessment.result') }}">Result</a>
-    <span class="breadcrumb-sep" aria-hidden="true">›</span>
+    <span class="breadcrumb-sep" aria-hidden="true">></span>
     <span class="current" aria-current="page">Guidance</span>
   </nav>
 </div>
@@ -21,9 +21,9 @@
     <p class="page-sub">{{ assessment_label }} — support notes based on your responses.</p>
   </div>
 
-  {# ═══════════════════════════════════════════════════════════════════════
+  {# -----------------------------------------------------------------------
      ASD GUIDANCE PATH
-  ═══════════════════════════════════════════════════════════════════════ #}
+  ---- #}
   {% if assessment_type == 'asd' %}
 
     {% set pinfo      = personal_info %}
@@ -39,7 +39,7 @@
     <!-- Critical ASD disclaimer -->
     <div class="asd-disclaimer mb-4" role="alert">
       <div style="display:flex;gap:.75rem;align-items:flex-start;">
-        <span style="font-size:1.4rem;flex-shrink:0;" aria-hidden="true">⚠️</span>
+        <span style="font-size:1.4rem;flex-shrink:0;" aria-hidden="true">[!]</span>
         <div>
           <strong style="font-size:1rem;">Screening tool — not a diagnosis.</strong>
           <p style="margin-top:.3rem;margin-bottom:0;font-size:.88rem;color:#92400e;">
@@ -80,7 +80,7 @@
 
     <div style="display:flex;flex-direction:column;gap:1rem;margin-bottom:2rem;">
 
-      {# ── LOWER INDICATION guidance ── #}
+      {# -- LOWER INDICATION guidance -- #}
       {% if band_color == 'asd_lower' %}
 
       {% set asd_guidance = [
@@ -106,7 +106,7 @@
          'Ongoing', 'Optional'),
       ] %}
 
-      {# ── REQUIRES ATTENTION guidance ── #}
+      {# -- REQUIRES ATTENTION guidance -- #}
       {% elif band_color == 'asd_attention' %}
 
       {% set asd_guidance = [
@@ -136,7 +136,7 @@
          'Flexible', 'Support'),
       ] %}
 
-      {# ── HIGHER INDICATION guidance ── #}
+      {# -- HIGHER INDICATION guidance -- #}
       {% else %}
 
       {% set asd_guidance = [
@@ -171,12 +171,12 @@
       {% for filter, bg, color, title, desc, effort, priority in asd_guidance %}
       <div class="rec-card" data-filter="{{ filter }}" role="article" aria-label="{{ title }}">
         <div class="rec-icon" style="background:{{ bg }};color:{{ color }};" aria-hidden="true">
-          {% if filter == 'Act' %}📋
-          {% elif filter == 'Observe' %}👁
-          {% elif filter == 'Understand' %}📖
-          {% elif filter == 'Support' %}🤲
-          {% elif filter == 'Resources' %}🔗
-          {% else %}💡{% endif %}
+          {% if filter == 'Act' %}
+          {% elif filter == 'Observe' %}
+          {% elif filter == 'Understand' %}
+          {% elif filter == 'Support' %}
+          {% elif filter == 'Resources' %}
+          {% else %}{% endif %}
         </div>
         <div class="rec-body" style="flex:1;">
           <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem;flex-wrap:wrap;">
@@ -188,7 +188,7 @@
           </div>
           <p style="font-size:.88rem;">{{ desc }}</p>
           <div style="margin-top:.5rem;font-size:.8rem;color:var(--text-muted);">
-            ⏱ {{ effort }}
+             {{ effort }}
           </div>
         </div>
       </div>
@@ -296,7 +296,7 @@
           {% endfor %}
         </div>
         <div class="info-box mt-2" role="note">
-          <span aria-hidden="true" style="flex-shrink:0;">ℹ️</span>
+          <span aria-hidden="true" style="flex-shrink:0;">[i]</span>
           <span style="font-size:.85rem;">
             Assessment waiting times can be lengthy. Starting the referral process early is
             recommended. Private assessment is also available if NHS waiting times are a concern.
@@ -305,14 +305,14 @@
       </div>
     </div>
 
-  {# ═══════════════════════════════════════════════════════════════════════
+  {# -----------------------------------------------------------------------
      STANDARD GUIDANCE PATH (all other assessments)
-  ═══════════════════════════════════════════════════════════════════════ #}
+  ---- #}
   {% else %}
 
     <!-- Standard disclaimer -->
     <div class="disclaimer-box mb-4" role="note">
-      <span class="d-icon" aria-hidden="true">⚠️</span>
+      <span class="d-icon" aria-hidden="true">[!]</span>
       <div>
         <strong>Screening tool, not a diagnosis.</strong>
         This guidance reflects patterns in your responses at a single point in time.
@@ -362,7 +362,7 @@
       {% for filter, bg, color, title, desc, effort, priority in guidance %}
       <div class="rec-card" data-filter="{{ filter }}" role="article" aria-label="{{ title }}">
         <div class="rec-icon" style="background:{{ bg }};color:{{ color }};" aria-hidden="true">
-          {% if filter == 'Reflect' %}🪞{% elif filter == 'Learn' %}📚{% elif filter == 'Act' %}🚶{% else %}🩺{% endif %}
+          {% if filter == 'Reflect' %}{% elif filter == 'Learn' %}{% elif filter == 'Act' %}{% else %}{% endif %}
         </div>
         <div class="rec-body" style="flex:1;">
           <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem;flex-wrap:wrap;">
@@ -373,7 +373,7 @@
             </span>
           </div>
           <p style="font-size:.88rem;">{{ desc }}</p>
-          <div style="margin-top:.5rem;font-size:.8rem;color:var(--text-muted);">⏱ {{ effort }}</div>
+          <div style="margin-top:.5rem;font-size:.8rem;color:var(--text-muted);"> {{ effort }}</div>
         </div>
       </div>
       {% endfor %}

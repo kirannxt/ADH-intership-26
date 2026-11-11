@@ -1,0 +1,54 @@
+date,assessment_type,pct_score,band
+# -----------------------------------------------------------------------------
+# AssessMe — Sample Import CSV
+# -----------------------------------------------------------------------------
+# Column reference:
+#   date            : YYYY-MM-DD  (required)
+#   assessment_type : adhd | anxiety | depression | stress | learning | eq | asd  (required)
+#   pct_score       : integer 0–100  (required)
+#   band            : Minimal | Mild | Moderate | High | Severe  (optional — any text accepted)
+#
+# Delete or keep the comment lines — they are ignored during import.
+# -----------------------------------------------------------------------------
+
+# -- ADHD Screening ------------------------------------------------------------
+2026-01-05,adhd,62,Moderate
+2026-02-12,adhd,55,Moderate
+2026-03-19,adhd,48,Mild
+2026-04-23,adhd,41,Mild
+2026-05-30,adhd,36,Mild
+
+# -- Anxiety Screening ---------------------------------------------------------
+2026-01-06,anxiety,71,High
+2026-02-13,anxiety,64,Moderate
+2026-03-20,anxiety,57,Moderate
+2026-04-24,anxiety,49,Mild
+2026-05-31,anxiety,38,Mild
+
+# -- Depression Screening ------------------------------------------------------
+2026-01-07,depression,58,Moderate
+2026-02-14,depression,51,Moderate
+2026-03-21,depression,44,Mild
+2026-04-25,depression,37,Mild
+
+# -- Perceived Stress ----------------------------------------------------------
+2026-01-08,stress,66,High
+2026-02-15,stress,59,Moderate
+2026-03-22,stress,52,Moderate
+2026-04-26,stress,43,Mild
+
+# -- Emotional Intelligence ----------------------------------------------------
+2026-01-09,eq,54,Moderate
+2026-02-16,eq,61,Moderate
+2026-03-23,eq,69,High
+2026-04-27,eq,76,High
+
+# -- Learning Style ------------------------------------------------------------
+2026-01-10,learning,60,Moderate
+2026-02-17,learning,67,High
+2026-03-24,learning,73,High
+
+# -- ASD Support Screen --------------------------------------------------------
+2026-01-11,asd,45,Mild
+2026-02-18,asd,39,Mild
+2026-03-25,asd,33,Minimal

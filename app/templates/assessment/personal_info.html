@@ -5,9 +5,9 @@
 <div class="container">
   <nav class="breadcrumb" aria-label="Breadcrumb">
     <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
-    <span class="breadcrumb-sep" aria-hidden="true">›</span>
+    <span class="breadcrumb-sep" aria-hidden="true">></span>
     <a href="{{ url_for('assessment.select') }}">Choose Assessment</a>
-    <span class="breadcrumb-sep" aria-hidden="true">›</span>
+    <span class="breadcrumb-sep" aria-hidden="true">></span>
     <span class="current" aria-current="page">Personal Information</span>
   </nav>
 </div>
@@ -28,7 +28,7 @@
 
   <!-- Privacy explanation -->
   <div class="privacy-note mb-3" role="note" aria-label="Privacy information">
-    <span class="p-icon" aria-hidden="true">🔒</span>
+    <span class="p-icon" aria-hidden="true"></span>
     <span>
       <strong>Why do we collect this?</strong>
       The information below helps us contextualise your results.
@@ -54,11 +54,11 @@
       <form method="POST" action="{{ url_for('assessment.personal_info') }}"
             class="validated" novalidate>
 
-        {# ══ ASD-SPECIFIC: Responder Role Selection ══════════════════════ #}
+        {# -- ASD-SPECIFIC: Responder Role Selection ---------------------- #}
         {% if is_asd %}
         <div class="asd-role-section mb-4">
           <div class="asd-role-header">
-            <span class="asd-role-icon" aria-hidden="true">🧩</span>
+            <span class="asd-role-icon" aria-hidden="true"></span>
             <div>
               <h3 style="margin-bottom:.2rem;">Who is completing this screen?</h3>
               <p style="font-size:.88rem;color:var(--text-muted);">
@@ -70,10 +70,10 @@
 
           <div class="asd-role-grid" role="radiogroup" aria-label="Responder role" aria-required="true">
             {% for role_val, role_label, role_desc, role_icon in [
-              ('parent',    'Parent',       'Completing on behalf of your child',         '👪'),
-              ('caregiver', 'Caregiver',    'Completing on behalf of someone in your care','🤲'),
-              ('teacher',   'Teacher / Professional', 'Completing based on classroom or professional observation', '🏫'),
-              ('individual','Self (Adult)', 'Completing for yourself as an adult',        '🙋'),
+              ('parent',    'Parent',       'Completing on behalf of your child',         ''),
+              ('caregiver', 'Caregiver',    'Completing on behalf of someone in your care',''),
+              ('teacher',   'Teacher / Professional', 'Completing based on classroom or professional observation', ''),
+              ('individual','Self (Adult)', 'Completing for yourself as an adult',        ''),
             ] %}
             <label class="asd-role-card" id="role-card-{{ role_val }}">
               <input type="radio" name="responder_role" value="{{ role_val }}"
@@ -162,9 +162,9 @@
           </div>
         </div>
         {% endif %}
-        {# ══ END ASD-SPECIFIC ════════════════════════════════════════════ #}
+        {# -- END ASD-SPECIFIC -------------------------------------------- #}
 
-        {# ══ STANDARD fields (shown for all assessments including ASD) ══ #}
+        {# -- STANDARD fields (shown for all assessments including ASD) -- #}
         <div class="form-row">
           <div class="form-group">
             <label class="form-label" for="first_name">
@@ -292,7 +292,7 @@
         </div>
 
         <div class="disclaimer-box" style="margin-bottom:1.5rem;" role="note">
-          <span class="d-icon" aria-hidden="true">⚠️</span>
+          <span class="d-icon" aria-hidden="true">[!]</span>
           <span>
             {% if is_asd %}
             The information you provide is used only to generate this support report.

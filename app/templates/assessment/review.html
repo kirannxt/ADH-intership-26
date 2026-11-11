@@ -5,11 +5,11 @@
 <div class="container-md">
   <nav class="breadcrumb" aria-label="Breadcrumb">
     <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
-    <span class="breadcrumb-sep" aria-hidden="true">›</span>
+    <span class="breadcrumb-sep" aria-hidden="true">></span>
     <a href="{{ url_for('assessment.select') }}">Choose Assessment</a>
-    <span class="breadcrumb-sep" aria-hidden="true">›</span>
+    <span class="breadcrumb-sep" aria-hidden="true">></span>
     <a href="{{ url_for('assessment.questionnaire') }}">Questionnaire</a>
-    <span class="breadcrumb-sep" aria-hidden="true">›</span>
+    <span class="breadcrumb-sep" aria-hidden="true">></span>
     <span class="current" aria-current="page">Review</span>
   </nav>
 </div>
@@ -48,9 +48,9 @@
       <div>
         <span style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--primary);">Status</span><br>
         {% if answered_count == total_q %}
-          <span class="badge badge-success">✅ All answered</span>
+          <span class="badge badge-success">[OK] All answered</span>
         {% else %}
-          <span class="badge badge-warning">⚠️ {{ total_q - answered_count }} unanswered</span>
+          <span class="badge badge-warning">[!] {{ total_q - answered_count }} unanswered</span>
         {% endif %}
       </div>
       <a href="{{ url_for('assessment.questionnaire') }}" class="btn btn-outline btn-sm"
@@ -63,7 +63,7 @@
   <!-- Unanswered warning -->
   {% if answered_count < total_q %}
   <div class="alert alert-warning" role="alert" aria-live="assertive">
-    ⚠️ You have <strong>{{ total_q - answered_count }} unanswered question(s)</strong>.
+    [!] You have <strong>{{ total_q - answered_count }} unanswered question(s)</strong>.
     Please go back and answer all questions before submitting.
   </div>
   {% endif %}
@@ -94,12 +94,12 @@
             </div>
             {% if answer %}
             <div style="display:flex;align-items:center;gap:.5rem;">
-              <span style="color:var(--success);" aria-hidden="true">✅</span>
+              <span style="color:var(--success);" aria-hidden="true">[OK]</span>
               <span style="font-size:.9rem;color:var(--text-muted);">{{ answer }}</span>
             </div>
             {% else %}
             <div style="display:flex;align-items:center;gap:.5rem;">
-              <span style="color:var(--warning);" aria-hidden="true">⚠️</span>
+              <span style="color:var(--warning);" aria-hidden="true">[!]</span>
               <span style="font-size:.9rem;color:var(--warning);font-weight:600;">
                 Not answered —
                 <a href="{{ url_for('assessment.questionnaire') }}"
@@ -130,16 +130,12 @@
         <a href="{{ url_for('assessment.questionnaire') }}" class="btn btn-secondary btn-lg">
           Go back
         </a>
-        <!-- Final submission is temporarily disabled -->
-        <button type="button" class="btn btn-primary btn-lg" disabled
-                aria-disabled="true"
-                title="Submission is temporarily unavailable">
+        <button type="button" class="btn btn-primary btn-lg"
+                id="open-submit-modal"
+                {% if answered_count < total_q %}disabled aria-disabled="true"
+                title="Answer all questions before submitting"{% endif %}>
           Submit Assessment
         </button>
-      </div>
-
-      <div class="alert alert-info mt-3" role="status" style="justify-content:center;">
-        ℹ️ Final submission is temporarily disabled. You can still review and edit your answers.
       </div>
     </div>
   </div>
@@ -161,7 +157,7 @@
         This action cannot be undone.
       </p>
       <div class="disclaimer-box" role="note">
-        <span class="d-icon" aria-hidden="true">⚠️</span>
+        <span class="d-icon" aria-hidden="true">[!]</span>
         <span>
           Your results are for <strong>personal insight only</strong> and do not
           constitute a clinical, medical, or professional assessment.
@@ -181,4 +177,36 @@
   </div>
 </div>
 
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Open confirmation modal when Submit button is clicked
+  const openBtn = document.getElementById("open-submit-modal");
+  const modal   = document.getElementById("confirm-submit-modal");
+  if (openBtn && modal) {
+    openBtn.addEventListener("click", () => {
+      modal.classList.add("open");
+      modal.removeAttribute("aria-hidden");
+    });
+  }
+  // Close modal on X or Cancel
+  document.querySelectorAll("[data-modal-close], .modal-close").forEach(btn => {
+    btn.addEventListener("click", () => {
+      if (modal) {
+        modal.classList.remove("open");
+        modal.setAttribute("aria-hidden", "true");
+      }
+    });
+  });
+  // Close on overlay click
+  if (modal) {
+    modal.addEventListener("click", e => {
+      if (e.target === modal) {
+        modal.classList.remove("open");
+        modal.setAttribute("aria-hidden", "true");
+      }
+    });
+  }
+</script>
 {% endblock %}

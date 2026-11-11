@@ -5,9 +5,9 @@
 <div class="container-md">
   <nav class="breadcrumb" aria-label="Breadcrumb">
     <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
-    <span class="breadcrumb-sep" aria-hidden="true">›</span>
+    <span class="breadcrumb-sep" aria-hidden="true">></span>
     <a href="{{ url_for('assessment.select') }}">Choose Assessment</a>
-    <span class="breadcrumb-sep" aria-hidden="true">›</span>
+    <span class="breadcrumb-sep" aria-hidden="true">></span>
     <span class="current" aria-current="page">{{ assessment_label }}</span>
   </nav>
 </div>
@@ -28,7 +28,7 @@
 
   <!-- Instructions card (shown once, collapses after first answer) -->
   <div class="info-box mb-3" id="instructions-box" role="note">
-    <span aria-hidden="true" style="flex-shrink:0;font-size:1.1rem;">📋</span>
+    <span aria-hidden="true" style="flex-shrink:0;font-size:1.1rem;"></span>
     <div>
       <strong>{{ assessment_label }}:</strong>
       <span style="color:var(--primary-dark);">{{ assessment_instructions }}</span>
@@ -81,9 +81,9 @@
       {% elif q.type == 'mc' %}
         <span class="q-type-tag q-type-mc" aria-label="Multiple choice">⊙ Multiple choice</span>
       {% elif q.type == 'rate5' %}
-        <span class="q-type-tag q-type-rate" aria-label="Rating scale">★ Rating scale</span>
+        <span class="q-type-tag q-type-rate" aria-label="Rating scale"> Rating scale</span>
       {% elif q.type == 'yn' %}
-        <span class="q-type-tag q-type-yn" aria-label="Yes or No">✓ Yes / No</span>
+        <span class="q-type-tag q-type-yn" aria-label="Yes or No"> Yes / No</span>
       {% endif %}
 
       <div class="question-number">
@@ -92,7 +92,7 @@
       </div>
       <div class="question-text" id="q{{ qnum }}-label">{{ q.text }}</div>
 
-      {# ── Multiple choice / frequency (radio list) ───────────────── #}
+      {# -- Multiple choice / frequency (radio list) ----------------- #}
       {% if q.type in ['mc', 'freq4', 'freq5'] %}
       <div class="option-group" role="radiogroup" aria-labelledby="q{{ qnum }}-label">
         {% for label, score_val in q.options %}
@@ -104,7 +104,7 @@
         {% endfor %}
       </div>
 
-      {# ── Rating scale (1–5 buttons) ─────────────────────────────── #}
+      {# -- Rating scale (1–5 buttons) ------------------------------- #}
       {% elif q.type == 'rate5' %}
       <input type="hidden" name="q{{ qnum }}" value="{{ saved }}" />
       <div class="rating-group" role="group" aria-labelledby="q{{ qnum }}-label">
@@ -123,7 +123,7 @@
         <span>{{ q.options[-1][0] }}</span>
       </div>
 
-      {# ── Yes / No ───────────────────────────────────────────────── #}
+      {# -- Yes / No ------------------------------------------------- #}
       {% elif q.type == 'yn' %}
       <input type="hidden" name="q{{ qnum }}" value="{{ saved }}" />
       <div class="yesno-group" role="group" aria-labelledby="q{{ qnum }}-label">
@@ -155,7 +155,7 @@
 
     <p style="text-align:center;margin-top:1rem;font-size:.8rem;color:var(--text-muted);"
        aria-live="polite">
-      💾 Answers are saved automatically as you go.
+       Answers are saved automatically as you go.
     </p>
 
   </form>

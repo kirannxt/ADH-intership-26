@@ -5,7 +5,7 @@
 <div class="container">
   <nav class="breadcrumb" aria-label="Breadcrumb">
     <a href="{{ url_for('main.dashboard') }}">Dashboard</a>
-    <span class="breadcrumb-sep" aria-hidden="true">›</span>
+    <span class="breadcrumb-sep" aria-hidden="true">></span>
     <span class="current" aria-current="page">Progress Tracking</span>
   </nav>
 </div>
@@ -16,7 +16,7 @@
 
   <div class="flex-between mb-4" style="flex-wrap:wrap;gap:1rem;">
     <div>
-      <h1 class="page-title">📈 Progress Tracking</h1>
+      <h1 class="page-title"> Progress Tracking</h1>
       <p class="page-sub">An overview of your assessment activity and development over time.</p>
     </div>
     <a href="{{ url_for('assessment.select') }}" class="btn btn-primary">New Assessment</a>
@@ -24,7 +24,7 @@
 
   <!-- Responsible note -->
   <div class="disclaimer-box mb-4" role="note">
-    <span class="d-icon" aria-hidden="true">⚠️</span>
+    <span class="d-icon" aria-hidden="true">[!]</span>
     <span>
       Scores shown here reflect your self-reported responses at the time of each assessment.
       They are indicators for personal reflection — not clinical measurements.
@@ -32,13 +32,52 @@
     </span>
   </div>
 
-  <!-- Summary stats — empty state when no real data -->
+  <!-- ----
+       ACTIVE FILTER BANNER  (shown when ML insights are filtered)
+  ---- -->
+  {% if ml.filter and ml.filter.is_active %}
+  <div class="info-box mb-4" role="status" aria-label="Active ML filter">
+    <span aria-hidden="true"></span>
+    <div style="flex:1;">
+      <strong>Insights are filtered</strong>
+      <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.4rem;">
+        {% if ml.filter.date_from or ml.filter.date_to %}
+        <span class="badge badge-primary">
+          
+          {% if ml.filter.date_from %}from {{ ml.filter.date_from }}{% endif %}
+          {% if ml.filter.date_to %}to {{ ml.filter.date_to }}{% endif %}
+        </span>
+        {% endif %}
+        {% if ml.filter.types_include %}
+          {% for t in ml.filter.types_include %}
+          <span class="badge badge-primary">
+            {{ all_assessment_types[t].icon }} {{ all_assessment_types[t].label }}
+          </span>
+          {% endfor %}
+        {% endif %}
+        <span class="badge badge-primary">
+           Mode:
+          {% if ml.filter.mode == 'recent' %}Recent Focus
+          {% elif ml.filter.mode == 'trend' %}Trend Focus
+          {% else %}All Data{% endif %}
+        </span>
+        <span class="badge badge-gray">{{ ml.filter.n_after_filter }} record(s) used</span>
+      </div>
+    </div>
+    <a href="{{ url_for('assessment.retrain_insights') }}"
+       class="btn btn-sm btn-secondary" style="flex-shrink:0;">
+      Edit Filter
+    </a>
+  </div>
+  {% endif %}
+
+  <!-- Summary stats -->
   <div class="grid-4 mb-4">
     {% for val, label, icon, bg in [
-      ('—', 'Assessments Taken', '📋', '#ede9ve'),
-      ('—', 'Completed',         '✅', '#d1fae5'),
-      ('—', 'In Progress',       '⏳', '#fef3c7'),
-      ('—', 'Avg. Score',        '📊', '#dbeafe'),
+      (total,                              'Assessments Taken', '', '#ede9fe'),
+      (completed,                          'Completed',         '[OK]', '#d1fae5'),
+      (in_progress,                        'In Progress',       '', '#fef3c7'),
+      ((avg_score ~ '%') if avg_score else '—', 'Avg. Score',  '', '#dbeafe'),
     ] %}
     <div class="stat-card" role="region" aria-label="{{ label }}">
       <div class="stat-icon" style="background:{{ bg }};" aria-hidden="true">{{ icon }}</div>
@@ -49,9 +88,10 @@
   </div>
 
   <!-- Empty state (shown when user has no history yet) -->
+  {% if not has_data %}
   <div class="card mb-4">
     <div class="empty-state" role="status" aria-label="No assessment history">
-      <div class="empty-icon" aria-hidden="true">📊</div>
+      <div class="empty-icon" aria-hidden="true"></div>
       <h3>No assessment data yet</h3>
       <p>
         Complete your first assessment to start tracking your progress.
@@ -60,35 +100,51 @@
       <a href="{{ url_for('assessment.select') }}" class="btn btn-primary">Start an Assessment</a>
     </div>
   </div>
+  {% endif %}
 
-  <!-- Score breakdown (placeholder — will populate from DB) -->
+  <!-- Score breakdown -->
   <div class="grid-2">
     <div class="card">
       <div class="card-header"><span class="card-title">Score by Category</span></div>
       <div class="card-body">
+        {% if type_scores %}
+          {% for a_type, info in type_scores.items() %}
+          <div style="display:flex;align-items:center;gap:.85rem;padding:.6rem 0;
+                      {% if not loop.last %}border-bottom:1px solid var(--border);{% endif %}">
+            <span style="width:32px;height:32px;background:{{ info.color }};border-radius:8px;
+                         display:flex;align-items:center;justify-content:center;font-size:1rem;"
+                  aria-hidden="true">{{ info.icon }}</span>
+            <div style="flex:1;">
+              <div style="font-weight:600;font-size:.9rem;">{{ info.label }}</div>
+              <div style="height:6px;background:var(--border);border-radius:3px;margin-top:.3rem;">
+                <div style="height:6px;background:var(--primary);border-radius:3px;width:{{ info.pct }}%;"
+                     role="progressbar" aria-valuenow="{{ info.pct }}" aria-valuemin="0" aria-valuemax="100"></div>
+              </div>
+            </div>
+            <span style="font-weight:700;font-size:.9rem;min-width:38px;text-align:right;">
+              {{ info.pct }}%
+            </span>
+          </div>
+          {% endfor %}
+        {% else %}
         <div class="empty-state" style="padding:2rem;" aria-label="No category scores yet">
-          <div class="empty-icon" style="font-size:2rem;" aria-hidden="true">📉</div>
+          <div class="empty-icon" style="font-size:2rem;" aria-hidden="true"></div>
           <p>Category scores will appear here after you complete an assessment.</p>
         </div>
+        {% endif %}
       </div>
     </div>
 
     <div class="card">
-      <div class="card-header"><span class="card-title">🎯 Milestones</span></div>
+      <div class="card-header"><span class="card-title"> Milestones</span></div>
       <div class="card-body" style="display:flex;flex-direction:column;gap:.75rem;">
-        {% for title, desc, done in [
-          ('First Assessment',    'Complete your first assessment',              False),
-          ('Honest Responder',    'Complete any assessment without skipping',    False),
-          ('Consistent Learner',  'Complete 3 assessments',                      False),
-          ('Explorer',            'Try 3 different assessment types',            False),
-          ('Well-Rounded',        'Complete all 6 assessment types',             False),
-        ] %}
+        {% for title, desc, done in milestones %}
         <div style="display:flex;align-items:center;gap:.85rem;padding:.75rem 1rem;
                     border-radius:var(--radius);
                     background:{% if done %}#d1fae5{% else %}var(--surface-2){% endif %};
                     border:1px solid {% if done %}var(--success){% else %}var(--border){% endif %};"
              role="listitem" aria-label="{{ title }}: {{ 'achieved' if done else 'not yet achieved' }}">
-          <span style="font-size:1.2rem;" aria-hidden="true">{% if done %}✅{% else %}🔒{% endif %}</span>
+          <span style="font-size:1.2rem;" aria-hidden="true">{% if done %}[OK]{% else %}{% endif %}</span>
           <div>
             <div style="font-weight:700;font-size:.9rem;color:{% if done %}#065f46{% else %}var(--text){% endif %};">
               {{ title }}
@@ -101,6 +157,335 @@
     </div>
   </div>
 
+  <!-- ----
+       TRAINED MODEL PREDICTIONS PANEL
+  ---- -->
+  {% if ml.trained_predictions %}
+  <div class="card mt-4" role="region" aria-label="Trained model predictions">
+    <div class="card-header"
+         style="background:linear-gradient(135deg,#fdf4ff,#ede9fe);border-color:#c4b5fd;">
+      <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;">
+        <span style="font-size:1.4rem;" aria-hidden="true"></span>
+        <div>
+          <span class="card-title" style="color:#5b21b6;">Trained Model Predictions</span>
+          <p style="font-size:.82rem;color:#6d28d9;margin:.1rem 0 0;">
+            Next-session band predictions from your persisted supervised models.
+          </p>
+        </div>
+        <a href="{{ url_for('assessment.retrain_insights') }}"
+           class="btn btn-sm btn-secondary" style="margin-left:auto;">
+           Retrain Models
+        </a>
+      </div>
+    </div>
+    <div class="card-body">
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));
+                  gap:.85rem;">
+        {% for a_type, pred in ml.trained_predictions.items() %}
+        {% set cfg = all_assessment_types.get(a_type, {}) %}
+        <div style="padding:1rem 1.1rem;border-radius:var(--radius);
+                    border:2px solid #c4b5fd;background:#fdf4ff;">
+          <div style="display:flex;align-items:center;gap:.5rem;margin-bottom:.65rem;">
+            <span style="font-size:1.1rem;" aria-hidden="true">{{ cfg.icon if cfg else '' }}</span>
+            <span style="font-weight:700;font-size:.88rem;">{{ cfg.label if cfg else a_type }}</span>
+          </div>
+          {# Probability bar #}
+          {% set labels = ['Low', 'Mod', 'High'] %}
+          {% set bar_colors = ['#10b981', '#f59e0b', '#ef4444'] %}
+          <div style="display:flex;gap:3px;height:10px;border-radius:5px;overflow:hidden;
+                      margin-bottom:.5rem;" aria-hidden="true">
+            {% for i in range(3) %}
+            <div style="flex:{{ (pred.probabilities[i] * 100) | int }};
+                        background:{{ bar_colors[i] }};
+                        min-width:{% if pred.probabilities[i] > 0 %}2px{% else %}0{% endif %};">
+            </div>
+            {% endfor %}
+          </div>
+          <div style="display:flex;justify-content:space-between;
+                      font-size:.72rem;color:var(--text-muted);margin-bottom:.6rem;">
+            {% for i in range(3) %}
+            <span>{{ labels[i] }} {{ (pred.probabilities[i] * 100) | round | int }}%</span>
+            {% endfor %}
+          </div>
+          <div style="font-weight:800;font-size:1rem;color:#5b21b6;">
+            {{ pred.predicted_band }}
+          </div>
+          <div style="font-size:.76rem;color:var(--text-muted);margin-top:.2rem;">
+            {{ pred.confidence_pct }}% confidence · {{ pred.algorithm }}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <p style="font-size:.76rem;color:var(--text-muted);margin-top:.85rem;">
+        [!] Predictions are based solely on your personal history and are statistical
+        estimates — not clinical forecasts.
+      </p>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ----
+       ML INSIGHTS PANEL
+  ---- -->
+  {% if ml and ml.available %}
+
+  <div class="card mt-4" role="region" aria-label="AI-powered insights">
+    <div class="card-header" style="background:linear-gradient(135deg,#ede9fe,#dbeafe);border-color:#a5b4fc;">
+      <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;">
+        <span style="font-size:1.4rem;" aria-hidden="true"></span>
+        <div>
+          <div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;">
+            <span class="card-title" style="color:#3730a3;">AI-Powered Insights</span>
+            {# -- ML status badge ---------------------------------------- #}
+            {% if ml.status %}
+            {% set s = ml.status %}
+            <span class="badge badge-{{ s.badge_class }}"
+                  style="flex-shrink:0;font-size:.72rem;letter-spacing:.04em;
+                         {% if s.state == 'live' %}animation:pulse 2s infinite;{% endif %}"
+                  role="status"
+                  aria-label="ML analysis status: {{ s.label }}, {{ s.active_count }} of {{ s.total_count }} analyses active">
+              <span aria-hidden="true">
+                {% if s.state == 'live' %}{% elif s.state == 'partial' %}{% else %}{% endif %}
+              </span>
+              {{ s.label }}
+            </span>
+            {% endif %}
+          </div>
+          <p style="font-size:.82rem;color:#4338ca;margin:.1rem 0 0;">
+            Personalised analysis based on your {{ ml.summary_stats.n_completed }} completed assessment(s)
+            across {{ ml.summary_stats.n_types }} type(s).
+          </p>
+        </div>
+        <div style="margin-left:auto;text-align:right;">
+          <div style="font-size:1.6rem;font-weight:800;color:#3730a3;line-height:1;">
+            {{ ml.summary_stats.wellness_score }}
+          </div>
+          <div style="font-size:.72rem;color:#4338ca;font-weight:600;text-transform:uppercase;letter-spacing:.05em;">
+            Wellness Score
+          </div>
+        </div>
+      </div>
+
+      {# -- Sub-analysis status checklist ------------------------------- #}
+      {% if ml.status and ml.status.checks %}
+      <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.75rem;padding-top:.6rem;
+                  border-top:1px solid #c7d2fe;">
+        {% for check in ml.status.checks %}
+        <div style="display:flex;align-items:center;gap:.35rem;font-size:.78rem;
+                    padding:.2rem .65rem;border-radius:999px;
+                    background:{% if check.unlocked %}#e0e7ff{% else %}var(--surface-2){% endif %};
+                    border:1px solid {% if check.unlocked %}#a5b4fc{% else %}var(--border){% endif %};
+                    color:{% if check.unlocked %}#3730a3{% else %}var(--text-muted){% endif %};"
+             role="listitem"
+             aria-label="{{ check.label }}: {{ 'active' if check.unlocked else 'locked — more data needed' }}">
+          <span aria-hidden="true">{% if check.unlocked %}{% else %}{% endif %}</span>
+          <span>{{ check.label }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="card-body" style="display:flex;flex-direction:column;gap:2rem;">
+
+      {# -- Wellness Archetype ------------------------------------------- #}
+      {% if ml.profile %}
+      {% set p = ml.profile %}
+      <div>
+        <h3 style="font-size:1rem;font-weight:700;margin-bottom:.85rem;color:var(--text);">
+           Your Wellness Archetype
+        </h3>
+        <div style="display:flex;align-items:flex-start;gap:1rem;padding:1.1rem 1.25rem;
+                    border-radius:var(--radius);background:var(--primary-light);
+                    border:1px solid var(--primary);">
+          <span style="font-size:2.2rem;flex-shrink:0;" aria-hidden="true">{{ p.archetype_emoji }}</span>
+          <div>
+            <div style="font-weight:800;font-size:1.05rem;color:var(--primary);">
+              {{ p.archetype_name }}
+            </div>
+            <p style="font-size:.88rem;color:var(--text);margin:.35rem 0 .6rem;">
+              {{ p.archetype_desc }}
+            </p>
+            <div style="font-size:.78rem;color:var(--text-muted);">
+              Based on {{ p.types_taken }} of {{ p.types_total }} possible assessment types.
+              Complete more assessments to refine this profile.
+            </div>
+          </div>
+        </div>
+
+        {# Score breakdown per type #}
+        {% if p.breakdown %}
+        <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.85rem;">
+          {% for item in p.breakdown %}
+          <div style="display:flex;align-items:center;gap:.4rem;padding:.35rem .75rem;
+                      background:var(--surface-2);border:1px solid var(--border);
+                      border-radius:999px;font-size:.8rem;">
+            <span aria-hidden="true">{{ item.icon }}</span>
+            <span style="font-weight:600;">{{ item.label }}</span>
+            <span style="color:var(--primary);font-weight:700;">{{ item.pct }}%</span>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      {# -- Trend Predictions ------------------------------------------- #}
+      {% if ml.trends %}
+      <div>
+        <h3 style="font-size:1rem;font-weight:700;margin-bottom:.85rem;color:var(--text);">
+           Score Trend Predictions
+          <span style="font-size:.75rem;font-weight:400;color:var(--text-muted);margin-left:.5rem;">
+            Linear regression on your historical scores
+          </span>
+        </h3>
+        <div style="display:flex;flex-direction:column;gap:.75rem;">
+          {% for a_type, trend in ml.trends.items() %}
+          <div style="display:flex;align-items:center;gap:1rem;padding:.85rem 1rem;
+                      border-radius:var(--radius);background:var(--surface-2);
+                      border:1px solid var(--border);flex-wrap:wrap;">
+
+            {# Direction icon + label #}
+            <span style="font-size:1.4rem;flex-shrink:0;" aria-hidden="true">
+              {{ trend.direction_icon }}
+            </span>
+
+            <div style="flex:1;min-width:140px;">
+              <div style="font-weight:700;font-size:.9rem;">{{ trend.label }}</div>
+              <div style="font-size:.78rem;color:var(--text-muted);margin-top:.15rem;">
+                Based on {{ trend.n }} record(s) &nbsp;·&nbsp;
+                Confidence:
+                <span style="font-weight:600;
+                  color:{% if trend.confidence == 'high' %}var(--success)
+                         {% elif trend.confidence == 'medium' %}var(--warning)
+                         {% else %}var(--text-muted){% endif %};">
+                  {{ trend.confidence | title }}
+                </span>
+              </div>
+            </div>
+
+            {# History sparkline (text-based) #}
+            <div style="display:flex;align-items:flex-end;gap:2px;height:28px;flex-shrink:0;">
+              {% for pval in trend.history %}
+              <div style="width:8px;border-radius:2px 2px 0 0;
+                          background:{% if trend.direction == 'improving' %}var(--success)
+                                     {% elif trend.direction == 'worsening' %}var(--danger)
+                                     {% else %}var(--primary){% endif %};
+                          height:{{ [4, (pval / 100 * 28) | int] | max }}px;"
+                   title="{{ pval }}%" aria-hidden="true"></div>
+              {% endfor %}
+            </div>
+
+            {# Predicted next score #}
+            <div style="text-align:center;flex-shrink:0;min-width:68px;">
+              <div style="font-size:1.2rem;font-weight:800;
+                          color:{% if trend.direction == 'improving' %}var(--success)
+                                {% elif trend.direction == 'worsening' %}var(--danger)
+                                {% else %}var(--primary){% endif %};">
+                {{ trend.predicted_next }}%
+              </div>
+              <div style="font-size:.7rem;color:var(--text-muted);font-weight:600;">
+                Predicted
+              </div>
+            </div>
+
+            {# Trend badge #}
+            <span class="badge badge-{% if trend.direction == 'improving' %}success
+                                       {% elif trend.direction == 'worsening' %}danger
+                                       {% else %}primary{% endif %}"
+                  style="flex-shrink:0;"
+                  aria-label="Trend: {{ trend.direction }}">
+              {{ trend.direction | title }}
+            </span>
+          </div>
+          {% endfor %}
+        </div>
+
+        <p style="font-size:.76rem;color:var(--text-muted);margin-top:.75rem;">
+          [!] Predictions are based on your personal history and are statistical estimates only —
+          they are not clinical forecasts. Complete more assessments to improve accuracy.
+        </p>
+      </div>
+      {% endif %}
+
+      {# -- Cross-Assessment Correlations ------------------------------- #}
+      {% if ml.correlations %}
+      <div>
+        <h3 style="font-size:1rem;font-weight:700;margin-bottom:.85rem;color:var(--text);">
+           Cross-Assessment Patterns
+          <span style="font-size:.75rem;font-weight:400;color:var(--text-muted);margin-left:.5rem;">
+            Pearson correlation between your assessment scores
+          </span>
+        </h3>
+        <div style="display:flex;flex-direction:column;gap:.6rem;">
+          {% for corr in ml.correlations %}
+          <div style="display:flex;align-items:flex-start;gap:.85rem;padding:.8rem 1rem;
+                      border-radius:var(--radius);background:var(--surface-2);
+                      border-left:4px solid
+                        {% if corr.strength == 'strong' %}var(--primary)
+                        {% elif corr.strength == 'moderate' %}var(--warning)
+                        {% else %}var(--border){% endif %};">
+            <span style="font-size:1rem;flex-shrink:0;margin-top:.1rem;" aria-hidden="true">
+              {% if corr.direction == 'positive' %}{% else %}{% endif %}
+            </span>
+            <div style="flex:1;">
+              <div style="font-weight:700;font-size:.88rem;">
+                {{ corr.label_a }} ↔ {{ corr.label_b }}
+                <span style="font-weight:400;color:var(--text-muted);margin-left:.5rem;font-size:.8rem;">
+                  r = {{ corr.r }} (n={{ corr.n }})
+                </span>
+              </div>
+              <p style="font-size:.84rem;color:var(--text-muted);margin:.25rem 0 0;">
+                {{ corr.insight }}
+              </p>
+            </div>
+            <span class="badge badge-{% if corr.strength == 'strong' %}primary
+                                       {% elif corr.strength == 'moderate' %}warning
+                                       {% else %}success{% endif %}"
+                  style="flex-shrink:0;text-transform:capitalize;">
+              {{ corr.strength }}
+            </span>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      {# -- Insufficient data notice (when some sub-analyses are empty) -- #}
+      {% if not ml.trends and not ml.profile and not ml.correlations %}
+      <div class="info-box" role="note">
+        <span aria-hidden="true"></span>
+        <div>
+          <strong>More data needed</strong>
+          <p style="margin-top:.2rem;font-size:.87rem;">
+            Complete at least <strong>{{ ml.min_records }}</strong> assessments of the same type
+            to unlock trend predictions, or assessments across <strong>2+</strong> different types
+            to unlock your wellness archetype.
+          </p>
+        </div>
+      </div>
+      {% endif %}
+
+    </div>{# end card-body #}
+  </div>
+
+  {% elif ml and not ml.available %}
+  {# ML panel — not enough data yet #}
+  <div class="card mt-4" role="region" aria-label="AI insights locked">
+    <div class="card-body">
+      <div class="empty-state" style="padding:1.5rem;">
+        <div class="empty-icon" aria-hidden="true"></div>
+        <h3>AI Insights Unlock After Your First Assessment</h3>
+        <p>
+          Complete your first assessment to start building your personal wellness profile,
+          score trend predictions, and cross-assessment pattern analysis.
+        </p>
+        <a href="{{ url_for('assessment.select') }}" class="btn btn-primary">Start an Assessment</a>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
   <!-- Link to history -->
   <div class="text-center mt-4">
     <a href="{{ url_for('assessment.history') }}" class="btn btn-outline btn-lg">
@@ -110,3 +495,5 @@
 
 </div>
 {% endblock %}
+
+{% block extra_js %}{% endblock %}
