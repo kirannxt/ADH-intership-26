@@ -702,14 +702,14 @@ def _compute_wellness_score(type_vector: dict[str, float]) -> int:
 
 def _type_icon(a_type: str) -> str:
     return {
-        "adhd":       "",
-        "anxiety":    "",
-        "depression": "",
-        "stress":     "",
-        "learning":   "",
-        "eq":         "",
-        "asd":        "",
-    }.get(a_type, "")
+        "adhd":       "AD",
+        "anxiety":    "AX",
+        "depression": "DP",
+        "stress":     "ST",
+        "learning":   "LS",
+        "eq":         "EQ",
+        "asd":        "AS",
+    }.get(a_type, "--")
 
 
 # -----------------------------------------------------------------------------

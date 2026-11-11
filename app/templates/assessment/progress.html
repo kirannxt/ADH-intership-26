@@ -73,14 +73,14 @@
 
   <!-- Summary stats -->
   <div class="grid-4 mb-4">
-    {% for val, label, icon, bg in [
-      (total,                              'Assessments Taken', '', '#ede9fe'),
-      (completed,                          'Completed',         '<svg style="display:inline;vertical-align:-.125em;width:1em;height:1em;" viewBox="0 0 16 16" fill="none" stroke="#10b981" stroke-width="2.5" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><polyline points="5,8 7,10.5 11,5.5"/></svg>', '#d1fae5'),
-      (in_progress,                        'In Progress',       '', '#fef3c7'),
-      ((avg_score ~ '%') if avg_score else '—', 'Avg. Score',  '', '#dbeafe'),
+    {% for val, label, bg in [
+      (total,                                   'Assessments Taken', '#ede9fe'),
+      (completed,                               'Completed',         '#d1fae5'),
+      (in_progress,                             'In Progress',       '#fef3c7'),
+      ((avg_score ~ '%') if avg_score else '—', 'Avg. Score',        '#dbeafe'),
     ] %}
     <div class="stat-card" role="region" aria-label="{{ label }}">
-      <div class="stat-icon" style="background:{{ bg }};" aria-hidden="true">{{ icon }}</div>
+      <div class="stat-icon" style="background:{{ bg }};" aria-hidden="true"></div>
       <div class="stat-value">{{ val }}</div>
       <div class="stat-label">{{ label }}</div>
     </div>

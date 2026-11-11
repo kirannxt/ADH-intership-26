@@ -83,15 +83,15 @@ class AssessmentRecord(db.Model):
     @property
     def icon(self):
         _icons = {
-            "adhd":       "",
-            "anxiety":    "",
-            "depression": "",
-            "stress":     "",
-            "learning":   "",
-            "eq":         "",
-            "asd":        "",
+            "adhd":       "AD",
+            "anxiety":    "AX",
+            "depression": "DP",
+            "stress":     "ST",
+            "learning":   "LS",
+            "eq":         "EQ",
+            "asd":        "AS",
         }
-        return _icons.get(self.assessment_type, "")
+        return _icons.get(self.assessment_type, "--")
 
     @property
     def color_bg(self):
